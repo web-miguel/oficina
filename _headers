@@ -1,0 +1,9 @@
+# La app no carga nada de afuera y solo se conecta a Supabase (connect-src), enviando la copia ya cifrada. GitHub Pages ignora este archivo: el CSP real va en index.html.
+/*
+  Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src https://neqivchshshsltjmqxob.supabase.co; frame-ancestors 'none'; base-uri 'none'; form-action 'none'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-cache
