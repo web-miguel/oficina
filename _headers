@@ -1,9 +1,0 @@
-# La app no carga nada de afuera ni envía datos a ningún servidor: default-src 'none' y form-action 'none' lo garantizan.
-/*
-  Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'
-  X-Frame-Options: DENY
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: no-referrer
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
-  X-Robots-Tag: noindex, nofollow
-  Cache-Control: no-cache
