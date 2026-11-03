@@ -8,6 +8,7 @@
 <!-- La página no carga nada de afuera. Solo se conecta a Supabase, y lo que envía ya va cifrado en el navegador. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src https://neqivchshshsltjmqxob.supabase.co wss://neqivchshshsltjmqxob.supabase.co; base-uri 'none'; form-action 'none'">
 <title>Mi oficina</title>
+<!-- Mi Oficina v1.2.0 -->
 <style>
 /* Galería blanca (modelo: página de producto de Apple). Lo de arriba —barra, pestañas y la cifra grande— va sobre blanco;
    el trabajo va en una banda gris claro (#f5f5f7) con tarjetas blancas de 28px, sin sombras.
@@ -852,6 +853,84 @@ footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: 
   .bar { background: var(--canvas); -webkit-backdrop-filter: none; backdrop-filter: none; }
   dialog.pop, dialog.spot { background: var(--canvas); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
+/* ---------- v1.2.0: vencimientos, créditos, filtros, historial y permisos ---------- */
+.vz-h .vz-tabs { overflow-x: auto; scrollbar-width: none; margin: 4px 0 8px; }
+.vz-h .vz-tabs .seg { flex-wrap: nowrap; }
+.vz-h .vz-tabs .seg button { white-space: nowrap; }
+.fbar { margin-top: 8px; }
+.fbar > summary { cursor: pointer; color: var(--link); font-size: 14px; padding: 6px 0; width: max-content; }
+.fbar-in { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; padding: 6px 0 4px; }
+.fl { display: grid; gap: 4px; min-width: 150px; }
+.fl > span { font-size: 12px; color: var(--muted); }
+.fl.grow { flex: 1 1 220px; }
+.fl .input { height: 40px; }
+.vz-kpis { margin-top: var(--gap); }
+.vz-kpis .kpi { text-align: left; }
+.vz-grupos { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--gap); margin-top: var(--gap); }
+.vz-grupos h3, .stack h3, #v-venc h3, #v-cred h3 { margin: 0; font: 600 19px/1.25 var(--display); color: var(--bone); }
+#v-venc > .card, #v-cred > .card, #v-venc > .kpis, #v-cred > .kpis { margin-top: var(--gap); }
+#v-venc > .card:first-child, #v-cred > .card:first-child { margin-top: 0; }
+.vz-list { list-style: none; margin: 0; padding: 0; }
+.vz-it { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; border-top: 1px solid var(--rule); background: transparent; padding: 10px 0; text-align: left; cursor: pointer; color: inherit; }
+.vz-it:hover { background: var(--raised); }
+.vz-it .t { display: grid; min-width: 0; flex: 1; }
+.vz-it .t b { font-weight: 600; color: var(--bone); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vz-it .w { font-size: 14px; white-space: nowrap; color: var(--muted); }
+.vz-it .w.late { color: var(--ember); font-weight: 600; }
+.pct { display: inline-flex; align-items: center; gap: 8px; }
+.pct i { display: inline-block; width: 56px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--ok) var(--p), var(--control) var(--p)); }
+.vz-semana { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.vz-dia { border: 1px solid var(--rule); border-radius: 14px; padding: 8px; min-height: 120px; }
+.vz-dia.today { border-color: var(--bone); }
+.vz-dia h4 { margin: 0 0 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.vz-agenda-movil { display: none; }
+.ok-t { color: var(--ok); }
+td.soon, .soon { color: var(--ember); }
+.hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; max-height: 60vh; overflow: auto; }
+.hist li { display: grid; gap: 2px; padding: 10px 0; border-top: 1px solid var(--rule); font-size: 15px; }
+.hist li:first-child { border-top: 0; }
+.claves-h li { gap: 6px; }
+.chk { display: grid; gap: 2px; border: 1px solid var(--steel); border-radius: 12px; padding: 6px 14px; margin: 0; max-height: 260px; overflow: auto; }
+.chk .opt-in { min-height: 38px; }
+.gen-op { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; }
+.gen-tbl { max-height: 46vh; overflow: auto; }
+.gen-tbl td, .gen-tbl th { font-size: 13px; white-space: nowrap; }
+tr.gen-dup td { color: var(--muted); }
+.cal-tbl { max-height: 60vh; overflow: auto; }
+.cal-tbl .input { height: 34px; padding: 0 6px; font-size: 13px; min-width: 128px; }
+.cal-tbl .input.per { min-width: 150px; }
+.cal-tbl th, .cal-tbl td { padding-right: 6px; }
+dialog:has(.cal-tbl), dialog:has(.gen-tbl) { width: min(1180px, calc(100vw - 24px)); max-width: none; }
+.warn { color: var(--ember); }
+.meta.warn { color: var(--ember); }
+.blk { display: block; }
+.rec-code { font: 600 22px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; color: var(--bone); background: var(--raised); padding: 14px 16px; border-radius: 12px; overflow-wrap: anywhere; }
+tr.c-pag td { color: var(--muted); }
+textarea.input { height: auto; padding: 10px 12px; font: 14px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+/* Filtros de pendientes */
+#tf-bar { margin: 4px 0 6px; }
+.tf-top { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.tf-top .tf-q { flex: 1 1 180px; }
+.tf-top .tf-q .input { height: 36px; width: 100%; }
+.tf-cats { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 0; }
+.chip .cnt { color: var(--muted); font-size: 12px; }
+.chip.late { color: var(--ember); }
+.t-extra { display: inline-flex; gap: 6px; margin-left: 8px; font-size: 12px; vertical-align: middle; }
+.prio { padding: 1px 8px; border-radius: 9999px; background: var(--control); color: var(--bone); }
+.prio-alta { background: #fde7dc; color: var(--ember); }
+.prio-baja { color: var(--muted); }
+/* Gestor: lo que no le corresponde no se muestra */
+body.gestor #add-cliente, body.gestor #copias, body.gestor #recuperacion, body.gestor #importar, body.gestor #tab-aseo, body.gestor #kpi-aseo { display: none !important; }
+@media (max-width: 900px) {
+  .vz-semana { grid-template-columns: 1fr; }
+  .vz-dia { min-height: 0; }
+}
+@media (max-width: 640px) {
+  #v-venc .cal-grid { display: none; }
+  .vz-agenda-movil { display: block; }
+  .fl { min-width: 0; flex: 1 1 140px; }
+  .vz-grupos { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -936,6 +1015,8 @@ footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: 
       <div class="views" role="tablist" aria-label="Vista">
         <button type="button" role="tab" id="tab-tablero" aria-controls="v-tablero" aria-selected="true">Tablero</button>
         <button type="button" role="tab" id="tab-cal" aria-controls="v-cal" aria-selected="false" tabindex="-1">Calendario</button>
+        <button type="button" role="tab" id="tab-venc" aria-controls="v-venc" aria-selected="false" tabindex="-1">Vencimientos</button>
+        <button type="button" role="tab" id="tab-cred" aria-controls="v-cred" aria-selected="false" tabindex="-1">Créditos</button>
         <button type="button" role="tab" id="tab-aseo" aria-controls="v-aseo" aria-selected="false" tabindex="-1">Aseo</button>
         <button type="button" role="tab" id="tab-reg" aria-controls="v-reg" aria-selected="false" tabindex="-1">Registros</button>
         <button type="button" role="tab" id="tab-cfg" aria-controls="v-cfg" aria-selected="false" tabindex="-1">Configuración</button>
@@ -985,6 +1066,7 @@ footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: 
           <h2 id="h-tareas">Tareas</h2>
           <button class="link" type="button" id="add-tarea">Agregar tarea</button>
         </div>
+        <div id="tf-bar"></div>
         <div id="groups"></div>
       </section>
 
@@ -1028,7 +1110,7 @@ footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: 
       <section class="card" aria-labelledby="h-cal" id="vencimientos">
         <div class="card-h">
           <h2 id="h-cal">Calendario tributario</h2>
-          <button class="link" type="button" id="add-venc">Agregar vencimiento</button>
+          <span class="acts"><button class="link" type="button" onclick="setView('vencimientos')">Panel de vencimientos</button><button class="link" type="button" id="add-venc">Agregar vencimiento</button></span>
         </div>
         <p class="sums num" id="due-sum" hidden></p>
         <div class="strip" id="strip" role="img"></div>
@@ -1042,6 +1124,9 @@ footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: 
       </section>
     </div>
     </div>
+
+    <div class="stack" id="v-venc" role="tabpanel" aria-labelledby="tab-venc" hidden></div>
+    <div class="stack" id="v-cred" role="tabpanel" aria-labelledby="tab-cred" hidden></div>
 
     <div id="v-aseo" role="tabpanel" aria-labelledby="tab-aseo" hidden></div>
 
@@ -1119,7 +1204,7 @@ footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: 
         <p class="meta">Para el PDF se abre la ventana de impresión: en Destino elige Guardar como PDF.</p>
       </section>
 
-      <section class="card" aria-labelledby="h-importar">
+      <section class="card" aria-labelledby="h-importar" id="importar">
         <h2 id="h-importar">Importar datos</h2>
         <p class="meta cfg-note">Combina un archivo de importación (por ejemplo, el preparado desde Notion) con lo que ya tienes. No borra nada: lo que ya existe se completa y no se duplica. Antes de importar se guarda una copia en la nube.</p>
         <input type="file" id="imp-in" accept=".json,application/json" class="sr" tabindex="-1" aria-hidden="true">
@@ -1146,6 +1231,11 @@ footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: 
         </div>
         <div id="recup-estado"></div>
         <p class="meta">Si olvidas tu clave, este código es la única forma de volver a abrir la oficina. Se muestra una sola vez y nunca se envía a la nube: guárdalo impreso y en un gestor de contraseñas distinto del de tu clave. El superadministrador no puede usarlo.</p>
+      </section>
+
+      <section class="card cfg-wide" aria-labelledby="h-personas" id="personas">
+        <div class="card-h"><h2 id="h-personas">Personas y permisos</h2></div>
+        <div id="personas-l"></div>
       </section>
 
       <section class="card cfg-wide" aria-labelledby="h-usuarios" id="usuarios">
@@ -1465,6 +1555,7 @@ function normalize(d) {
   d = d && typeof d === "object" ? d : {};
   for (const k of ["clientes", "tareas", "vencimientos", "claves", "frecuentes", "documentos", "registros"]) if (!Array.isArray(d[k])) d[k] = [];
   if (d.aseo) for (const k of ["dias", "pagos"]) if (!Array.isArray(d.aseo[k])) d.aseo[k] = [];
+  for (const k of XCOLLS) if (!Array.isArray(d[k])) d[k] = [];
   if (!("ultimaCopia" in d)) d.ultimaCopia = null;
   if (!d.ajustes || typeof d.ajustes !== "object") d.ajustes = {};
   // Cada cliente conserva su color aunque se agreguen o borren otros.
@@ -1500,7 +1591,7 @@ const COLLS = ["clientes", "tareas", "vencimientos", "claves", "frecuentes", "do
 const FORCE = new Set(["meta" + SEP + "actualizado", "meta" + SEP + "actualizadoPor"]); // se pisan sin control de versión
 const hasIds = a => Array.isArray(a) && a.every(x => isObj(x) && x.id != null && x.id !== "");
 const rowAad = (col, id, kid) => te.encode(col + SEP + id + SEP + kid);
-function splitData(d) {
+function splitDataTodo(d) {
   const m = new Map(), put = (col, id, v) => m.set(col + SEP + id, { col, id: String(id), json: JSON.stringify(v) });
   for (const [k, v] of Object.entries(d || {})) {
     if (v === undefined) continue;
@@ -1513,6 +1604,7 @@ function splitData(d) {
         else put("aseo", k2, v2);
       }
     }
+    else if (XCOLLS.includes(k) && hasIds(v)) v.forEach(x => put("meta", XPRE + k + "." + x.id, x));
     else put("meta", k, v);
   }
   return m;
@@ -1525,11 +1617,12 @@ function setRow(d, col, id, v) {
   else if (col === "ajustes") { if (!isObj(d.ajustes)) d.ajustes = {}; if (v === null) delete d.ajustes[id]; else d.ajustes[id] = v; }
   else if (col === "aseo.dias" || col === "aseo.pagos") { if (!isObj(d.aseo)) d.aseo = {}; inList(arr(d.aseo, col.slice(5))); }
   else if (col === "aseo") { if (!isObj(d.aseo)) d.aseo = {}; if (id !== "_") { if (v === null) delete d.aseo[id]; else d.aseo[id] = v; } }
+  else if (col === "meta" && xRow(id)) { const [xk, xid] = xRow(id); const list = arr(d, xk), i = list.findIndex(x => String(x.id) === xid); if (v === null) { if (i >= 0) list.splice(i, 1); } else if (i >= 0) list[i] = v; else list.push(v); }
   else if (col === "meta") { if (id === "_ajustes") { if (!isObj(d.ajustes)) d.ajustes = {}; } else if (v === null) delete d[id]; else d[id] = v; }
 }
 async function encRow(v, base) {
   const [iv, datos] = await enc(S.key, te.encode(v.json), rowAad(v.col, v.id, S.kid));
-  return { col: v.col, id: v.id, iv, datos, borrado: false, base: FORCE.has(v.col + SEP + v.id) ? -1 : base };
+  return { col: v.col, id: v.id, iv, datos, borrado: false, base: FORCE.has(v.col + SEP + v.id) ? -1 : base, cliente: filaCliente(v.col, v.id, v.json) };
 }
 async function decRow(row, key = S.key) { return JSON.parse(td.decode(await dec(key, row.iv, row.datos, rowAad(row.col, row.id, row.kid)))); }
 // Llaves de la oficina (sin datos): lo que se guarda en oficinas.sobre.
@@ -1560,13 +1653,14 @@ function applyKeys(k) {
 // Carga todas las filas (al entrar o cuando cambió la llave).
 async function loadAllRows() {
   const rows = await rpc("cambios", { p_id: SB.oficina, p_desde: 0 });
-  const d = {}; S.base = new Map(); S.rev = 0;
+  const d = {}; S.base = new Map(); S.rev = 0; S.cliFix = new Set();
   for (const r of rows) {
     S.rev = Math.max(S.rev, r.rev);
     if (r.borrado) continue;
     const v = await decRow(r);
     setRow(d, r.col, r.id, v);
     S.base.set(r.col + SEP + r.id, { json: JSON.stringify(v), rev: r.rev });
+    cliRevisar(r, JSON.stringify(v));
   }
   S.vseen = Math.max(S.vseen, S.rev);
   S.data = normalize(d);
@@ -1586,6 +1680,7 @@ async function applyRemote(rows, full) {
     else if (lj === null) fj = rj;   // borrado aquí, cambiado allá: se conserva
     else fj = JSON.stringify(mergeData(bj === null ? undefined : JSON.parse(bj), JSON.parse(lj), JSON.parse(rj)));
     S.base.set(k, { json: rj, rev: r.rev });
+    if (rj !== null && S.cliFix) cliRevisar(r, rj);
     if (fj !== lj) setRow(S.data, r.col, r.id, fj === null ? null : JSON.parse(fj));
   }
   if (full) for (const [k, b] of [...S.base]) if (!seen.has(k)) {
@@ -1606,7 +1701,7 @@ async function diffRows() {
   const cur = splitData(S.data), filas = [], next = new Map();
   for (const [k, v] of cur) {
     const b = S.base.get(k);
-    if (!b || b.json !== v.json) { filas.push(await encRow(v, b ? b.rev : 0)); next.set(k, v.json); }
+    if (!b || b.json !== v.json || (S.cliFix && S.cliFix.has(k))) { filas.push(await encRow(v, b ? b.rev : 0)); next.set(k, v.json); }
   }
   for (const [k, b] of S.base) if (b.json !== null && !cur.has(k)) {
     const [col, id] = k.split(SEP);
@@ -1615,7 +1710,7 @@ async function diffRows() {
   return { filas, next };
 }
 async function allRows() { const out = []; for (const v of splitData(S.data).values()) out.push(await encRow(v, 0)); return out; }
-function baseFromAll(rev) { S.base = new Map([...splitData(S.data)].map(([k, v]) => [k, { json: v.json, rev }])); S.rev = Math.max(S.rev, rev); S.vseen = Math.max(S.vseen, rev); }
+function baseFromAll(rev) { S.cliFix = new Set(); S.base = new Map([...splitData(S.data)].map(([k, v]) => [k, { json: v.json, rev }])); S.rev = Math.max(S.rev, rev); S.vseen = Math.max(S.vseen, rev); }
 
 /* ---------- Documentos en Supabase Storage ----------
    Cada archivo va cifrado con su propia llave (que viaja dentro de la fila del documento, también cifrada). */
@@ -1643,10 +1738,10 @@ async function moveDocs() {
   if (n) changed();
   return n;
 }
-async function uploadDoc(id, bytes) {
+async function uploadDoc(id, bytes, cliente) {
   const raw = rnd(32), iv = rnd(12);
   const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await dataKey(raw), bytes);
-  const nube = SB.oficina + "/" + id;
+  const nube = SB.oficina + "/" + (cliente ? cliente + "/" : "") + id;
   try { await sbStorage("POST", BUCKET + "/" + nube, new Blob([ct]), "application/octet-stream"); }
   catch (e) { // bucket propio aún no creado: va al antiguo y se copia después
     if (e.offline) throw e;
@@ -1661,7 +1756,7 @@ async function offloadDocs() {
   for (const d of (S.data && S.data.documentos) || []) {
     const a = d.archivo;
     if (!a || !a.datos || a.nube) continue;
-    const up = await uploadDoc(d.id, fromB64(a.datos));
+    const up = await uploadDoc(d.id, fromB64(a.datos), d.cliente);
     d.archivo = { nombre: a.nombre, mime: a.mime, tamano: a.tamano, ...up }; n++;
   }
   return n;
@@ -1706,6 +1801,7 @@ function rtNotify(rev) { if (RT.joined) rtSend({ topic: RT.topic, event: "broadc
 // Abre la oficina de la nube. pass = null: con la llave guardada de la sesión (al recargar).
 async function openCloud(o, pass) {
   SB.oficina = o.id; SB.config = o.config || null; SB.nombre = o.nombre || ""; S.me = o.usuario;
+  await cargarAcceso(o.id);
   const env = JSON.parse(o.sobre);
   if (env.version !== 3) {
     // Formato anterior (archivo único): se pasa a filas una sola vez. La versión anterior queda en Copias.
@@ -1721,7 +1817,7 @@ async function openCloud(o, pass) {
   if (pass != null) await openKeys(env, o.usuario, pass); else applyKeys(await decryptKeys(env));
   await loadAllRows();
   if (await ensureRecovery()) { S.pending = true; }
-  if (await ensureOfficeRecovery()) { S.pending = true; }
+  if (!esGestor() && await ensureOfficeRecovery()) { S.pending = true; }
   return "ok";
 }
 
@@ -1817,7 +1913,7 @@ $("login-form").addEventListener("submit", async e => {
     if (!o) { showFirst(c); return; }
     let kind;
     try { kind = await openCloud(o, c.p); }
-    catch (err) { if (err.recuperable) { recoveryDialog(o, c.p); return; } throw err; }
+    catch (err) { if (esGestor() && /no corresponden/.test(err.message)) { codigoGestorDialog(o, c.p); return; } if (err.recuperable) { recoveryDialog(o, c.p); return; } throw err; }
     dropPending();
     try { localStorage.removeItem(LS_WORK); } catch (err) {}
     enterApp(kind);
@@ -2042,6 +2138,7 @@ function enterApp(kind) {
   migrateAseo().catch(() => {});
   try { sessionStorage.removeItem(SS_AGENDA); } catch (e) {}
   setTimeout(alertTick, 1500);
+  v12AlEntrar();
 }
 
 // Una sola vez por copia: las repeticiones creadas con fecha de inicio en el pasado (antes de que eso creara las fechas
@@ -2137,8 +2234,8 @@ async function persistNow() {
         const { filas, next } = await diffRows();
         if (filas.length) {
           const r = (await rpc("guardar_filas", { p_id: SB.oficina, p_kid: S.kid, p_filas: filas }))[0];
-          const confl = new Set((r.conflictos || []).map(x => x.col + SEP + x.id));
-          for (const [k, j] of next) if (!confl.has(k)) S.base.set(k, { json: j, rev: r.rev });
+          const confl = new Set(rechazos(r.conflictos || []).map(x => x.col + SEP + x.id));
+          for (const [k, j] of next) if (!confl.has(k)) { S.base.set(k, { json: j, rev: r.rev }); if (S.cliFix) S.cliFix.delete(k); }
           rtNotify(r.rev);
           if (confl.size) { await pullRows(false); continue; }
         }
@@ -2494,7 +2591,7 @@ async function usersDialog(o) {
     // v1.0.1: el administrador ya no fija claves ajenas ni cambia correos o usuarios desde aquí (todas esas acciones
     // dependían de conocer la clave de la persona). La administración de usuarios completa llega en la v1.1.0;
     // mientras tanto, cada persona restablece su acceso con «Olvidé mi clave» y el código de recuperación de su oficina.
-    el("p", { class: "meta", text: "La administración de usuarios (agregar, quitar, restablecer) llega en la v1.1.0. Hoy cada persona recupera su acceso con «Olvidé mi clave» y el código de recuperación de su oficina." }),
+    invitarEnConsola(o),
     el("div", { class: "dlg-acts" }, el("span", { class: "r" }, el("button", { class: "btn alt", type: "button", text: "Cerrar", onclick: () => d.close() })))));
   openDialog(d, true); d.querySelector(".btn").focus();
 }
@@ -2785,7 +2882,7 @@ function editor({ title, fields, values = {}, saveText = "Guardar", onSave, onDe
   d.replaceChildren(form); openDialog(d);
   const first = form.querySelector("input, select"); if (first) first.focus();
 }
-const clientOpts = (blank) => [...(blank ? [["", blank]] : []), ...S.data.clientes.map(c => [c.id, c.nombre])];
+const clientOpts = (blank) => [...(blank && !esGestor() ? [["", blank]] : []), ...S.data.clientes.map(c => [c.id, c.nombre])];
 const defClient = () => filter !== "all" ? filter : (S.data.clientes[0] || {}).id || "";
 const cName = id => (S.data.clientes.find(c => c.id === id) || {}).nombre || "General";
 
@@ -2793,6 +2890,7 @@ const cName = id => (S.data.clientes.find(c => c.id === id) || {}).nombre || "Ge
 function taskDialog(t, fecha, hora, cliente) {
   if (!S.data.clientes.length) { toast("Primero agrega un cliente."); return; }
   suggest("categorias", CATEGORIAS, S.data.tareas.map(x => x.categoria));
+  suggest("responsables", responsables(), S.data.tareas.map(x => x.responsable));
   // Si la tarea ya es parte de una repetición, el formulario trae esa repetición; cambiarla vale para esta y las próximas.
   const rec = t && recurOf(t.frecuente);
   editor({
@@ -2804,6 +2902,8 @@ function taskDialog(t, fecha, hora, cliente) {
       { name: "hora", label: "Hora", type: "time" },
       { name: "horaFin", label: "Hasta", type: "time" },
       { name: "categoria", label: "Categoría", list: "categorias" },
+      { name: "prioridad", label: "Prioridad", type: "select", options: [["", "Sin prioridad"], ...PRIORIDADES] },
+      { name: "responsable", label: "Responsable", list: "responsables" },
       { name: "nota", label: "Nota", ph: "Detalles, soportes, a quién llamar…" },
       { name: "repetir", label: "Repetir", type: "select", options: [["", rec ? "Dejar de repetir después de esta" : "No se repite"], ...FREQ.map(f => [f[0], f[1]])],
         hint: rec ? "Se repite: " + ruleText(rec) + ". Si cambias la repetición, vale para esta y las próximas." : null },
@@ -3206,7 +3306,8 @@ $("add-cliente").addEventListener("click", () => clientDialog());
 
 /* ---------- Vencimientos ---------- */
 const OBLIG = ["Retención en la fuente", "IVA bimestral", "IVA cuatrimestral", "Renta", "ICA", "Exógena", "Seguridad social"];
-function dueDialog(x) {
+function dueDialog(x, fecha) {
+  suggest("responsables", responsables(), S.data.vencimientos.map(v => v.responsable));
   if (!S.data.clientes.length) { toast("Primero agrega un cliente."); return; }
   editor({
     title: x ? "Editar vencimiento" : "Nuevo vencimiento",
@@ -3217,12 +3318,14 @@ function dueDialog(x) {
       { name: "periodo", label: "Periodo" },
       { name: "formulario", label: "N.º de formulario" },
       { name: "valor", label: "Valor", ph: "1.250.000" },
+      { name: "responsable", label: "Responsable", list: "responsables" },
+      { name: "grupo", label: "Grupo", type: "select", options: GRUPOS },
       { name: "nota", label: "Nota" }
     ],
-    values: x || { cliente: defClient() },
+    values: x ? { ...x, grupo: grupoDe(x) } : { cliente: defClient(), fecha: fecha || "", grupo: "nacional" },
     saveText: x ? "Guardar" : "Agregar",
     onSave: v => {
-      if (x) Object.assign(x, v); else S.data.vencimientos.push({ id: uid(), estado: "pendiente", ...v });
+      if (x) { vencEditHist(x, v); Object.assign(x, v); } else S.data.vencimientos.push(vencNuevo(v));
       changed();
     },
     onDelete: x ? () => removeItem("vencimientos", x, "Vencimiento eliminado.") : null
@@ -3258,7 +3361,7 @@ function keyDialog(k) {
     values: k || { cliente: filter !== "all" ? filter : "" },
     saveText: k ? "Guardar" : "Agregar",
     onSave: v => {
-      if (k) Object.assign(k, v); else S.data.claves.push({ id: uid(), ...v });
+      if (k) { claveHist(k, v); Object.assign(k, v); } else S.data.claves.push({ id: uid(), ...v, vigenteDesde: iso(todayD()) });
       changed();
     },
     onDelete: k ? () => removeItem("claves", k, "Acceso eliminado.") : null
@@ -3334,7 +3437,7 @@ $("add-usuario").addEventListener("click", () => editor({
     toast("Usuario " + u + " agregado. A " + correo + " le llega un correo para confirmar la cuenta; luego entra con ese correo y la clave.");
   }
 }));
-$("cambiar-acceso").addEventListener("click", () => editor({
+$("cambiar-acceso").addEventListener("click", () => esGestor() ? gestorClaveDialog() : editor({
   title: "Cambiar mi usuario o clave",
   fields: [
     { name: "usuario", label: "Usuario", req: true, ac: "username" },
@@ -3554,9 +3657,11 @@ function render() {
   keepFocus(() => {
     renderFilters();
     if (view === "calendario") renderCalendar();
-    else if (view === "ajustes") renderSettings();
+    else if (view === "ajustes") { renderSettings(); renderPersonas(); }
     else if (view === "registros") renderRecords();
     else if (view === "aseo") renderAseo();
+    else if (view === "vencimientos") renderVenc();
+    else if (view === "creditos") renderCred();
     else renderBoard();
   });
   renderAlerts(); renderSelBar();
@@ -3635,6 +3740,8 @@ const dayLabel = ds => {
 };
 const byHour = (a, b) => (a.hora || "99").localeCompare(b.hora || "99");
 function renderTasks(open) {
+  renderTareasFiltros();
+  if (tfActivos()) { renderTareasFiltradas(); return; }
   const g = $("groups"); g.replaceChildren();
   const mine = t => filter === "all" || t.cliente === filter, today = iso(todayD());
   const from = iso(addDays(todayD(), -doneBack)), to = iso(addDays(todayD(), ahead));
@@ -3692,7 +3799,7 @@ function taskRow(t, done, withDate) {
         e.currentTarget.closest(".task").classList.add("leaving"); setTimeout(() => setDone(t, !done), 220);
       } }),
     el("button", { class: "task-t", type: "button", "data-f": "tt:" + t.id, title: t.titulo + " · " + cName(t.cliente) + (recurOf(t.frecuente) ? " · se repite: " + ruleText(recurOf(t.frecuente)) : ""), onclick: e => detailDialog("tarea", t, e.currentTarget) },
-      recurOf(t.frecuente) ? el("span", { class: "rep-i", text: "↻ ", "aria-label": "Frecuente:" }) : null, t.titulo),
+      recurOf(t.frecuente) ? el("span", { class: "rep-i", text: "↻ ", "aria-label": "Frecuente:" }) : null, t.titulo, taskExtra(t)),
     el("span", { class: "task-time num" + (withDate ? " dated" : "") + (late ? " late" : ""), text: withDate ? short(t.fecha) + (t.hora ? " " + t.hora : "") : hourText(t) }),
     // El día ya lo dice el grupo: aquí va de quién es la tarea (o "Hecha" si se filtra por un cliente).
     filter === "all" ? el("span", { class: "when-t task-who" }, dot(cColor(t.cliente)), cShort(t.cliente)) : el("span", { class: "when-t", text: done ? "Hecha" : "" }),
@@ -3735,6 +3842,7 @@ function stateSelect(x) {
 }
 function setDueState(x, estado) {
   const prev = x.estado, prevPaid = x.pagada;
+  vencEstadoHist(x, prev, estado);
   x.estado = estado; x.pagada = estado === "pagada" ? new Date().toISOString() : undefined; changed();
   if (estado === "pagada") toast("Marcado como pagado: " + x.obligacion, () => { x.estado = prev; x.pagada = prevPaid; changed(); });
 }
@@ -3933,7 +4041,7 @@ function docDialog(doc) {
       { name: "nota", label: "Nota" }
     ],
     values: doc,
-    onSave: v => { Object.assign(doc, v); changed(); },
+    onSave: v => { const antes = doc.cliente; Object.assign(doc, v); changed(); if (antes !== doc.cliente) moverArchivo(doc); },
     onDelete: () => confirmDialog("Eliminar documento", "Se borra " + doc.nombre + (doc.archivo ? " y su archivo" : "") + ". No se puede deshacer.", "Eliminar", async () => {
       S.data.documentos.splice(S.data.documentos.indexOf(doc), 1);
       changed(); toast("Documento eliminado.");
@@ -3946,7 +4054,8 @@ $("doc-in").addEventListener("change", async () => {
   if (f.size > MAX_DOC) { toast("El documento pesa " + fSize(f.size) + "; el máximo es " + fSize(MAX_DOC) + "."); return; }
   const id = uid();
   let up;
-  try { up = await uploadDoc(id, new Uint8Array(await f.arrayBuffer())); } catch (e) { toast("No se pudo subir el documento: " + e.message); return; }
+  if (esGestor() && filter === "all") { toast("Elige primero el cliente en los filtros de arriba."); return; }
+  try { up = await uploadDoc(id, new Uint8Array(await f.arrayBuffer()), filter !== "all" ? filter : ""); } catch (e) { toast("No se pudo subir el documento: " + e.message); return; }
   const doc = { id, cliente: filter !== "all" ? filter : "", nombre: f.name.replace(/\.[^.]+$/, ""), fecha: iso(todayD()),
     archivo: { nombre: f.name, mime: f.type || "application/octet-stream", tamano: f.size, ...up } };
   S.data.documentos.push(doc);
@@ -4121,7 +4230,7 @@ const fDayLong = new Intl.DateTimeFormat("es-CO", { weekday: "long", day: "numer
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const WD = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const PER_DAY = 3;
-const VIEWS = [["tablero", "tab-tablero", "v-tablero"], ["calendario", "tab-cal", "v-cal"], ["aseo", "tab-aseo", "v-aseo"], ["registros", "tab-reg", "v-reg"], ["ajustes", "tab-cfg", "v-cfg"]];
+const VIEWS = [["tablero", "tab-tablero", "v-tablero"], ["calendario", "tab-cal", "v-cal"], ["vencimientos", "tab-venc", "v-venc"], ["creditos", "tab-cred", "v-cred"], ["aseo", "tab-aseo", "v-aseo"], ["registros", "tab-reg", "v-reg"], ["ajustes", "tab-cfg", "v-cfg"]];
 let view = "tablero";
 let calMonth = new Date(todayD().getFullYear(), todayD().getMonth(), 1);
 try { view = localStorage.getItem(LS_VIEW) || view; } catch (e) {}
@@ -4129,6 +4238,8 @@ try { view = localStorage.getItem(LS_VIEW) || view; } catch (e) {}
 function setView(v, focus) {
   view = VIEWS.some(x => x[0] === v) ? v : "tablero";
   if (VIEW_MOD[view] && !MOD(VIEW_MOD[view])) view = "tablero";
+  if (!vistaPermitida(view)) view = "tablero";
+  if (view === "ajustes") PERS = null;
   if (view === "ajustes" && S.data) loadCopias();
   if (view !== "calendario") calSel.clear(); // la selección es del calendario: al salir se suelta
   try { localStorage.setItem(LS_VIEW, view); } catch (e) {}
@@ -4274,6 +4385,7 @@ function detailDialog(kind, x, anchor) {
       paid ? "done" : n <= soon() ? "late" : null);
     add("Periodo", x.periodo); add("N.º de formulario", x.formulario);
     add("Valor", money(x.valor) != null ? fMoney.format(money(x.valor)) : x.valor);
+    vencDetalleExtra(x, add);
   } else {
     const done = x.estado === "hecha", prog = kind === "prog";
     add("Fecha", cap(fDayLong.format(parse(x.fecha))) + " de " + x.fecha.slice(0, 4) + (x.hora ? ", " + hourText(x) : ""));
@@ -4294,6 +4406,7 @@ function detailDialog(kind, x, anchor) {
   const toggle = () => { d.close(); if (venc) setDueState(x, isDone ? "pendiente" : "pagada"); else setDone(x, !isDone); };
   const edit = el("span", { class: "cell-acts" },
     prog ? null : el("button", { class: "link", type: "button", text: "Editar", onclick: () => { d.close(); venc ? dueDialog(x) : taskDialog(x); } }),
+    ...(venc ? vencAcciones(x, d) : []),
     rec ? el("button", { class: "link", type: "button", text: prog ? "Editar tarea frecuente" : "Frecuente", onclick: () => { d.close(); recurDialog(rec); } }) : null,
     // La tarea de pagar el aseo lleva directo a registrar el pago (que la marca hecha).
     !venc && !isDone && /\baseo\b/.test(nkey(x.titulo)) ? el("button", { class: "link", type: "button", text: "Registrar pago de aseo", onclick: () => pagoDialog() }) : null,
@@ -4391,6 +4504,7 @@ function keyPop(k, anchor, vis) {
   if (url) add("Portal", el("a", { class: "link", href: url, target: "_blank", rel: "noopener noreferrer", text: new URL(url).hostname }));
   if (k.rotacion) add("Clave cambiada", fLong.format(parse(k.rotacion)));
   if (k.nota) add("Nota", vis ? k.nota : "Oculta: usa Mostrar");
+  keyPopExtra(k, add);
   d.replaceChildren(el("div", { class: "dlg" }, closeX(),
     el("p", { class: "det-k" }, dot(cColor(k.cliente)), k.tipo || "Acceso"),
     el("h2", { id: "dlg-t", text: k.entidad }),
@@ -4398,6 +4512,7 @@ function keyPop(k, anchor, vis) {
     el("div", { class: "dlg-acts" },
       el("span", { class: "cell-acts" },
         el("button", { class: "link", type: "button", text: "Editar", onclick: () => { d.close(); keyDialog(k); } }),
+        el("button", { class: "link", type: "button", text: "Cambiar contraseña", onclick: () => { d.close(); cambiarClaveDialog(k); } }),
         el("button", { class: "link danger", type: "button", text: "Eliminar", onclick: () => { d.close(); removeItem("claves", k, "Acceso eliminado."); } })),
       el("span", { class: "r" }, el("button", { class: "btn", type: "button", text: "Copiar clave", onclick: () => copyText(k.clave, "Clave") })))));
   openDialog(d, true, { anchor });
@@ -5439,6 +5554,1562 @@ $("cfg-aviso-min").addEventListener("change", e => setCfg("avisoMin", Number(e.t
 $("cfg-aviso-venc").addEventListener("change", e => setCfg("avisoVenc", Number(e.target.value)));
 
 if (!window.crypto || !crypto.subtle) loginError("Este navegador no permite abrir copias cifradas. Usa Chrome o Edge actualizados.");
+/* ==V12-INICIO== ════════════════════════════════════════════════════════════════════════════════════════
+   Mi Oficina v1.2.0: vencimientos por cliente, historial de claves, filtros de pendientes, créditos y gestores.
+   ════════════════════════════════════════════════════════════════════════════════════════════════════ */
+const V12 = "1.2.0";
+
+/* ---------- Colecciones nuevas ----------
+   Cada registro nuevo viaja como una fila «meta» con id x.<colección>.<id>. Así, si alguna vez se vuelve a la v1.0.1,
+   esa versión las conserva tal cual (las lee y las vuelve a escribir sin tocarlas) en lugar de marcarlas como borradas. */
+const XCOLLS = ["tiposOblig", "obligaciones", "calendarios", "creditos", "cuotas", "pagos"];
+const XPRE = "x.";
+const xRow = id => { const m = /^x\.([A-Za-z]+)\.(.+)$/.exec(id); return m && XCOLLS.includes(m[1]) ? [m[1], m[2]] : null; };
+// Catálogos de la oficina que un gestor puede leer (no escribir).
+const X_OFICINA = ["tiposOblig", "calendarios"];
+
+// Cliente al que pertenece una fila: el servidor no puede leer los datos cifrados, así que la app se lo dice.
+function filaCliente(col, id, json) {
+  if (col === "clientes") return String(id);
+  let x = null;
+  if (COLLS.includes(col)) x = col;
+  else if (col === "meta") { const r = xRow(id); if (r && !X_OFICINA.includes(r[0])) x = r[0]; }
+  if (!x) return "";
+  try { const v = JSON.parse(json); return v && typeof v.cliente === "string" ? v.cliente : ""; } catch (e) { return ""; }
+}
+// Filas cuyo cliente en el servidor no coincide (las de antes de la v1.2.0): un administrador las vuelve a enviar.
+function cliRevisar(r, json) {
+  if (!("cliente_id" in r) || esGestor()) return;
+  const k = r.col + SEP + r.id;
+  if ((r.cliente_id || "") !== filaCliente(r.col, r.id, json)) S.cliFix.add(k); else S.cliFix.delete(k);
+}
+
+/* ---------- Roles: administrador y gestor ----------
+   El servidor decide qué filas recibe y guarda cada persona (archivo sql 12). Aquí solo se ajusta la interfaz
+   para que el gestor no vea ni intente lo que el servidor le va a negar. */
+const esGestor = () => SB.rol === "gestor";
+const misClientes = () => SB.misClientes || [];
+async function cargarAcceso(oficinaId) {
+  SB.rol = "admin"; SB.misClientes = []; SB.roles = false;
+  try {
+    const r = (await rpc("mi_acceso", { p_id: oficinaId }))[0];
+    if (r) { SB.rol = r.rol === "gestor" ? "gestor" : "admin"; SB.misClientes = r.clientes || []; SB.roles = true; }
+  } catch (e) {
+    if (e.offline) throw e;
+    // Base de datos sin el SQL de roles (versión anterior): todos son administradores, como en la v1.0.1.
+  }
+}
+// Lo que un gestor puede tener en su copia de trabajo (lo demás nunca se envía ni se borra en la nube).
+function gestorLee(col, id, json) {
+  if (col === "ajustes") return id === S.me;
+  if (col === "meta") {
+    if (["actualizado", "actualizadoPor", "_ajustes"].includes(id)) return true;
+    const r = xRow(id); if (r && X_OFICINA.includes(r[0])) return true;
+  }
+  const c = filaCliente(col, id, json);
+  return !!c && misClientes().includes(c);
+}
+function splitData(d) {
+  const m = splitDataTodo(d);
+  if (!esGestor()) return m;
+  for (const [k, v] of m) if (!gestorLee(v.col, v.id, v.json)) m.delete(k);
+  return m;
+}
+// El servidor rechazó filas (gestor fuera de sus clientes): se deshacen aquí, volviendo a lo que hay en la nube.
+function rechazos(list) {
+  const no = list.filter(x => x.rechazado);
+  for (const x of no) {
+    const b = S.base.get(x.col + SEP + x.id);
+    setRow(S.data, x.col, x.id, b && b.json !== null ? JSON.parse(b.json) : null);
+  }
+  if (no.length) { normalize(S.data); render(); toast("No tienes permiso para guardar " + no.length + plural(no.length, " cambio", " cambios") + " fuera de tus clientes; se deshicieron."); }
+  return list;
+}
+const VISTAS_GESTOR = ["tablero", "calendario", "vencimientos", "creditos", "registros", "ajustes"];
+const vistaPermitida = v => !esGestor() || VISTAS_GESTOR.includes(v);
+
+// Al entrar: interfaz según el rol y, para un administrador, envío del cliente de las filas antiguas.
+function v12AlEntrar() {
+  aplicarRol();
+  if (!esGestor() && S.cliFix && S.cliFix.size) { S.pending = true; S.dirty++; persist(); }
+}
+function aplicarRol() {
+  const g = esGestor();
+  document.body.classList.toggle("gestor", g);
+  for (const id of ["tab-aseo", "kpi-aseo"]) if (g) $(id).hidden = true;
+  for (const id of ["add-cliente", "copias", "recuperacion", "importar", "add-usuario"]) { const e = $(id); if (e && g) e.hidden = true; }
+}
+
+/* ---------- Utilidades comunes de la v1.2.0 ---------- */
+// Historial de cambios de un registro: quién, cuándo y qué. Nunca se recorta.
+function hist(o, accion, detalle) {
+  if (!Array.isArray(o.historial)) o.historial = [];
+  o.historial.push({ t: new Date().toISOString(), por: S.me, accion, detalle: detalle || "" });
+}
+function histList(o) {
+  const hs = (o.historial || []).slice().reverse();
+  if (!hs.length) return el("p", { class: "meta", text: "Sin cambios registrados." });
+  return el("ol", { class: "hist" }, ...hs.map(h => el("li", {},
+    el("span", { class: "meta num", text: fStamp.format(new Date(h.t)) + " · " + (h.por || "—") }),
+    el("span", {}, el("b", { text: h.accion }), h.detalle ? " · " + h.detalle : ""))));
+}
+function histDialog(titulo, o) {
+  const d = $("dlg");
+  d.replaceChildren(el("div", { class: "dlg" }, closeX(), el("h2", { id: "dlg-t", text: titulo }), histList(o),
+    el("div", { class: "dlg-acts" }, el("span", { class: "r" }, el("button", { class: "btn alt", type: "button", text: "Cerrar", onclick: () => d.close() })))));
+  openDialog(d, true); d.querySelector(".btn").focus();
+}
+const num = s => { const n = money(s); return n == null ? 0 : n; };
+const fPeso = n => fMoney.format(Math.round(n || 0));
+const fPct = n => (Math.round(n * 1000) / 10).toLocaleString("es-CO") + " %";
+const monthsAdd = (s, n) => { const d = parse(s), day = d.getDate(), r = new Date(d.getFullYear(), d.getMonth() + n, 1); r.setDate(Math.min(day, new Date(r.getFullYear(), r.getMonth() + 1, 0).getDate())); return iso(r); };
+const fechaCorta = s => s ? short(s) + " " + s.slice(0, 4) : "—";
+const responsables = extra => [...new Set([...S.users.map(u => u.usuario), ...(extra || [])].filter(Boolean))].sort((a, b) => a.localeCompare(b));
+// Control segmentado sencillo (pestañas internas de un módulo).
+function segs(opts, value, onPick, label) {
+  return el("div", { class: "seg", role: "group", "aria-label": label || null },
+    ...opts.map(([v, l]) => el("button", { type: "button", "aria-pressed": String(v === value), text: l, onclick: () => onPick(v) })));
+}
+// Lista de casillas para elegir varios valores (clientes de un gestor, etc.).
+function checks(name, opts, values) {
+  return el("fieldset", { class: "chk" }, ...opts.map(([v, l]) => el("label", { class: "opt-in" },
+    el("input", { type: "checkbox", name, value: v, checked: values.includes(v) }), el("span", { text: l }))));
+}
+// Diálogo propio para formularios que el editor general no cubre (casillas, tablas). body: nodos; onOk: async () => mensaje de error o nada.
+function panelDialog(title, body, okText, onOk, extra) {
+  const d = $("dlg"), err = el("p", { class: "err", role: "alert" });
+  const form = el("form", { class: "dlg", novalidate: true }, el("h2", { id: "dlg-t", text: title }), ...body, err,
+    el("div", { class: "dlg-acts" }, extra || el("span"), el("span", { class: "r" },
+      el("button", { class: "btn alt", type: "button", text: okText ? "Cancelar" : "Cerrar", onclick: () => d.close() }),
+      okText ? el("button", { class: "btn", type: "submit", text: okText }) : null)));
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    const b = form.querySelector("[type=submit]"); if (b) b.disabled = true;
+    let msg; try { msg = await onOk(form); } catch (x) { msg = x.message; }
+    if (b) b.disabled = false;
+    if (msg) { err.textContent = msg; return; }
+    d.close();
+  });
+  d.replaceChildren(form); openDialog(d);
+  const first = form.querySelector("input, select, button.btn"); if (first) first.focus();
+  return form;
+}
+const formVal = (form, name) => { const e = form.elements[name]; return e ? String(e.value).trim() : ""; };
+const formChecks = (form, name) => [...form.querySelectorAll('input[name="' + name + '"]:checked')].map(x => x.value);
+
+/* ---------- Vencimientos: panel, calendario, obligaciones por cliente y calendarios oficiales ----------
+   Una sola fuente: la colección «vencimientos» de siempre (el tablero, el calendario de tareas, la campana y este
+   módulo leen lo mismo). Las fechas tributarias salen de calendarios oficiales que la persona VALIDA (con su fuente)
+   o de reglas y fechas que ella misma escribe. Generar siempre muestra una vista previa, nunca duplica y nunca
+   cambia un vencimiento que ya existe. */
+const GRUPOS = [["nacional", "Nacionales"], ["territorial", "Territoriales"], ["retencion", "Retenciones"], ["seguridad", "Seguridad social"]];
+const grupoNombre = g => (GRUPOS.find(x => x[0] === g) || GRUPOS[0])[1];
+const PERIODOS = [["mensual", "Mensual", 1], ["bimestral", "Bimestral", 2], ["trimestral", "Trimestral", 3], ["cuatrimestral", "Cuatrimestral", 4], ["semestral", "Semestral", 6], ["anual", "Anual", 12]];
+const REGLAS = [["oficial", "Calendario oficial validado (según el NIT)"], ["fija", "Día fijo después del periodo"], ["manual", "Fechas que escribo yo"]];
+const ESTADOS_V = [["pendiente", "Pendiente"], ["vencida", "Vencida"], ["presentada", "Presentada"], ["pagada", "Pagada"]];
+const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+// Catálogo inicial (configurable en «Tipos»). «oficial»: la DIAN publica un calendario por dígito del NIT.
+const DEF_TIPOS = [
+  { id: "retefuente", nombre: "Retención en la fuente", grupo: "retencion", periodicidad: "mensual", formulario: "350", oficial: true },
+  { id: "iva-bim", nombre: "IVA bimestral", grupo: "nacional", periodicidad: "bimestral", formulario: "300", oficial: true },
+  { id: "iva-cua", nombre: "IVA cuatrimestral", grupo: "nacional", periodicidad: "cuatrimestral", formulario: "300", oficial: true },
+  { id: "renta-pj", nombre: "Renta personas jurídicas", grupo: "nacional", periodicidad: "anual", formulario: "110", oficial: true },
+  { id: "renta-pn", nombre: "Renta personas naturales", grupo: "nacional", periodicidad: "anual", formulario: "210", oficial: true },
+  { id: "simple", nombre: "Régimen SIMPLE (anticipo bimestral)", grupo: "nacional", periodicidad: "bimestral", oficial: true },
+  { id: "exogena", nombre: "Exógena nacional", grupo: "nacional", periodicidad: "anual", oficial: true },
+  { id: "ica", nombre: "ICA", grupo: "territorial", periodicidad: "bimestral" },
+  { id: "reteica", nombre: "Retención de ICA", grupo: "retencion", periodicidad: "bimestral" },
+  { id: "exogena-ter", nombre: "Exógena distrital o municipal", grupo: "territorial", periodicidad: "anual" },
+  { id: "predial", nombre: "Impuesto predial", grupo: "territorial", periodicidad: "anual" },
+  { id: "pila", nombre: "Seguridad social (PILA)", grupo: "seguridad", periodicidad: "mensual" }
+];
+function tiposV() {
+  const own = S.data.tiposOblig || [], out = DEF_TIPOS.map(t => ({ ...t, ...(own.find(o => o.id === t.id) || {}) }));
+  for (const o of own) if (!out.some(t => t.id === o.id)) out.push(o);
+  return out;
+}
+const tipoV = id => tiposV().find(t => t.id === id) || null;
+const tipoPorNombre = n => { const k = nkey(n); return tiposV().find(t => nkey(t.nombre) === k) || null; };
+// Grupo de un vencimiento (los de antes de la v1.2.0 no lo tienen: se deduce solo para mostrarlo, sin guardarlo).
+function grupoDe(x) {
+  if (x.grupo) return x.grupo;
+  const t = (x.tipo && tipoV(x.tipo)) || tipoPorNombre(x.obligacion || "");
+  if (t) return t.grupo;
+  const k = nkey(x.obligacion || "");
+  return /retenc|rete/.test(k) ? "retencion" : /segur|pila|parafisc/.test(k) ? "seguridad" : /\bica\b|predial|vehic|municip|distrit|departam/.test(k) ? "territorial" : "nacional";
+}
+// Estado que se ve: «vencida» se calcula (pendiente con fecha pasada), nunca se guarda.
+const cumplida = x => x.estado === "pagada" || x.estado === "presentada";
+const estadoV = x => cumplida(x) ? x.estado : days(x.fecha) < 0 ? "vencida" : "pendiente";
+const mediodia = ds => { const d = parse(ds); return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12).toISOString(); };
+const diaDe = t => t ? iso(new Date(t)) : "";
+
+let VZ = { tab: "panel", modo: "mes", grupo: "", estado: "", resp: "", q: "", ref: iso(new Date(todayD().getFullYear(), todayD().getMonth(), 1)), cli: "" };
+try { VZ = { ...VZ, ...JSON.parse(localStorage.getItem("mo-venc") || "{}"), ref: VZ.ref }; } catch (e) {}
+const vzSave = () => { try { localStorage.setItem("mo-venc", JSON.stringify({ tab: VZ.tab, modo: VZ.modo })); } catch (e) {} };
+function vzSet(o) { Object.assign(VZ, o); vzSave(); render(); }
+
+// Vencimientos visibles con los filtros del módulo (y el filtro de cliente de arriba, que vale en todas las vistas).
+function vencFiltrados(conEstado = true) {
+  const ws = nkey(VZ.q).split(" ").filter(Boolean);
+  return S.data.vencimientos.filter(x => (filter === "all" || x.cliente === filter)
+    && (!VZ.grupo || grupoDe(x) === VZ.grupo)
+    && (!VZ.resp || (x.responsable || "") === VZ.resp)
+    && (!conEstado || !VZ.estado || estadoV(x) === VZ.estado)
+    && (!ws.length || ws.every(w => nkey([x.obligacion, cName(x.cliente), x.periodo, x.formulario, x.nota, x.responsable].join(" ")).includes(w))));
+}
+
+function renderVenc() {
+  const box = $("v-venc"); if (!box) return;
+  const head = el("section", { class: "card vz-h" },
+    el("div", { class: "card-h" }, el("h2", { text: "Vencimientos" }),
+      el("span", { class: "acts" },
+        el("button", { class: "link", type: "button", text: "Nuevo vencimiento", onclick: () => dueDialog() }),
+        el("button", { class: "link", type: "button", text: "Generar vencimientos", onclick: () => generarDialog() }))),
+    el("div", { class: "vz-tabs" }, segs([["panel", "Panel"], ["calendario", "Calendario"], ["clientes", "Por cliente"], ["oficiales", "Calendarios oficiales"], ["tipos", "Tipos"]],
+      VZ.tab, v => vzSet({ tab: v }), "Secciones de vencimientos")),
+    VZ.tab === "panel" || VZ.tab === "calendario" ? vencFiltrosBar() : null);
+  const body = VZ.tab === "calendario" ? vencCalendario() : VZ.tab === "clientes" ? vencPorCliente() : VZ.tab === "oficiales" ? vencOficiales() : VZ.tab === "tipos" ? vencTipos() : vencPanel();
+  box.replaceChildren(head, ...[].concat(body));
+}
+
+function vencFiltrosBar() {
+  const resps = responsables(S.data.vencimientos.map(x => x.responsable));
+  const n = [VZ.grupo, VZ.estado, VZ.resp, VZ.q].filter(Boolean).length;
+  const sel = (label, key, opts) => el("label", { class: "fl" }, el("span", { text: label }),
+    el("select", { class: "input", onchange: e => vzSet({ [key]: e.target.value }) }, ...[["", "Todos"], ...opts].map(([v, l]) => el("option", { value: v, text: l, selected: VZ[key] === v }))));
+  const q = el("input", { class: "input", type: "search", placeholder: "Buscar obligación, periodo, nota…", value: VZ.q, "aria-label": "Buscar vencimientos" });
+  q.addEventListener("input", () => { VZ.q = q.value; clearTimeout(q._t); q._t = setTimeout(() => keepFocus(renderVenc), 200); });
+  return el("details", { class: "fbar", open: !narrow.matches || n > 0 },
+    el("summary", { text: "Filtros" + (n ? " (" + n + ")" : "") }),
+    el("div", { class: "fbar-in" }, sel("Grupo", "grupo", GRUPOS), sel("Estado", "estado", ESTADOS_V), sel("Responsable", "resp", resps.map(r => [r, r])),
+      el("label", { class: "fl grow" }, el("span", { text: "Buscar" }), q),
+      n ? el("button", { class: "link", type: "button", text: "Limpiar filtros", onclick: () => vzSet({ grupo: "", estado: "", resp: "", q: "" }) }) : null));
+}
+
+/* Panel: indicadores, listas por grupo y cumplimiento por cliente. */
+function vencPanel() {
+  const L = vencFiltrados(false), t0 = todayD(), hoy = iso(t0), mes = hoy.slice(0, 7), anio = hoy.slice(0, 4);
+  const abiertos = L.filter(x => !cumplida(x));
+  const k = {
+    hoy: abiertos.filter(x => x.fecha === hoy),
+    semana: abiertos.filter(x => { const n = days(x.fecha); return n >= 0 && n <= 7; }),
+    mes: L.filter(x => x.fecha.slice(0, 7) === mes),
+    vencidas: abiertos.filter(x => days(x.fecha) < 0),
+    pendientes: abiertos.filter(x => days(x.fecha) >= 0),
+    presentadas: L.filter(x => x.estado === "presentada" && x.fecha.slice(0, 4) === anio),
+    pagadas: L.filter(x => x.estado === "pagada" && x.fecha.slice(0, 4) === anio)
+  };
+  const kpi = (label, xs, sub, cls, go) => el("button", { class: "kpi", type: "button", onclick: go },
+    el("span", { class: "k", text: label }), el("span", { class: "v num" + (cls ? " " + cls : ""), text: String(xs.length) }), el("span", { class: "s", text: sub }));
+  const suma = xs => xs.reduce((a, x) => a + (money(x.valor) || 0), 0);
+  const verAgenda = o => vzSet({ tab: "calendario", modo: "agenda", ...o });
+  const kpis = el("section", { class: "kpis vz-kpis", "aria-label": "Indicadores de vencimientos" },
+    kpi("Vencen hoy", k.hoy, k.hoy.length ? k.hoy.map(x => x.obligacion).slice(0, 2).join(", ") : "Nada vence hoy", k.hoy.length ? "late" : "ok", () => verAgenda({ estado: "pendiente", ref: hoy.slice(0, 8) + "01" })),
+    kpi("Próximos 7 días", k.semana, k.semana.length ? "Hasta el " + short(iso(addDays(t0, 7))) : "Sin vencimientos cercanos", null, () => verAgenda({ estado: "pendiente" })),
+    kpi("Este mes", k.mes, k.mes.filter(cumplida).length + " de " + k.mes.length + " cumplidos" + (suma(k.mes.filter(x => !cumplida(x))) ? " · por pagar " + fPeso(suma(k.mes.filter(x => !cumplida(x)))) : ""), null, () => verAgenda({ estado: "", ref: mes + "-01" })),
+    kpi("Vencidas", k.vencidas, k.vencidas.length ? "La más antigua: " + fechaCorta(k.vencidas.reduce((a, b) => a.fecha < b.fecha ? a : b).fecha) : "Ninguna sin cumplir", k.vencidas.length ? "late" : "ok", () => verAgenda({ estado: "vencida" })),
+    kpi("Pendientes", k.pendientes, "Por presentar o pagar, desde hoy", null, () => verAgenda({ estado: "pendiente" })),
+    kpi("Presentadas " + anio, k.presentadas, "Falta registrar el pago, si aplica", null, () => verAgenda({ estado: "presentada" })),
+    kpi("Pagadas " + anio, k.pagadas, suma(k.pagadas) ? fPeso(suma(k.pagadas)) + " registrados" : "Pagos registrados en el año", "ok", () => verAgenda({ estado: "pagada" })));
+  // Listas por grupo: primero lo vencido, luego lo de los próximos 30 días.
+  const grupos = el("div", { class: "vz-grupos" }, ...GRUPOS.filter(([g]) => !VZ.grupo || VZ.grupo === g).map(([g, nombre]) => {
+    const xs = abiertos.filter(x => grupoDe(x) === g && days(x.fecha) <= 30).sort((a, b) => a.fecha.localeCompare(b.fecha));
+    return el("section", { class: "card" },
+      el("div", { class: "card-h" }, el("h3", { text: nombre }), el("span", { class: "meta num", text: xs.length + plural(xs.length, " abierto", " abiertos") })),
+      xs.length ? el("ul", { class: "vz-list" }, ...xs.slice(0, 8).map(vencItem)) : el("p", { class: "empty", text: "Nada vencido ni en los próximos 30 días." }),
+      xs.length > 8 ? el("button", { class: "more", type: "button", text: "Ver los " + xs.length, onclick: () => verAgenda({ grupo: g, estado: "" }) }) : null);
+  }));
+  return [kpis, grupos, vencCumplimiento(L, anio)];
+}
+function vencItem(x) {
+  const st = estadoV(x), n = days(x.fecha);
+  return el("li", {}, el("button", { class: "vz-it", type: "button", "data-f": "vz:" + x.id, onclick: e => detailDialog("venc", x, e.currentTarget) },
+    dot(cColor(x.cliente), true),
+    el("span", { class: "t" }, el("b", { text: x.obligacion + (x.periodo ? " · " + x.periodo : "") }),
+      el("span", { class: "meta", text: [cName(x.cliente), x.responsable].filter(Boolean).join(" · ") })),
+    el("span", { class: "num w" + (st === "vencida" || (st === "pendiente" && n <= soon()) ? " late" : "") , text: fechaCorta(x.fecha) + " · " + (st === "vencida" ? leftText(n) : st === "pendiente" ? (n === 0 ? "Hoy" : n === 1 ? "Mañana" : n + " días") : cap(st)) })));
+}
+// Cumplimiento por cliente en el año: cumplidas (presentadas o pagadas), a tiempo (registradas a más tardar el día del
+// vencimiento), vencidas sin cumplir y próximas.
+function vencCumplimiento(L, anio) {
+  const cs = S.data.clientes.filter(c => filter === "all" || c.id === filter);
+  const rows = cs.map(c => {
+    const xs = L.filter(x => x.cliente === c.id && x.fecha.slice(0, 4) === anio), hechos = xs.filter(cumplida);
+    const aTiempo = hechos.filter(x => { const f = diaDe(x.presentada) || diaDe(x.pagada); return f && f <= x.fecha; }).length;
+    const exig = xs.filter(x => days(x.fecha) < 0 || cumplida(x)).length;
+    return { c, total: xs.length, hechos: hechos.length, aTiempo, vencidas: xs.filter(x => estadoV(x) === "vencida").length,
+      prox: xs.filter(x => !cumplida(x) && days(x.fecha) >= 0 && days(x.fecha) <= 30).length, pct: exig ? hechos.length / exig : null };
+  }).filter(r => r.total);
+  return el("section", { class: "card" },
+    el("div", { class: "card-h" }, el("h3", { text: "Cumplimiento por cliente · " + anio }),
+      el("span", { class: "meta", text: "Cumplido = presentado o pagado. El porcentaje cuenta solo lo que ya debía estar cumplido." })),
+    rows.length ? el("div", { class: "tbl-wrap" }, el("table", {},
+      el("thead", {}, el("tr", {}, ...["Cliente", "Del año", "Cumplidos", "A tiempo", "Vencidos", "Próx. 30 días", "Cumplimiento"].map((h, i) => el("th", { scope: "col", class: i ? "r" : null, text: h })))),
+      el("tbody", {}, ...rows.map(r => el("tr", {},
+        el("td", {}, el("span", { class: "client-n" }, dot(r.c.color || GRAY), r.c.nombre)),
+        el("td", { class: "r num", text: String(r.total) }), el("td", { class: "r num", text: String(r.hechos) }),
+        el("td", { class: "r num", text: String(r.aTiempo) }), el("td", { class: "r num" + (r.vencidas ? " soon" : ""), text: String(r.vencidas) }),
+        el("td", { class: "r num", text: String(r.prox) }),
+        el("td", { class: "r num" }, r.pct == null ? "—" : el("span", { class: "pct" }, el("i", { style: "--p:" + Math.round(r.pct * 100) + "%" }), fPct(r.pct))))))))
+      : el("p", { class: "empty", text: "Sin vencimientos en " + anio + " con estos filtros." }));
+}
+
+/* Calendario: mes, semana y agenda, con los mismos filtros. */
+function vencCalendario() {
+  const ref = parse(VZ.ref), modo = VZ.modo;
+  const paso = n => { const d = parse(VZ.ref); vzSet({ ref: iso(modo === "semana" ? addDays(d, 7 * n) : new Date(d.getFullYear(), d.getMonth() + n, 1)) }); };
+  const lunes = d => addDays(d, -((d.getDay() + 6) % 7));
+  const titulo = modo === "semana" ? "Semana del " + fDay.format(lunes(ref)) : cap(fMonth.format(ref));
+  const bar = el("div", { class: "cal-h" }, el("h2", { text: titulo }),
+    el("div", { class: "cal-tools" },
+      segs([["mes", "Mes"], ["semana", "Semana"], ["agenda", "Agenda"]], modo, v => vzSet({ modo: v, ref: v === "semana" ? iso(lunes(todayD())) : iso(new Date(ref.getFullYear(), ref.getMonth(), 1)) }), "Vista del calendario"),
+      el("div", { class: "cal-nav" },
+        el("button", { class: "btn alt", type: "button", text: "‹", "aria-label": "Anterior", onclick: () => paso(-1) }),
+        el("button", { class: "btn alt", type: "button", text: "Hoy", onclick: () => vzSet({ ref: modo === "semana" ? iso(lunes(todayD())) : iso(new Date(todayD().getFullYear(), todayD().getMonth(), 1)) }) }),
+        el("button", { class: "btn alt", type: "button", text: "›", "aria-label": "Siguiente", onclick: () => paso(1) }))));
+  const L = vencFiltrados(true);
+  const delDia = ds => L.filter(x => x.fecha === ds).sort((a, b) => grupoDe(a).localeCompare(grupoDe(b)));
+  const it = x => { const st = estadoV(x); return el("button", { type: "button", class: "cal-it" + (st === "vencida" || (st === "pendiente" && days(x.fecha) <= soon()) ? " urg" : "") + (cumplida(x) ? " done" : ""),
+    title: x.obligacion + " · " + cName(x.cliente) + " · " + cap(st), onclick: e => detailDialog("venc", x, e.currentTarget) },
+    dot(cColor(x.cliente), true), el("span", { class: "t" }, el("span", { class: "t1" }, cumplida(x) ? el("span", { class: "ok", text: "✓" }) : null, x.obligacion.replace("Retención en la fuente", "Retefuente") + (x.periodo ? " · " + x.periodo : "")),
+      filter === "all" ? el("span", { class: "t2", text: cShort(x.cliente) }) : null)); };
+  const card = el("section", { class: "card cal-card" }, bar);
+  const hoy = iso(todayD());
+  if (modo === "agenda") {
+    const y = ref.getFullYear(), m = ref.getMonth(), desde = iso(new Date(y, m, 1)), hasta = iso(new Date(y, m + 1, 0));
+    const atras = y === todayD().getFullYear() && m === todayD().getMonth() ? L.filter(x => x.fecha < desde && estadoV(x) === "vencida") : [];
+    const xs = [...atras, ...L.filter(x => x.fecha >= desde && x.fecha <= hasta)].sort((a, b) => a.fecha.localeCompare(b.fecha));
+    card.append(xs.length ? vencTabla(xs) : el("p", { class: "empty", text: "Sin vencimientos en " + fMonth.format(ref) + " con estos filtros." }));
+    return card;
+  }
+  if (modo === "semana") {
+    const l = lunes(ref);
+    card.append(el("div", { class: "vz-semana" }, ...[0, 1, 2, 3, 4, 5, 6].map(i => {
+      const d = addDays(l, i), ds = iso(d), xs = delDia(ds);
+      return el("div", { class: "vz-dia" + (ds === hoy ? " today" : "") }, el("h4", { text: cap(fDayLong.format(d)) }),
+        xs.length ? el("div", { class: "day-list" }, ...xs.map(it)) : el("p", { class: "meta", text: "—" }));
+    })));
+    return card;
+  }
+  const y = ref.getFullYear(), m = ref.getMonth(), first = new Date(y, m, 1), off = (first.getDay() + 6) % 7, weeks = Math.ceil((off + new Date(y, m + 1, 0).getDate()) / 7);
+  const grid = el("div", { class: "cal-grid" }, ...WD.map(w => el("div", { class: "cal-wd", text: w })));
+  for (let i = 0; i < weeks * 7; i++) {
+    const d = new Date(y, m, 1 - off + i), ds = iso(d), xs = delDia(ds);
+    const cell = el("div", { class: "cal-day" + (d.getMonth() !== m ? " out" : "") + (ds === hoy ? " today" : "") },
+      el("button", { class: "cal-n num", type: "button", text: String(d.getDate()), "aria-label": "Nuevo vencimiento el " + fDayLong.format(d), onclick: () => dueDialog(null, ds) }));
+    xs.slice(0, xs.length > PER_DAY + 1 ? PER_DAY : PER_DAY + 1).forEach(x => cell.append(it(x)));
+    if (xs.length > PER_DAY + 1) cell.append(el("button", { class: "cal-more", type: "button", text: "+" + (xs.length - PER_DAY) + " más", onclick: () => vzSet({ modo: "agenda" }) }));
+    grid.append(cell);
+  }
+  card.append(grid, el("div", { class: "vz-agenda-movil" }, vencTabla(L.filter(x => x.fecha.slice(0, 7) === VZ.ref.slice(0, 7)).sort((a, b) => a.fecha.localeCompare(b.fecha)))));
+  return card;
+}
+function vencTabla(xs) {
+  return el("div", { class: "tbl-wrap" }, el("table", { class: "vz-tbl" },
+    el("thead", {}, el("tr", {}, ...["Vence", "Obligación", "Cliente", "Periodo", "Grupo", "Responsable", "Estado", "Valor"].map((h, i) => el("th", { scope: "col", class: i === 7 ? "r" : null, text: h })))),
+    el("tbody", {}, ...xs.map(x => { const st = estadoV(x); return el("tr", {},
+      el("td", { class: "when num" + (st === "vencida" ? " soon" : ""), text: fechaCorta(x.fecha) }),
+      el("td", { class: "ob" }, el("button", { type: "button", text: x.obligacion, onclick: e => detailDialog("venc", x, e.currentTarget) })),
+      el("td", { text: cName(x.cliente) }), el("td", { text: x.periodo || "—" }), el("td", { text: grupoNombre(grupoDe(x)) }),
+      el("td", { text: x.responsable || "—" }), el("td", { class: st === "vencida" ? "soon" : null, text: cap(st) }),
+      el("td", { class: "r num", text: money(x.valor) != null ? fPeso(money(x.valor)) : x.valor || "—" })); }))));
+}
+
+/* ---------- Registro de cambios de un vencimiento ---------- */
+const CAMPOS_V = { obligacion: "Obligación", cliente: "Cliente", fecha: "Fecha", periodo: "Periodo", formulario: "Formulario", valor: "Valor", nota: "Nota", responsable: "Responsable", grupo: "Grupo" };
+function vencEditHist(x, v) {
+  const cambios = Object.keys(CAMPOS_V).filter(k => k in v && (v[k] || "") !== (x[k] || ""));
+  if (!cambios.length) return;
+  if (cambios.includes("fecha")) { if (!x.fechaOriginal) x.fechaOriginal = x.fecha; hist(x, "Reprogramado", fechaCorta(x.fecha) + " → " + fechaCorta(v.fecha)); }
+  const otros = cambios.filter(k => k !== "fecha");
+  if (otros.length) hist(x, "Editado", otros.map(k => CAMPOS_V[k] + ": " + (k === "cliente" ? cName(x[k]) + " → " + cName(v[k]) : (x[k] || "—") + " → " + (v[k] || "—"))).join("; "));
+}
+function vencNuevo(v) {
+  const x = { id: uid(), estado: "pendiente", ...v, origen: "manual", creada: new Date().toISOString() };
+  const t = tipoPorNombre(x.obligacion); if (t) x.tipo = t.id;
+  hist(x, "Creado", "Manual");
+  return x;
+}
+function vencEstadoHist(x, prev, estado) {
+  if (estado === "presentada" && !x.presentada) x.presentada = new Date().toISOString();
+  hist(x, "Estado", cap(prev || "pendiente") + " → " + cap(estado));
+}
+function reprogramarDialog(x) {
+  editor({
+    title: "Reprogramar " + x.obligacion,
+    fields: [{ name: "fecha", label: "Fecha nueva", type: "date", req: true }, { name: "motivo", label: "Motivo", req: true, ph: "Prórroga, corrección del calendario…" }],
+    values: { fecha: x.fecha }, saveText: "Reprogramar",
+    onSave: v => {
+      if (v.fecha === x.fecha) return "Es la misma fecha.";
+      if (!x.fechaOriginal) x.fechaOriginal = x.fecha;
+      hist(x, "Reprogramado", fechaCorta(x.fecha) + " → " + fechaCorta(v.fecha) + ". Motivo: " + v.motivo);
+      x.fecha = v.fecha; changed();
+    }
+  });
+}
+function registrarDialog(x, que) {
+  const pago = que === "pago";
+  editor({
+    title: (pago ? "Registrar pago · " : "Registrar presentación · ") + x.obligacion,
+    fields: [
+      { name: "fecha", label: pago ? "Fecha del pago" : "Fecha de presentación", type: "date", req: true },
+      { name: "formulario", label: "N.º de formulario" },
+      ...(pago ? [{ name: "valor", label: "Valor pagado", ph: "1.250.000" }] : []),
+      { name: "nota", label: "Nota", ph: "Número de radicado, banco, soporte…" }
+    ],
+    values: { fecha: iso(todayD()), formulario: x.formulario || "", valor: x.valor || "" },
+    saveText: "Registrar",
+    onSave: v => {
+      const prev = x.estado || "pendiente";
+      if (v.formulario) x.formulario = v.formulario;
+      if (pago) { x.pagada = mediodia(v.fecha); if (v.valor) x.valor = v.valor; x.estado = "pagada"; if (!x.presentada) x.presentada = mediodia(v.fecha); }
+      else { x.presentada = mediodia(v.fecha); if (x.estado !== "pagada") x.estado = "presentada"; }
+      hist(x, pago ? "Pago registrado" : "Presentación registrada", fechaCorta(v.fecha) + (v.formulario ? " · formulario " + v.formulario : "") + (pago && v.valor ? " · " + v.valor : "") + (v.nota ? " · " + v.nota : "") + (prev !== x.estado ? " (" + cap(prev) + " → " + cap(x.estado) + ")" : ""));
+      changed();
+    }
+  });
+}
+// Filas extra en la ficha de un vencimiento.
+function vencDetalleExtra(x, add) {
+  add("Grupo", grupoNombre(grupoDe(x)));
+  add("Responsable", x.responsable);
+  if (x.presentada) add("Presentada", fLong.format(new Date(x.presentada)));
+  if (x.fechaOriginal && x.fechaOriginal !== x.fecha) add("Fecha original", fechaCorta(x.fechaOriginal));
+  add("Origen", x.origen === "generado" ? "Generado" + (x.fuente ? " · " + x.fuente : "") : x.origen === "manual" ? "Creado a mano" : null);
+}
+function vencAcciones(x, d) {
+  return [
+    el("button", { class: "link", type: "button", text: "Reprogramar", onclick: () => { d.close(); reprogramarDialog(x); } }),
+    x.estado === "pagada" ? null : el("button", { class: "link", type: "button", text: x.estado === "presentada" ? "Registrar pago" : "Registrar presentación", onclick: () => { d.close(); registrarDialog(x, x.estado === "presentada" ? "pago" : "presentacion"); } }),
+    el("button", { class: "link", type: "button", text: "Historial" + (x.historial && x.historial.length ? " (" + x.historial.length + ")" : ""), onclick: () => histDialog("Historial · " + x.obligacion, x) })];
+}
+
+/* ---------- Obligaciones por cliente ---------- */
+const oblDe = cid => S.data.obligaciones.filter(o => o.cliente === cid);
+function nitDigitos(c) {
+  const s = String(c && c.nit || "").split("-")[0].replace(/\D/g, "");
+  return s.length ? s : "";
+}
+function vencPorCliente() {
+  const cs = S.data.clientes;
+  if (!cs.length) return el("section", { class: "card" }, el("p", { class: "empty", text: "Agrega primero un cliente." }));
+  const cid = filter !== "all" ? filter : cs.some(c => c.id === VZ.cli) ? VZ.cli : cs[0].id, c = cs.find(x => x.id === cid);
+  const picker = filter === "all" ? el("label", { class: "fl" }, el("span", { text: "Cliente" }),
+    el("select", { class: "input", onchange: e => vzSet({ cli: e.target.value }) }, ...cs.map(x => el("option", { value: x.id, text: x.nombre, selected: x.id === cid })))) : null;
+  const nit = nitDigitos(c), os = oblDe(cid);
+  const card = el("section", { class: "card" },
+    el("div", { class: "card-h" }, el("h3", {}, dot(c.color || GRAY), " ", c.nombre),
+      el("span", { class: "acts" },
+        el("button", { class: "link", type: "button", text: "Agregar obligación", onclick: () => oblDialog(null, cid) }),
+        el("button", { class: "link", type: "button", text: "Sugeridas", onclick: () => sugeridasDialog(c) }))),
+    picker,
+    el("p", { class: "meta", text: nit ? "NIT o cédula " + c.nit + " · último dígito " + nit.slice(-1) + " · dos últimos " + nit.slice(-2) + ". Los calendarios oficiales usan estos dígitos (sin el dígito de verificación)."
+      : "Este cliente no tiene NIT o cédula: complétalo en su ficha para usar los calendarios oficiales." }),
+    os.length ? el("div", { class: "tbl-wrap" }, el("table", {},
+      el("thead", {}, el("tr", {}, ...["Obligación", "Periodicidad", "Fechas", "Responsable", "Estado", ""].map(h => el("th", { scope: "col", text: h })))),
+      el("tbody", {}, ...os.map(o => { const t = tipoV(o.tipo) || { nombre: o.tipo, grupo: "nacional" }; return el("tr", {},
+        el("td", { class: "ob" }, el("button", { type: "button", text: t.nombre, onclick: () => oblDialog(o, cid) }), el("span", { class: "meta key-sub", text: grupoNombre(t.grupo) + (o.nota ? " · " + o.nota : "") })),
+        el("td", { text: (PERIODOS.find(p => p[0] === o.periodicidad) || ["", "—"])[1] }),
+        el("td", { class: "meta", text: reglaTexto(o) }),
+        el("td", { text: o.responsable || "—" }),
+        el("td", { text: o.activa === false ? "Inactiva" : "Activa" }),
+        el("td", { class: "act" }, el("button", { class: "link", type: "button", text: "Historial", onclick: () => histDialog("Historial · " + t.nombre + " · " + c.nombre, o) }))); }))))
+      : el("p", { class: "empty", text: "Sin obligaciones configuradas. Usa «Sugeridas» o «Agregar obligación»." }));
+  return card;
+}
+function reglaTexto(o) {
+  if (o.regla === "fija") return "Día " + o.dia + " del " + (Number(o.meses) || 1) + ".º mes después del periodo" + (o.finSemana === "siguiente" ? " (si cae en fin de semana, el lunes)" : "");
+  if (o.regla === "manual") return (o.fechas || []).length + plural((o.fechas || []).length, " fecha escrita", " fechas escritas");
+  return "Calendario oficial validado";
+}
+const OBL_CAMPOS = { tipo: "Obligación", periodicidad: "Periodicidad", regla: "Fechas", dia: "Día", meses: "Meses después", finSemana: "Fin de semana", responsable: "Responsable", activa: "Estado", nota: "Nota" };
+function oblDialog(o, cid) {
+  suggest("responsables", responsables(), S.data.obligaciones.map(x => x.responsable));
+  const ts = tiposV().filter(t => t.activo !== false);
+  editor({
+    title: o ? "Editar obligación" : "Agregar obligación",
+    fields: [
+      { name: "tipo", label: "Obligación", type: "select", options: ts.map(t => [t.id, t.nombre + " · " + grupoNombre(t.grupo)]), req: true },
+      { name: "periodicidad", label: "Periodicidad", type: "select", options: PERIODOS.map(p => [p[0], p[1]]) },
+      { name: "regla", label: "De dónde salen las fechas", type: "select", options: REGLAS },
+      { name: "dia", label: "Día del mes", type: "number", min: 1, max: 31, when: v => v.regla === "fija", hint: "Fecha que tú defines (por ejemplo, la que fija el municipio). La app no la inventa." },
+      { name: "meses", label: "Meses después del cierre del periodo", type: "number", min: 0, max: 12, when: v => v.regla === "fija" },
+      { name: "finSemana", label: "Si cae en sábado o domingo", type: "select", options: [["igual", "Dejarla ese día"], ["siguiente", "Pasarla al lunes"]], when: v => v.regla === "fija", hint: "Los festivos no se calculan: revísalos en la vista previa." },
+      { name: "responsable", label: "Responsable", list: "responsables" },
+      { name: "activa", label: "Estado", type: "select", options: [["si", "Activa"], ["no", "Inactiva (no se generan fechas)"]] },
+      { name: "nota", label: "Observaciones" }
+    ],
+    values: o ? { ...o, activa: o.activa === false ? "no" : "si" } : { tipo: ts[0].id, periodicidad: ts[0].periodicidad, regla: ts[0].oficial ? "oficial" : "fija", dia: 20, meses: 1, finSemana: "siguiente", activa: "si" },
+    saveText: o ? "Guardar" : "Agregar",
+    onSave: v => {
+      const val = { ...v, activa: v.activa !== "no", dia: v.regla === "fija" ? Number(v.dia) : undefined, meses: v.regla === "fija" ? Number(v.meses) || 0 : undefined };
+      if (v.regla === "fija" && !(val.dia >= 1 && val.dia <= 31)) return "Escribe el día del mes (1 a 31).";
+      if (!o && S.data.obligaciones.some(x => x.cliente === cid && x.tipo === v.tipo)) return "Este cliente ya tiene esa obligación.";
+      if (o) {
+        const ch = Object.keys(OBL_CAMPOS).filter(k => String(val[k] ?? "") !== String(o[k] ?? ""));
+        if (ch.length) hist(o, "Editada", ch.map(k => OBL_CAMPOS[k] + ": " + (o[k] ?? "—") + " → " + (val[k] ?? "—")).join("; "));
+        Object.assign(o, val);
+      } else {
+        const n = { id: uid(), cliente: cid, ...val, fechas: [], creada: new Date().toISOString() };
+        hist(n, "Creada", (tipoV(v.tipo) || {}).nombre || v.tipo);
+        S.data.obligaciones.push(n);
+        if (v.regla === "manual") setTimeout(() => fechasManualesDialog(n), 50);
+      }
+      changed();
+    },
+    onDelete: o ? () => confirmDialog("Quitar obligación", "Se quita la configuración de " + ((tipoV(o.tipo) || {}).nombre || o.tipo) + " para " + cName(cid) + ". Los vencimientos ya creados no cambian.", "Quitar", () => removeItem("obligaciones", o, "Obligación quitada.")) : null
+  });
+}
+// Fechas escritas a mano para una obligación (periodo y fecha).
+function fechasManualesDialog(o) {
+  const filas = (o.fechas || []).map(f => ({ ...f }));
+  const tb = el("tbody");
+  const pinta = () => tb.replaceChildren(...filas.map((f, i) => el("tr", {},
+    el("td", {}, el("input", { class: "input", value: f.periodo || "", placeholder: "Enero 2026", "aria-label": "Periodo", oninput: e => { f.periodo = e.target.value; } })),
+    el("td", {}, el("input", { class: "input", type: "date", value: f.fecha || "", "aria-label": "Fecha", oninput: e => { f.fecha = e.target.value; } })),
+    el("td", { class: "act" }, el("button", { class: "x", type: "button", text: "×", "aria-label": "Quitar", onclick: () => { filas.splice(i, 1); pinta(); } })))));
+  pinta();
+  panelDialog("Fechas de " + ((tipoV(o.tipo) || {}).nombre || o.tipo) + " · " + cName(o.cliente), [
+    el("p", { class: "meta", text: "Escribe cada periodo con su fecha de vencimiento. Al generar, se crean solo las que no existan." }),
+    el("div", { class: "tbl-wrap" }, el("table", {}, el("thead", {}, el("tr", {}, el("th", { text: "Periodo" }), el("th", { text: "Vence" }), el("th"))), tb)),
+    el("button", { class: "link", type: "button", text: "Agregar fecha", onclick: () => { filas.push({ periodo: "", fecha: "" }); pinta(); } })
+  ], "Guardar", async () => {
+    const ok = filas.filter(f => f.fecha);
+    if (ok.some(f => !f.periodo.trim())) return "Cada fecha necesita su periodo.";
+    hist(o, "Fechas escritas", ok.length + plural(ok.length, " fecha", " fechas"));
+    o.fechas = ok.map(f => ({ periodo: f.periodo.trim(), fecha: f.fecha })).sort((a, b) => a.fecha.localeCompare(b.fecha));
+    changed();
+  });
+}
+// Sugerencias según la ficha del cliente (periodicidad de IVA, tipo). Solo se agregan las que la persona marque.
+function sugeridasDialog(c) {
+  const k = nkey([c.tipo, c.responsabilidades].join(" ")), iva = nkey(c.periodicidadIva || "");
+  const pn = /natural|persona n/.test(k), sug = ["retefuente", iva.includes("cuatri") ? "iva-cua" : iva.includes("bimes") ? "iva-bim" : null, pn ? "renta-pn" : "renta-pj", "exogena", "pila", "ica"].filter(Boolean);
+  const ya = oblDe(c.id).map(o => o.tipo), opts = tiposV().filter(t => t.activo !== false && !ya.includes(t.id));
+  if (!opts.length) { toast("Este cliente ya tiene todas las obligaciones del catálogo."); return; }
+  panelDialog("Obligaciones de " + c.nombre, [
+    el("p", { class: "meta", text: "Marcadas: las que suelen aplicar según su ficha (" + ([c.tipo, c.periodicidadIva && "IVA " + c.periodicidadIva].filter(Boolean).join(", ") || "sin datos") + "). Revisa y ajusta antes de agregar." }),
+    checks("tipo", opts.map(t => [t.id, t.nombre + " · " + grupoNombre(t.grupo)]), sug)
+  ], "Agregar", async form => {
+    const sel = formChecks(form, "tipo"); if (!sel.length) return "Marca al menos una.";
+    for (const id of sel) {
+      const t = tipoV(id), n = { id: uid(), cliente: c.id, tipo: id, periodicidad: t.periodicidad, regla: t.oficial ? "oficial" : "fija", dia: t.oficial ? undefined : 20, meses: t.oficial ? undefined : 1, finSemana: "siguiente", activa: true, fechas: [], creada: new Date().toISOString() };
+      hist(n, "Creada", t.nombre + " (sugerida)"); S.data.obligaciones.push(n);
+    }
+    changed(); toast(sel.length + plural(sel.length, " obligación agregada", " obligaciones agregadas") + ". Las de día fijo quedan con el día 20: ajústalo si es otro.");
+  });
+}
+
+/* ---------- Calendarios oficiales (con fuente y validación) ---------- */
+// Claves de las columnas: un dígito (0–9), dos dígitos por pares (01-02 … 99-00) o una sola fecha para todos.
+const CLAVES_CAL = {
+  digito: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+  dos: Array.from({ length: 50 }, (_, i) => { const a = String(i * 2 + 1).padStart(2, "0"), b = String((i * 2 + 2) % 100).padStart(2, "0"); return a + "-" + b; }),
+  unico: ["*"]
+};
+const claveLabel = k => k === "*" ? "Todos" : k;
+function claveDeNit(cal, nit) {
+  if (cal.columnas === "unico") return "*";
+  if (!nit) return null;
+  if (cal.columnas === "digito") return nit.slice(-1);
+  const d2 = nit.slice(-2).padStart(2, "0");
+  return CLAVES_CAL.dos.find(k => k.split("-").includes(d2)) || null;
+}
+const calNombre = cal => ((tipoV(cal.tipo) || {}).nombre || cal.tipo) + " " + cal.anio + (cal.variante ? " · " + cal.variante : "");
+function vencOficiales() {
+  const cals = S.data.calendarios.slice().sort((a, b) => b.anio - a.anio || calNombre(a).localeCompare(calNombre(b)));
+  const g = esGestor();
+  return el("section", { class: "card" },
+    el("div", { class: "card-h" }, el("h3", { text: "Calendarios oficiales" }),
+      g ? null : el("span", { class: "acts" },
+        el("button", { class: "link", type: "button", text: "Cargar fechas precargadas", onclick: precargaDialog }),
+        el("button", { class: "link", type: "button", text: "Nuevo calendario", onclick: () => calDialog(null) }))),
+    el("p", { class: "meta", text: "Solo los calendarios VALIDADOS sirven para generar vencimientos. Validar significa que comparaste las fechas con la fuente oficial (decreto o resolución). Cambiar un calendario nunca cambia los vencimientos ya creados." }),
+    cals.length ? el("div", { class: "tbl-wrap" }, el("table", {},
+      el("thead", {}, el("tr", {}, ...["Calendario", "Fuente", "Periodos", "Estado", ""].map(h => el("th", { scope: "col", text: h })))),
+      el("tbody", {}, ...cals.map(cal => el("tr", {},
+        el("td", { class: "ob" }, el("button", { type: "button", text: calNombre(cal), onclick: () => calTablaDialog(cal) })),
+        el("td", { class: "meta", text: cal.fuente || "—" }),
+        el("td", { class: "num", text: String((cal.filas || []).length) }),
+        el("td", { class: cal.validado ? "ok-t" : "soon", text: cal.validado ? "Validado por " + cal.validadoPor + " el " + fLong.format(new Date(cal.validadoEn)) : "Sin validar" }),
+        el("td", { class: "act" }, el("span", { class: "cell-acts" },
+          g ? null : el("button", { class: "link", type: "button", text: cal.validado ? "Quitar validación" : "Validar", onclick: () => validarDialog(cal) }),
+          el("button", { class: "link", type: "button", text: "Historial", onclick: () => histDialog("Historial · " + calNombre(cal), cal) }))))))))
+      : el("p", { class: "empty", text: "Aún no hay calendarios. Carga las fechas precargadas (quedan sin validar) o crea uno." }));
+}
+function calDialog(cal) {
+  editor({
+    title: cal ? "Datos del calendario" : "Nuevo calendario",
+    fields: [
+      { name: "tipo", label: "Obligación", type: "select", options: tiposV().map(t => [t.id, t.nombre]), req: true },
+      { name: "anio", label: "Año de las fechas", type: "number", min: 2020, max: 2100, req: true },
+      { name: "variante", label: "Variante", ph: "Grandes contribuyentes, primera cuota…" },
+      { name: "columnas", label: "Columnas", type: "select", options: [["digito", "Último dígito del NIT (0 a 9)"], ["dos", "Dos últimos dígitos (01-02 … 99-00)"], ["unico", "Una sola fecha para todos"]] },
+      { name: "fuente", label: "Fuente oficial", req: true, ph: "Decreto, resolución o enlace de la DIAN o el municipio" }
+    ],
+    values: cal ? { ...cal } : { anio: todayD().getFullYear(), columnas: "digito" },
+    saveText: cal ? "Guardar" : "Crear",
+    onSave: v => {
+      const anio = Number(v.anio);
+      if (!cal) {
+        const n = { id: uid(), tipo: v.tipo, anio, variante: v.variante, columnas: v.columnas, fuente: v.fuente, validado: false, filas: [], creada: new Date().toISOString() };
+        hist(n, "Creado", v.fuente); S.data.calendarios.push(n); changed(); setTimeout(() => calTablaDialog(n), 50); return;
+      }
+      if (v.columnas !== cal.columnas && (cal.filas || []).length) return "Este calendario ya tiene fechas: crea otro para usar otras columnas.";
+      hist(cal, "Datos cambiados", ["tipo", "anio", "variante", "fuente"].filter(k => String(cal[k] ?? "") !== String(k === "anio" ? anio : v[k])).join(", ") + (cal.validado ? " · queda sin validar" : ""));
+      Object.assign(cal, { tipo: v.tipo, anio, variante: v.variante, columnas: v.columnas, fuente: v.fuente, validado: false });
+      changed();
+    }
+  });
+}
+// Tabla de fechas: una fila por periodo, una columna por dígito. Guardar cambios deja el calendario sin validar.
+function calTablaDialog(cal) {
+  const claves = CLAVES_CAL[cal.columnas] || CLAVES_CAL.digito, g = esGestor();
+  const filas = (cal.filas || []).map(f => ({ periodo: f.periodo, fechas: { ...f.fechas } }));
+  const tb = el("tbody");
+  const pinta = () => tb.replaceChildren(...filas.map((f, i) => el("tr", {},
+    el("th", { scope: "row" }, g ? el("span", { text: f.periodo }) : el("input", { class: "input per", value: f.periodo, placeholder: "Periodo", "aria-label": "Periodo", oninput: e => { f.periodo = e.target.value; } })),
+    ...claves.map(k => el("td", {}, g ? el("span", { class: "num", text: f.fechas[k] ? short(f.fechas[k]) : "—" })
+      : el("input", { class: "input", type: "date", value: f.fechas[k] || "", "aria-label": f.periodo + ", " + claveLabel(k), oninput: e => { f.fechas[k] = e.target.value; } }))),
+    g ? null : el("td", { class: "act" }, el("button", { class: "x", type: "button", text: "×", "aria-label": "Quitar periodo", onclick: () => { filas.splice(i, 1); pinta(); } })))));
+  pinta();
+  const body = [
+    el("p", { class: "meta", text: "Fuente: " + (cal.fuente || "—") + " · " + (cal.validado ? "Validado por " + cal.validadoPor + " el " + fLong.format(new Date(cal.validadoEn)) : "SIN VALIDAR: compara cada fecha con la fuente antes de validarlo.") }),
+    el("div", { class: "tbl-wrap cal-tbl" }, el("table", {}, el("thead", {}, el("tr", {}, el("th", { text: "Periodo" }), ...claves.map(k => el("th", { class: "num", text: claveLabel(k) })), g ? null : el("th"))), tb))];
+  if (g) { panelDialog(calNombre(cal), body, null, async () => {}); return; }
+  body.push(el("span", { class: "cell-acts" },
+    el("button", { class: "link", type: "button", text: "Agregar periodo", onclick: () => { filas.push({ periodo: "", fechas: {} }); pinta(); } }),
+    el("button", { class: "link", type: "button", text: "Datos y fuente", onclick: () => { $("dlg").close(); calDialog(cal); } })));
+  panelDialog(calNombre(cal), body, "Guardar", async () => {
+    const ok = filas.filter(f => f.periodo.trim() || Object.values(f.fechas).some(Boolean));
+    if (ok.some(f => !f.periodo.trim())) return "Cada fila necesita el nombre del periodo.";
+    const nuevo = ok.map(f => ({ periodo: f.periodo.trim(), fechas: Object.fromEntries(Object.entries(f.fechas).filter(([, v]) => v)) }));
+    if (same(nuevo, cal.filas || [])) return;
+    hist(cal, "Fechas editadas", nuevo.length + plural(nuevo.length, " periodo", " periodos") + (cal.validado ? " · queda sin validar" : ""));
+    cal.filas = nuevo; cal.validado = false; delete cal.validadoPor; delete cal.validadoEn;
+    changed();
+  });
+}
+function validarDialog(cal) {
+  if (cal.validado) {
+    confirmDialog("Quitar validación", calNombre(cal) + " deja de usarse para generar. Los vencimientos ya creados no cambian.", "Quitar validación", () => {
+      cal.validado = false; delete cal.validadoPor; delete cal.validadoEn; hist(cal, "Validación quitada"); changed();
+    });
+    return;
+  }
+  const vacias = (cal.filas || []).reduce((a, f) => a + (CLAVES_CAL[cal.columnas] || []).filter(k => !f.fechas[k]).length, 0);
+  if (!(cal.filas || []).length) { toast("El calendario no tiene fechas todavía."); return; }
+  panelDialog("Validar " + calNombre(cal), [
+    el("p", { text: "Fuente: " + (cal.fuente || "—") }),
+    el("p", { class: "meta", text: "Antes de validar, compara cada fecha de la tabla con la fuente oficial." + (vacias ? " Hay " + vacias + plural(vacias, " casilla vacía", " casillas vacías") + ": esos dígitos no tendrán fecha." : "") }),
+    el("label", { class: "opt-in" }, el("input", { type: "checkbox", name: "ok" }), el("span", { text: "Revisé las fechas contra la fuente oficial y son correctas." }))
+  ], "Validar", async form => {
+    if (!form.elements.ok.checked) return "Marca la casilla para confirmar la revisión.";
+    cal.validado = true; cal.validadoPor = S.me; cal.validadoEn = new Date().toISOString();
+    hist(cal, "Validado", "Contra: " + (cal.fuente || "—")); changed();
+    toast(calNombre(cal) + " validado: ya sirve para generar vencimientos.");
+  });
+}
+function precargaDialog() {
+  const ya = S.data.calendarios.map(c => c.precarga).filter(Boolean);
+  const disp = PRECARGA.filter(p => !ya.includes(p.id));
+  if (!disp.length) { toast("Ya cargaste todas las fechas precargadas."); return; }
+  panelDialog("Cargar fechas precargadas", [
+    el("p", { class: "meta", text: "Son fechas tomadas de la fuente indicada en cada una. Se cargan SIN VALIDAR: revísalas y valídalas tú antes de generar." }),
+    checks("pre", disp.map(p => [p.id, p.nombre + " · " + p.fuente]), disp.map(p => p.id))
+  ], "Cargar", async form => {
+    const sel = formChecks(form, "pre"); if (!sel.length) return "Marca al menos uno.";
+    for (const id of sel) {
+      const p = PRECARGA.find(x => x.id === id);
+      const n = { id: uid(), precarga: p.id, tipo: p.tipo, anio: p.anio, variante: p.variante || "", columnas: p.columnas, fuente: p.fuente, validado: false,
+        filas: p.filas.map(f => ({ periodo: f.periodo, fechas: { ...f.fechas } })), creada: new Date().toISOString() };
+      hist(n, "Cargado desde precarga", p.fuente); S.data.calendarios.push(n);
+    }
+    changed(); toast(sel.length + plural(sel.length, " calendario cargado", " calendarios cargados") + " sin validar.");
+  });
+}
+
+/* ---------- Tipos de obligación (catálogo configurable) ---------- */
+function vencTipos() {
+  const g = esGestor();
+  return el("section", { class: "card" },
+    el("div", { class: "card-h" }, el("h3", { text: "Tipos de obligación" }), g ? null : el("button", { class: "link", type: "button", text: "Nuevo tipo", onclick: () => tipoDialog(null) })),
+    el("p", { class: "meta", text: "El catálogo con el que se configuran los clientes. Puedes agregar tipos propios (por ejemplo, un impuesto municipal) y ocultar los que no uses." }),
+    el("div", { class: "tbl-wrap" }, el("table", {},
+      el("thead", {}, el("tr", {}, ...["Tipo", "Grupo", "Periodicidad", "Formulario", "Estado"].map(h => el("th", { scope: "col", text: h })))),
+      el("tbody", {}, ...tiposV().map(t => el("tr", {},
+        el("td", { class: "ob" }, g ? el("span", { text: t.nombre }) : el("button", { type: "button", text: t.nombre, onclick: () => tipoDialog(t) })),
+        el("td", { text: grupoNombre(t.grupo) }), el("td", { text: (PERIODOS.find(p => p[0] === t.periodicidad) || ["", "—"])[1] }),
+        el("td", { text: t.formulario || "—" }), el("td", { text: t.activo === false ? "Oculto" : "En uso" })))))));
+}
+function tipoDialog(t) {
+  editor({
+    title: t ? "Tipo · " + t.nombre : "Nuevo tipo de obligación",
+    fields: [
+      { name: "nombre", label: "Nombre", req: true }, { name: "grupo", label: "Grupo", type: "select", options: GRUPOS },
+      { name: "periodicidad", label: "Periodicidad habitual", type: "select", options: PERIODOS.map(p => [p[0], p[1]]) },
+      { name: "formulario", label: "Formulario" },
+      { name: "activo", label: "Estado", type: "select", options: [["si", "En uso"], ["no", "Oculto (no aparece al configurar)"]] }
+    ],
+    values: t ? { ...t, activo: t.activo === false ? "no" : "si" } : { grupo: "territorial", periodicidad: "anual", activo: "si" },
+    onSave: v => {
+      const val = { nombre: v.nombre, grupo: v.grupo, periodicidad: v.periodicidad, formulario: v.formulario, activo: v.activo !== "no" };
+      if (tiposV().some(x => x !== t && x.id !== (t && t.id) && nkey(x.nombre) === nkey(v.nombre))) return "Ya existe un tipo con ese nombre.";
+      let own = S.data.tiposOblig.find(x => t && x.id === t.id);
+      if (!own) { own = { id: t ? t.id : uid() }; S.data.tiposOblig.push(own); }
+      hist(own, t ? "Editado" : "Creado", v.nombre);
+      Object.assign(own, val); changed();
+    }
+  });
+}
+
+/* ---------- Generar vencimientos: vista previa, sin duplicados ---------- */
+const genKey = (cliente, tipo, periodo) => cliente + "|" + tipo + "|" + nkey(periodo);
+function existeVenc(c, t, periodo, fecha) {
+  const k = genKey(c, t.id, periodo), nob = nkey(t.nombre), np = nkey(periodo);
+  return S.data.vencimientos.find(x => x.cliente === c && (x.gen === k
+    || ((x.tipo === t.id || nkey(x.obligacion) === nob) && ((x.periodo && nkey(x.periodo) === np) || x.fecha === fecha || x.fechaOriginal === fecha)))) || null;
+}
+function periodosFija(o, anio) {
+  const p = (PERIODOS.find(x => x[0] === o.periodicidad) || PERIODOS[0])[2], out = [];
+  for (const y of [anio - 1, anio]) for (let k = 0; k < 12 / p; k++) {
+    const m0 = k * p, m1 = m0 + p - 1;
+    const per = p === 12 ? "Año " + y : p === 1 ? MESES[m0] + " " + y : MESES[m0].slice(0, 3) + "–" + MESES[m1].slice(0, 3) + " " + y;
+    const base = new Date(y, m1 + 1 + (Number(o.meses) || 0) - 1, 1), ult = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+    let d = new Date(base.getFullYear(), base.getMonth(), Math.min(o.dia || 1, ult));
+    if (o.finSemana === "siguiente") while (d.getDay() === 0 || d.getDay() === 6) d = addDays(d, 1);
+    out.push({ periodo: per, fecha: iso(d) });
+  }
+  return out.filter(x => x.fecha.slice(0, 4) === String(anio));
+}
+// Candidatos para un cliente y un año: cada uno dice de dónde sale su fecha o por qué no se puede crear.
+function candidatos(c, anio) {
+  const out = [], nit = nitDigitos(c);
+  for (const o of oblDe(c.id).filter(o => o.activa !== false)) {
+    const t = tipoV(o.tipo); if (!t) continue;
+    const push = (periodo, fecha, fuente, prob) => {
+      const dup = !prob && existeVenc(c.id, t, periodo, fecha);
+      out.push({ c, o, t, periodo, fecha, fuente, prob, dup });
+    };
+    if (o.regla === "fija") periodosFija(o, anio).forEach(p => push(p.periodo, p.fecha, "Regla: " + reglaTexto(o)));
+    else if (o.regla === "manual") (o.fechas || []).filter(f => f.fecha.slice(0, 4) === String(anio)).forEach(f => push(f.periodo, f.fecha, "Fecha escrita a mano"));
+    else {
+      const cals = S.data.calendarios.filter(k => k.tipo === t.id && Number(k.anio) === anio);
+      const val = cals.filter(k => k.validado);
+      if (!cals.length) { push("—", "", "", "No hay calendario oficial de " + anio + " para " + t.nombre); continue; }
+      if (!val.length) { push("—", "", "", "El calendario de " + anio + " está sin validar"); continue; }
+      for (const cal of val) {
+        const k = claveDeNit(cal, nit);
+        if (!k) { push("—", "", "", "Falta el NIT del cliente"); break; }
+        for (const f of cal.filas || []) {
+          const per = f.periodo + (cal.variante ? " · " + cal.variante : "");
+          if (!f.fechas[k]) push(per, "", "", "El calendario no tiene fecha para el dígito " + claveLabel(k));
+          else push(per, f.fechas[k], calNombre(cal) + " · " + (cal.fuente || "") + " · dígito " + claveLabel(k));
+        }
+      }
+    }
+  }
+  return out;
+}
+function generarDialog() {
+  const cs = S.data.clientes.filter(c => (filter === "all" || c.id === filter) && oblDe(c.id).some(o => o.activa !== false));
+  if (!cs.length) { toast("Primero configura las obligaciones de tus clientes (pestaña Por cliente)."); vzSet({ tab: "clientes" }); return; }
+  const anios = [todayD().getFullYear(), todayD().getFullYear() + 1];
+  let anio = anios[0], desdeHoy = true, sel = cs.map(c => c.id), lista = [];
+  const pv = el("div", { class: "gen-pv" });
+  const calcula = () => {
+    lista = cs.filter(c => sel.includes(c.id)).flatMap(c => candidatos(c, anio)).filter(x => x.prob || !desdeHoy || x.fecha >= iso(todayD()));
+    const nuevos = lista.filter(x => !x.prob && !x.dup), dups = lista.filter(x => x.dup), probs = lista.filter(x => x.prob);
+    pv.replaceChildren(
+      el("p", { class: "sums" }, el("b", { text: nuevos.length + plural(nuevos.length, " nuevo", " nuevos") }), " · " + dups.length + plural(dups.length, " ya existe (no se toca)", " ya existen (no se tocan)") + (probs.length ? " · " + probs.length + plural(probs.length, " problema", " problemas") : "")),
+      lista.length ? el("div", { class: "tbl-wrap gen-tbl" }, el("table", {},
+        el("thead", {}, el("tr", {}, ...["", "Cliente", "Obligación", "Periodo", "Vence", "De dónde sale la fecha"].map(h => el("th", { text: h })))),
+        el("tbody", {}, ...lista.sort((a, b) => (a.fecha || "9").localeCompare(b.fecha || "9")).map(x => el("tr", { class: x.prob ? "gen-prob" : x.dup ? "gen-dup" : null },
+          el("td", { class: x.prob ? "soon" : null, text: x.prob ? "Problema" : x.dup ? "Ya existe" : "Nuevo" }),
+          el("td", { text: x.c.nombre }), el("td", { text: x.t.nombre }), el("td", { text: x.periodo }),
+          el("td", { class: "num", text: x.fecha ? fechaCorta(x.fecha) : "—" }),
+          el("td", { class: "meta", text: x.prob || (x.dup ? "Ya creado: " + fechaCorta(x.dup.fecha) + " · " + cap(estadoV(x.dup)) : x.fuente) }))))))
+        : el("p", { class: "empty", text: "Nada para generar con estas opciones." }));
+  };
+  const anioSel = el("select", { class: "input", onchange: e => { anio = Number(e.target.value); calcula(); } }, ...anios.map(a => el("option", { value: a, text: "Fechas de " + a })));
+  const hoyChk = el("input", { type: "checkbox", checked: true, onchange: e => { desdeHoy = e.target.checked; calcula(); } });
+  const cliBox = checks("gcli", cs.map(c => [c.id, c.nombre]), sel);
+  cliBox.addEventListener("change", () => { sel = [...cliBox.querySelectorAll("input:checked")].map(i => i.value); calcula(); });
+  calcula();
+  panelDialog("Generar vencimientos", [
+    el("p", { class: "meta", text: "Vista previa: nada se crea hasta que confirmes. Lo que ya existe no se toca ni se duplica." }),
+    el("div", { class: "gen-op" }, el("label", { class: "fl" }, el("span", { text: "Año" }), anioSel), el("label", { class: "opt-in" }, hoyChk, el("span", { text: "Solo fechas desde hoy" }))),
+    cs.length > 1 ? el("details", {}, el("summary", { text: "Clientes (" + cs.length + ")" }), cliBox) : null,
+    pv
+  ].filter(Boolean), "Crear los nuevos", async () => {
+    const nuevos = lista.filter(x => !x.prob && !x.dup && !existeVenc(x.c.id, x.t, x.periodo, x.fecha));
+    if (!nuevos.length) return "No hay vencimientos nuevos para crear.";
+    const ahora = new Date().toISOString();
+    for (const x of nuevos) {
+      const v = { id: uid(), cliente: x.c.id, obligacion: x.t.nombre, tipo: x.t.id, grupo: x.t.grupo, fecha: x.fecha, periodo: x.periodo, formulario: "",
+        valor: "", nota: "", estado: "pendiente", responsable: x.o.responsable || "", origen: "generado", obligacionId: x.o.id, gen: genKey(x.c.id, x.t.id, x.periodo),
+        fuente: x.fuente, creada: ahora };
+      hist(v, "Creado", "Generado · " + x.fuente);
+      S.data.vencimientos.push(v);
+    }
+    changed(); toast(nuevos.length + plural(nuevos.length, " vencimiento creado", " vencimientos creados") + ".");
+  });
+}
+
+/* ---------- Historial de contraseñas ----------
+   Cada acceso tiene UNA clave vigente (el campo «clave» de siempre: es la que copian todos los botones).
+   Al cambiarla, la anterior pasa a «historial» con sus fechas y una nota. Ver o copiar una anterior es una acción
+   aparte y pide volver a escribir la clave de la app. Todo viaja cifrado como el resto; no va a exportaciones. */
+// Al editar un acceso: si la clave cambió, la anterior queda en el historial.
+function claveHist(k, v, nota) {
+  if (!k.clave || v.clave === undefined || v.clave === k.clave) return;
+  if (!Array.isArray(k.historial)) k.historial = [];
+  const hoy = iso(todayD());
+  k.historial.push({ clave: k.clave, desde: k.vigenteDesde || k.rotacion || "", hasta: hoy, nota: nota || "", por: S.me, t: new Date().toISOString() });
+  k.vigenteDesde = hoy;
+  if (!v.rotacion || v.rotacion === k.rotacion) v.rotacion = hoy;
+}
+function cambiarClaveDialog(k) {
+  editor({
+    title: "Cambiar contraseña · " + k.entidad,
+    fields: [
+      { name: "clave", label: "Contraseña nueva", type: "password", req: true, ac: "new-password" },
+      { name: "repetir", label: "Repite la contraseña nueva", type: "password", req: true, ac: "new-password" },
+      { name: "desde", label: "Vigente desde", type: "date", req: true },
+      { name: "nota", label: "Nota del cambio", ph: "Vencimiento del portal, cambio de responsable…" }
+    ],
+    values: { desde: iso(todayD()) },
+    saveText: "Cambiar",
+    onSave: v => {
+      if (v.clave !== v.repetir) return "Las contraseñas no coinciden.";
+      if (v.clave === k.clave) return "Es la misma contraseña vigente.";
+      if ((k.historial || []).some(h => h.clave === v.clave)) return "Esa contraseña ya se usó antes en este acceso. Usa una distinta.";
+      if (!Array.isArray(k.historial)) k.historial = [];
+      k.historial.push({ clave: k.clave, desde: k.vigenteDesde || k.rotacion || "", hasta: v.desde, nota: v.nota, por: S.me, t: new Date().toISOString() });
+      k.clave = v.clave; k.vigenteDesde = v.desde; k.rotacion = v.desde;
+      changed(); toast("Contraseña cambiada. La anterior quedó en el historial de " + k.entidad + ".");
+    }
+  });
+}
+// Filas extra en la ficha de un acceso.
+function keyPopExtra(k, add) {
+  if (k.vigenteDesde) add("Vigente desde", fLong.format(parse(k.vigenteDesde)));
+  const n = (k.historial || []).length;
+  add("Anteriores", el("span", { class: "cell-acts" }, el("span", { text: n ? n + plural(n, " contraseña anterior", " contraseñas anteriores") : "Ninguna" }),
+    n ? el("button", { class: "link", type: "button", text: "Ver historial", onclick: () => historialClavesDialog(k) }) : null));
+}
+// Ver las contraseñas anteriores exige volver a escribir la clave de la app (la que abre tu llave).
+function historialClavesDialog(k) {
+  editor({
+    title: "Historial de " + k.entidad,
+    fields: [{ name: "pass", label: "Tu clave de Mi oficina", type: "password", req: true, ac: "current-password", hint: "Por seguridad, ver contraseñas anteriores pide confirmar que eres tú." }],
+    saveText: "Ver historial",
+    onSave: async v => {
+      const mine = S.users.find(u => u.usuario === S.me);
+      try { await userPriv(mine, v.pass); } catch (e) { return "La clave no es correcta."; }
+      setTimeout(() => historialClavesLista(k, Date.now() + 5 * 60000), 30);
+    }
+  });
+}
+function historialClavesLista(k, hasta, vis) {
+  if (Date.now() > hasta) { toast("Por seguridad, vuelve a confirmar tu clave para ver el historial."); return; }
+  vis = vis || new Set();
+  const d = $("dlg"), hs = (k.historial || []).map((h, i) => [h, i]).reverse();
+  const fila = (h, i) => el("li", {},
+    el("span", { class: "meta num", text: (h.desde ? fechaCorta(h.desde) : "¿?") + " → " + fechaCorta(h.hasta) + (h.por ? " · cambió " + h.por : "") }),
+    el("span", { class: "cell-acts" }, el("span", { class: "secret", text: vis.has(i) ? h.clave : "••••••••" }),
+      el("button", { class: "link", type: "button", text: vis.has(i) ? "Ocultar" : "Mostrar", onclick: () => { vis.has(i) ? vis.delete(i) : vis.add(i); historialClavesLista(k, hasta, vis); } }),
+      el("button", { class: "link", type: "button", text: "Copiar esta anterior", "aria-label": "Copiar la contraseña anterior usada hasta el " + fechaCorta(h.hasta),
+        onclick: () => copiarAnterior(h.clave, h.hasta) })),
+    h.nota ? el("span", { class: "meta", text: h.nota }) : null);
+  d.replaceChildren(el("div", { class: "dlg" }, closeX(),
+    el("p", { class: "det-k" }, dot(cColor(k.cliente)), "Historial de contraseñas"),
+    el("h2", { id: "dlg-t", text: k.entidad }),
+    el("p", { class: "meta", text: "Vigente desde " + (k.vigenteDesde ? fechaCorta(k.vigenteDesde) : "—") + ". «Copiar contraseña» en la lista y en la ficha siempre copia la vigente." }),
+    el("ol", { class: "hist claves-h" }, ...hs.map(([h, i]) => fila(h, i))),
+    el("div", { class: "dlg-acts" }, el("span"), el("span", { class: "r" }, el("button", { class: "btn alt", type: "button", text: "Cerrar", onclick: () => d.close() })))));
+  openDialog(d, true);
+}
+async function copiarAnterior(text, hasta) {
+  try { await navigator.clipboard.writeText(text); } catch (e) { toast("No se pudo copiar. Usa Mostrar."); return; }
+  forgetClip(text);
+  toast("Copiada la contraseña ANTERIOR (usada hasta el " + fechaCorta(hasta) + "). Se borra del portapapeles en " + CLIP_SECS + " s.");
+}
+
+/* ---------- Filtros avanzados de pendientes (tareas) ----------
+   Se combinan: categoría, cliente (el de arriba), responsable, estado, prioridad, fecha de creación, fecha de la tarea
+   y búsqueda. Con algún filtro activo, la lista pasa a ser una sola lista ordenada por fecha. Solo filtran: no cambian
+   ninguna tarea. Las tareas de antes no tienen prioridad ni responsable: cuentan como «Sin prioridad» y «Sin responsable». */
+const PRIORIDADES = [["alta", "Alta"], ["media", "Media"], ["baja", "Baja"]];
+const ESTADOS_T = [["pendiente", "Pendientes"], ["atrasada", "Atrasadas"], ["proxima", "Próximos 7 días"], ["hecha", "Hechas"]];
+const TF0 = { cat: "", resp: "", estado: "", prio: "", cDesde: "", cHasta: "", fDesde: "", fHasta: "", q: "" };
+let TF = { ...TF0 };
+try { TF = { ...TF0, ...JSON.parse(localStorage.getItem("mo-tfiltros") || "{}") }; } catch (e) {}
+const tfActivos = () => Object.keys(TF0).filter(k => TF[k]).length;
+function tfSet(o) { Object.assign(TF, o); try { localStorage.setItem("mo-tfiltros", JSON.stringify(TF)); } catch (e) {} render(); }
+const estadoT = t => t.estado === "hecha" ? "hecha" : days(t.fecha) < 0 ? "atrasada" : "pendiente";
+// sin: nombre del filtro que se deja fuera (para contar por categoría con los demás filtros puestos).
+function tareasFiltradas(sin) {
+  const ws = nkey(TF.q).split(" ").filter(Boolean);
+  return S.data.tareas.filter(t => (filter === "all" || t.cliente === filter)
+    && (sin === "cat" || !TF.cat || (TF.cat === "_" ? !t.categoria : nkey(t.categoria || "") === nkey(TF.cat)))
+    && (!TF.resp || (TF.resp === "_" ? !t.responsable : t.responsable === TF.resp))
+    && (!TF.prio || (TF.prio === "_" ? !t.prioridad : t.prioridad === TF.prio))
+    && (!TF.estado || (TF.estado === "proxima" ? t.estado !== "hecha" && days(t.fecha) >= 0 && days(t.fecha) <= 7
+      : TF.estado === "pendiente" ? t.estado !== "hecha" : estadoT(t) === TF.estado))
+    && (!TF.cDesde || (t.creada || "").slice(0, 10) >= TF.cDesde) && (!TF.cHasta || ((t.creada || "").slice(0, 10) && t.creada.slice(0, 10) <= TF.cHasta))
+    && (!TF.fDesde || t.fecha >= TF.fDesde) && (!TF.fHasta || t.fecha <= TF.fHasta)
+    && (!ws.length || ws.every(w => nkey([t.titulo, t.nota, t.categoria, cName(t.cliente), t.responsable].join(" ")).includes(w))));
+}
+function renderTareasFiltros() {
+  const box = $("tf-bar"); if (!box) return;
+  const mine = S.data.tareas.filter(t => filter === "all" || t.cliente === filter);
+  const abiertas = mine.filter(t => t.estado !== "hecha");
+  const vencidas = abiertas.filter(t => days(t.fecha) < 0).length, prox = abiertas.filter(t => days(t.fecha) >= 0 && days(t.fecha) <= 7).length;
+  // Contadores por categoría con los demás filtros aplicados.
+  const base = tareasFiltradas("cat"), cats = new Map();
+  for (const t of base) { const c = t.categoria || ""; cats.set(c, (cats.get(c) || 0) + 1); }
+  const catChips = [...cats].sort((a, b) => b[1] - a[1]).map(([c, n]) => {
+    const v = c || "_", on = TF.cat ? (TF.cat === "_" ? !c : nkey(TF.cat) === nkey(c)) : false;
+    return el("button", { class: "chip", type: "button", "aria-pressed": String(on), onclick: () => tfSet({ cat: on ? "" : v }) }, (c || "Sin categoría") + " ", el("span", { class: "num cnt", text: String(n) }));
+  });
+  const n = tfActivos();
+  const sel = (label, key, opts) => el("label", { class: "fl" }, el("span", { text: label }),
+    el("select", { class: "input", onchange: e => tfSet({ [key]: e.target.value }) }, ...[["", "Todos"], ...opts].map(([v, l]) => el("option", { value: v, text: l, selected: TF[key] === v }))));
+  const date = (label, key) => el("label", { class: "fl" }, el("span", { text: label }),
+    el("input", { class: "input", type: "date", value: TF[key], onchange: e => tfSet({ [key]: e.target.value }) }));
+  const q = el("input", { class: "input", type: "search", placeholder: "Buscar en tareas", value: TF.q, "aria-label": "Buscar en las tareas" });
+  q.addEventListener("input", () => { TF.q = q.value; clearTimeout(q._t); q._t = setTimeout(() => { try { localStorage.setItem("mo-tfiltros", JSON.stringify(TF)); } catch (e) {} keepFocus(render); }, 220); });
+  const resps = responsables(S.data.tareas.map(t => t.responsable));
+  box.replaceChildren(
+    el("div", { class: "tf-top" },
+      el("button", { class: "chip" + (vencidas ? " late" : ""), type: "button", "aria-pressed": String(TF.estado === "atrasada"), onclick: () => tfSet({ estado: TF.estado === "atrasada" ? "" : "atrasada" }) }, "Atrasadas ", el("span", { class: "num cnt", text: String(vencidas) })),
+      el("button", { class: "chip", type: "button", "aria-pressed": String(TF.estado === "proxima"), onclick: () => tfSet({ estado: TF.estado === "proxima" ? "" : "proxima" }) }, "Próximos 7 días ", el("span", { class: "num cnt", text: String(prox) })),
+      el("label", { class: "tf-q" }, q),
+      n ? el("button", { class: "link", type: "button", text: "Limpiar filtros (" + n + ")", onclick: () => tfSet({ ...TF0 }) }) : null),
+    el("details", { class: "fbar", open: TF._abierto || null, ontoggle: e => { TF._abierto = e.target.open; } },
+      el("summary", { text: "Más filtros" + (n ? " · " + n + plural(n, " activo", " activos") : "") }),
+      el("div", { class: "tf-cats", role: "group", "aria-label": "Categorías" }, ...catChips),
+      el("div", { class: "fbar-in" },
+        sel("Estado", "estado", ESTADOS_T), sel("Prioridad", "prio", [...PRIORIDADES, ["_", "Sin prioridad"]]),
+        sel("Responsable", "resp", [...resps.map(r => [r, r]), ["_", "Sin responsable"]]),
+        date("Fecha desde", "fDesde"), date("Fecha hasta", "fHasta"), date("Creada desde", "cDesde"), date("Creada hasta", "cHasta"))));
+}
+// Con filtros: una sola lista por fecha (con su fecha en cada fila), y el total arriba.
+function renderTareasFiltradas() {
+  const g = $("groups"); g.replaceChildren();
+  const ts = tareasFiltradas().sort((a, b) => a.fecha.localeCompare(b.fecha) || byHour(a, b));
+  const cap0 = 60, all = expanded.has("tf");
+  g.append(el("div", { class: "group" },
+    el("div", { class: "group-h" }, el("strong", { text: "Resultado" }), el("span", { class: "meta num", text: ts.length + plural(ts.length, " tarea", " tareas") })),
+    ts.length ? el("ul", { class: "rows" }, ...ts.slice(0, all ? ts.length : cap0).map(t => taskRow(t, t.estado === "hecha", true)))
+      : el("p", { class: "empty", text: "Ninguna tarea cumple estos filtros." }),
+    ts.length > cap0 ? el("button", { class: "more", type: "button", text: all ? "Mostrar menos" : "Ver las " + ts.length, onclick: () => { all ? expanded.delete("tf") : expanded.add("tf"); render(); } }) : null));
+}
+// Prioridad y responsable en la fila de la tarea (solo si los tiene).
+function taskExtra(t) {
+  const p = PRIORIDADES.find(x => x[0] === t.prioridad);
+  if (!p && !t.responsable) return null;
+  return el("span", { class: "t-extra" }, p ? el("span", { class: "prio prio-" + p[0], text: p[1] }) : null, t.responsable ? el("span", { class: "meta", text: t.responsable }) : null);
+}
+
+/* ---------- Obligaciones financieras y créditos ----------
+   Un crédito es de un cliente o de la oficina. Su plan de pagos puede venir del banco (cuotas escritas o pegadas: son
+   las reales) o ser PROYECTADO por la app (cuota fija o abono constante a capital), y así se marca siempre.
+   El saldo calculado sale de los pagos registrados; el saldo certificado por el banco se muestra aparte, con su fecha.
+   Nada se borra: al recalcular una proyección, las cuotas proyectadas anteriores quedan anuladas (no eliminadas). */
+const TIPOS_CRED = [["comercial", "Comercial"], ["consumo", "Consumo"], ["hipotecario", "Hipotecario"], ["leasing", "Leasing"], ["libranza", "Libranza"], ["tarjeta", "Tarjeta de crédito"], ["rotativo", "Rotativo"], ["otro", "Otro"]];
+const MODALIDADES = [["EA", "Efectiva anual (EA)"], ["MV", "Mensual vencida (MV)"], ["NAMV", "Nominal anual mes vencido (NAMV)"]];
+const SISTEMAS = [["manual", "Plan del banco (cuotas que escribo o pego)"], ["frances", "Proyectado · cuota fija"], ["aleman", "Proyectado · abono constante a capital"]];
+const ESTADOS_C = [["vigente", "Vigente"], ["reestructurado", "Reestructurado"], ["cancelado", "Cancelado (pagado)"]];
+const FREC_C = PERIODOS.filter(p => p[0] !== "cuatrimestral");
+const mesesFrec = f => (PERIODOS.find(p => p[0] === f) || PERIODOS[0])[2];
+const r0 = n => Math.round(n);
+// Tasa del periodo según la modalidad (tasa en porcentaje).
+function tasaPeriodo(cr) {
+  const r = (Number(String(cr.tasa).replace(",", ".")) || 0) / 100, m = mesesFrec(cr.frecuencia);
+  if (cr.modalidad === "MV") return Math.pow(1 + r, m) - 1;
+  if (cr.modalidad === "NAMV") return Math.pow(1 + r / 12, m) - 1;
+  return Math.pow(1 + r, m / 12) - 1;
+}
+// Proyección: n cuotas desde «saldo», la primera en «fecha», numeradas desde «desde».
+function proyectar(cr, saldo, n, fecha, desde, cuotaFija) {
+  const i = tasaPeriodo(cr), m = mesesFrec(cr.frecuencia), out = [];
+  const cuota = cuotaFija || (i ? saldo * i / (1 - Math.pow(1 + i, -n)) : saldo / n), capK = saldo / n;
+  let s = saldo;
+  for (let k = 0; k < n && s > 0.5; k++) {
+    const interes = r0(s * i);
+    let capital = cr.sistema === "aleman" ? r0(capK) : r0(cuota - s * i);
+    if (k === n - 1 || capital > s) capital = r0(s);
+    s -= capital;
+    out.push({ numero: desde + k, fecha: monthsAdd(fecha, k * m), capital, interes, otros: 0, total: capital + interes });
+  }
+  return out;
+}
+// Cuántas cuotas hacen falta para pagar «saldo» manteniendo la cuota (cuota fija) o el abono a capital (constante).
+function cuotasPara(cr, saldo, cuota, capK) {
+  const i = tasaPeriodo(cr);
+  if (cr.sistema === "aleman") return Math.max(1, Math.ceil(saldo / capK - 1e-9));
+  if (!i) return Math.max(1, Math.ceil(saldo / cuota - 1e-9));
+  if (cuota <= saldo * i) return null;
+  return Math.max(1, Math.ceil(-Math.log(1 - saldo * i / cuota) / Math.log(1 + i) - 1e-9));
+}
+
+const cuotasDe = id => S.data.cuotas.filter(c => c.credito === id && !c.anulada).sort((a, b) => a.fecha.localeCompare(b.fecha) || a.numero - b.numero);
+const pagosDe = id => S.data.pagos.filter(p => p.credito === id).sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.t || "").localeCompare(b.t || ""));
+// Estado del crédito: aplica los pagos a las cuotas (intereses y otros primero, luego capital; lo que sobra va a capital).
+function estadoCredito(cr) {
+  const cs = cuotasDe(cr.id), ps = pagosDe(cr.id), st = new Map(cs.map(c => [c.id, { int: 0, otros: 0, cap: 0, pagado: 0 }]));
+  let capPagado = 0, intPagado = 0, excedente = 0;
+  for (const p of ps) {
+    const valor = num(p.valor);
+    if (p.extraordinario) { capPagado += p.capital !== "" && p.capital != null ? num(p.capital) : valor; continue; }
+    let rest = valor, cap = 0, int = 0;
+    const objetivos = p.cuota ? cs.filter(c => c.id === p.cuota) : cs;
+    for (const c of objetivos) {
+      const s = st.get(c.id), falta = num(c.total) - s.pagado;
+      if (falta <= 0.5 || rest <= 0) continue;
+      const take = Math.min(rest, falta), ti = Math.max(0, Math.min(take, num(c.interes) - s.int)), to = Math.max(0, Math.min(take - ti, num(c.otros) - s.otros)), tc = take - ti - to;
+      s.int += ti; s.otros += to; s.cap += tc; s.pagado += take; rest -= take; cap += tc; int += ti;
+    }
+    if (rest > 0.5) { cap += rest; excedente += rest; }
+    // Si el pago trae el desglose del banco, ese manda para el saldo.
+    if (p.capital !== "" && p.capital != null) { capPagado += num(p.capital); intPagado += num(p.interes); }
+    else { capPagado += cap; intPagado += int; }
+  }
+  const hoy = iso(todayD());
+  const cuotas = cs.map(c => { const s = st.get(c.id), falta = Math.max(0, num(c.total) - s.pagado);
+    return { c, pagado: s.pagado, falta, estado: falta <= 0.5 ? "pagada" : c.fecha < hoy ? "vencida" : s.pagado > 0.5 ? "parcial" : "pendiente" }; });
+  const vencidas = cuotas.filter(x => x.estado === "vencida");
+  const saldo = Math.max(0, num(cr.valorInicial) - capPagado);
+  return { cuotas, pagos: ps, capPagado, intPagado, excedente, saldo, vencidas, valorVencido: vencidas.reduce((a, x) => a + x.falta, 0),
+    proxima: cuotas.find(x => x.estado !== "pagada" && x.c.fecha >= hoy) || null, proyectado: cs.some(c => c.proyectada) };
+}
+const credNombre = cr => cr.acreedor + (cr.referencia ? " · " + cr.referencia : "");
+const propNombre = cr => cr.cliente ? cName(cr.cliente) : "Oficina";
+
+let CZ = { tab: "panel", cred: "", acreedor: "", estado: "", tipo: "", anuladas: false };
+function czSet(o) { Object.assign(CZ, o); render(); }
+function credFiltrados() {
+  return S.data.creditos.filter(cr => (filter === "all" || cr.cliente === filter)
+    && (!CZ.acreedor || cr.acreedor === CZ.acreedor) && (!CZ.estado || (cr.estado || "vigente") === CZ.estado) && (!CZ.tipo || cr.tipo === CZ.tipo));
+}
+
+function renderCred() {
+  const box = $("v-cred"); if (!box) return;
+  const cr = CZ.cred && S.data.creditos.find(c => c.id === CZ.cred);
+  if (CZ.cred && !cr) CZ.cred = "";
+  const head = el("section", { class: "card vz-h" },
+    el("div", { class: "card-h" }, el("h2", { text: cr ? "Crédito" : "Créditos y obligaciones financieras" }),
+      el("span", { class: "acts" }, cr ? el("button", { class: "link", type: "button", text: "← Todos los créditos", onclick: () => czSet({ cred: "" }) }) : null,
+        el("button", { class: "link", type: "button", text: "Nuevo crédito", onclick: () => credDialog(null) }))),
+    cr ? null : credFiltrosBar());
+  box.replaceChildren(head, ...(cr ? credDetalle(cr) : credPanel()));
+}
+function credFiltrosBar() {
+  const acreedores = [...new Set(S.data.creditos.map(c => c.acreedor).filter(Boolean))].sort();
+  const n = [CZ.acreedor, CZ.estado, CZ.tipo].filter(Boolean).length;
+  const sel = (label, key, opts) => el("label", { class: "fl" }, el("span", { text: label }),
+    el("select", { class: "input", onchange: e => czSet({ [key]: e.target.value }) }, ...[["", "Todos"], ...opts].map(([v, l]) => el("option", { value: v, text: l, selected: CZ[key] === v }))));
+  return el("details", { class: "fbar", open: !narrow.matches || n > 0 }, el("summary", { text: "Filtros" + (n ? " (" + n + ")" : "") }),
+    el("div", { class: "fbar-in" }, sel("Acreedor", "acreedor", acreedores.map(a => [a, a])), sel("Estado", "estado", ESTADOS_C), sel("Tipo", "tipo", TIPOS_CRED),
+      n ? el("button", { class: "link", type: "button", text: "Limpiar filtros", onclick: () => czSet({ acreedor: "", estado: "", tipo: "" }) }) : null),
+    el("p", { class: "meta", text: "El cliente se elige arriba (Todos incluye los créditos de la oficina)." }));
+}
+function credPanel() {
+  const crs = credFiltrados(), est = new Map(crs.map(cr => [cr.id, estadoCredito(cr)])), hoy = iso(todayD()), mes = hoy.slice(0, 7), anio = hoy.slice(0, 4);
+  const vig = crs.filter(cr => (cr.estado || "vigente") !== "cancelado");
+  const todas = crs.flatMap(cr => est.get(cr.id).cuotas.map(x => ({ ...x, cr })));
+  const delMes = todas.filter(x => x.c.fecha.slice(0, 7) === mes), venc = todas.filter(x => x.estado === "vencida");
+  const prox = todas.filter(x => x.estado !== "pagada" && x.c.fecha >= hoy && days(x.c.fecha) <= 30);
+  const pagAnio = crs.flatMap(cr => pagosDe(cr.id)).filter(p => p.fecha.slice(0, 4) === anio).reduce((a, p) => a + num(p.valor), 0);
+  const sum = (xs, f) => xs.reduce((a, x) => a + f(x), 0);
+  const kpi = (k, v, s, cls) => el("div", { class: "kpi" }, el("span", { class: "k", text: k }), el("span", { class: "v num sm" + (cls ? " " + cls : ""), text: v }), el("span", { class: "s", text: s }));
+  const kpis = el("section", { class: "kpis vz-kpis" },
+    kpi("Saldo de capital (calculado)", fPeso(sum(vig, cr => est.get(cr.id).saldo)), vig.length + plural(vig.length, " crédito vigente", " créditos vigentes")),
+    kpi("Cuotas de este mes", fPeso(sum(delMes, x => num(x.c.total))), delMes.filter(x => x.estado === "pagada").length + " de " + delMes.length + " pagadas"),
+    kpi("Cuotas vencidas", venc.length ? fPeso(sum(venc, x => x.falta)) : "Al día", venc.length + plural(venc.length, " cuota sin pagar", " cuotas sin pagar"), venc.length ? "late" : "ok"),
+    kpi("Próximos 30 días", fPeso(sum(prox, x => x.falta)), prox.length + plural(prox.length, " cuota", " cuotas")),
+    kpi("Pagado en " + anio, fPeso(pagAnio), "Pagos registrados, incluye abonos"));
+  const tabla = crs.length ? el("div", { class: "tbl-wrap" }, el("table", {},
+    el("thead", {}, el("tr", {}, ...["Crédito", "De", "Saldo calculado", "Saldo certificado", "Próxima cuota", "Vencido", "Tasa", "Estado"].map((h, i) => el("th", { scope: "col", class: [2, 3, 5].includes(i) ? "r" : null, text: h })))),
+    el("tbody", {}, ...crs.map(cr => { const e = est.get(cr.id); return el("tr", {},
+      el("td", { class: "ob" }, el("button", { type: "button", text: credNombre(cr), onclick: () => czSet({ cred: cr.id }) }), el("span", { class: "meta key-sub", text: (TIPOS_CRED.find(t => t[0] === cr.tipo) || ["", ""])[1] + (e.proyectado ? " · plan proyectado" : "") })),
+      el("td", { text: propNombre(cr) }),
+      el("td", { class: "r num", text: fPeso(e.saldo) }),
+      el("td", { class: "r num", text: cr.saldoCertificado ? fPeso(num(cr.saldoCertificado)) + (cr.fechaCertificado ? " · " + fechaCorta(cr.fechaCertificado) : "") : "—" }),
+      el("td", { class: "num", text: e.proxima ? fechaCorta(e.proxima.c.fecha) + " · " + fPeso(e.proxima.falta) : "—" }),
+      el("td", { class: "r num" + (e.vencidas.length ? " soon" : ""), text: e.vencidas.length ? fPeso(e.valorVencido) + " (" + e.vencidas.length + ")" : "—" }),
+      el("td", { class: "num", text: cr.tasa ? cr.tasa + " % " + (cr.modalidad || "EA") : "—" }),
+      el("td", { text: (ESTADOS_C.find(s => s[0] === (cr.estado || "vigente")) || ESTADOS_C[0])[1] })); }))))
+    : el("p", { class: "empty", text: S.data.creditos.length ? "Ningún crédito con estos filtros." : "Aún no hay créditos. Agrega uno con «Nuevo crédito»." });
+  const lista = [...venc, ...prox].sort((a, b) => a.c.fecha.localeCompare(b.c.fecha));
+  return [kpis, el("section", { class: "card" }, el("div", { class: "card-h" }, el("h3", { text: "Obligaciones" })), tabla),
+    el("section", { class: "card" }, el("div", { class: "card-h" }, el("h3", { text: "Cuotas vencidas y próximas (30 días)" })),
+      lista.length ? el("ul", { class: "vz-list" }, ...lista.map(x => el("li", {}, el("button", { class: "vz-it", type: "button", onclick: () => czSet({ cred: x.cr.id }) },
+        dot(x.cr.cliente ? cColor(x.cr.cliente) : GRAY, true),
+        el("span", { class: "t" }, el("b", { text: credNombre(x.cr) + " · cuota " + x.c.numero }), el("span", { class: "meta", text: propNombre(x.cr) + (x.c.proyectada ? " · proyectada" : "") })),
+        el("span", { class: "num w" + (x.estado === "vencida" ? " late" : ""), text: fechaCorta(x.c.fecha) + " · " + fPeso(x.falta) })))))
+        : el("p", { class: "empty", text: "Nada vencido ni por pagar en los próximos 30 días." }))];
+}
+
+function credDetalle(cr) {
+  const e = estadoCredito(cr), proy = SISTEMAS.find(s => s[0] === cr.sistema) || SISTEMAS[0];
+  const rows = [], add = (k, v, cls) => { if (v != null && v !== "") rows.push(el("dt", { text: k }), el("dd", { class: cls || null }, v)); };
+  add("De", propNombre(cr)); add("Acreedor", cr.acreedor); add("Tipo", (TIPOS_CRED.find(t => t[0] === cr.tipo) || ["", cr.tipo])[1]); add("Referencia", cr.referencia);
+  add("Desembolso", cr.desembolso ? fechaCorta(cr.desembolso) + " · " + fPeso(num(cr.valorInicial)) : fPeso(num(cr.valorInicial)));
+  add("Tasa", cr.tasa ? cr.tasa + " % " + (MODALIDADES.find(m => m[0] === (cr.modalidad || "EA")) || MODALIDADES[0])[1] + " · " + fPct(tasaPeriodo(cr)) + " por periodo" : "");
+  add("Plazo", cr.plazo ? cr.plazo + " cuotas " + ((PERIODOS.find(p => p[0] === cr.frecuencia) || ["", ""])[1] || "").toLowerCase() + "es" : "");
+  add("Plan de pagos", proy[1]);
+  add("Saldo calculado", fPeso(e.saldo) + " · capital pagado " + fPeso(e.capPagado) + " · intereses pagados " + fPeso(e.intPagado));
+  if (cr.saldoCertificado) add("Saldo certificado", fPeso(num(cr.saldoCertificado)) + " al " + fechaCorta(cr.fechaCertificado) + (Math.abs(num(cr.saldoCertificado) - e.saldo) > 1 ? " · diferencia con el calculado: " + fPeso(num(cr.saldoCertificado) - e.saldo) : ""));
+  add("Vencido", e.vencidas.length ? fPeso(e.valorVencido) + " en " + e.vencidas.length + plural(e.vencidas.length, " cuota", " cuotas") : "Al día", e.vencidas.length ? "late" : "done");
+  if (e.excedente > 0.5) add("Aplicado a capital", fPeso(e.excedente) + " de pagos mayores a la cuota");
+  add("Estado", (ESTADOS_C.find(s => s[0] === (cr.estado || "vigente")) || ESTADOS_C[0])[1]); add("Nota", cr.nota);
+  const ficha = el("section", { class: "card" },
+    el("div", { class: "card-h" }, el("h3", {}, dot(cr.cliente ? cColor(cr.cliente) : GRAY, true), " ", credNombre(cr)),
+      el("span", { class: "acts" },
+        el("button", { class: "link", type: "button", text: "Editar", onclick: () => credDialog(cr) }),
+        el("button", { class: "link", type: "button", text: "Registrar pago", onclick: () => pagoCredDialog(cr, null, false) }),
+        el("button", { class: "link", type: "button", text: "Abono extraordinario", onclick: () => pagoCredDialog(cr, null, true) }),
+        el("button", { class: "link", type: "button", text: "Historial", onclick: () => histDialog("Historial · " + credNombre(cr), cr) }))),
+    el("dl", { class: "det" }, ...rows));
+  const anul = S.data.cuotas.filter(c => c.credito === cr.id && c.anulada);
+  const plan = el("section", { class: "card" },
+    el("div", { class: "card-h" }, el("h3", { text: "Plan de pagos" }),
+      el("span", { class: "acts" },
+        cr.sistema !== "manual" ? el("button", { class: "link", type: "button", text: e.cuotas.length ? "Recalcular proyección" : "Generar plan proyectado", onclick: () => proyeccionDialog(cr) }) : null,
+        el("button", { class: "link", type: "button", text: "Agregar cuota", onclick: () => cuotaDialog(cr, null) }),
+        el("button", { class: "link", type: "button", text: "Pegar plan del banco", onclick: () => pegarPlanDialog(cr) }),
+        e.cuotas.length ? el("button", { class: "link", type: "button", text: "Reprogramar", onclick: () => reprogCredDialog(cr) }) : null)),
+    e.proyectado ? el("p", { class: "meta warn", text: "Las cuotas marcadas «Proyectada» son un cálculo de la app con la tasa y el plazo registrados: no son el plan oficial del banco. Usa el certificado o el plan del banco para confirmarlas." }) : null,
+    e.cuotas.length ? el("div", { class: "tbl-wrap" }, el("table", {},
+      el("thead", {}, el("tr", {}, ...["#", "Fecha", "Capital", "Interés", "Otros", "Cuota", "Pagado", "Estado", ""].map((h, i) => el("th", { scope: "col", class: i >= 2 && i <= 6 ? "r" : null, text: h })))),
+      el("tbody", {}, ...e.cuotas.map(x => el("tr", { class: x.estado === "pagada" ? "c-pag" : null },
+        el("td", { class: "num", text: String(x.c.numero) }),
+        el("td", { class: "num" + (x.estado === "vencida" ? " soon" : "") }, fechaCorta(x.c.fecha), (x.c.reprogramaciones || []).length ? el("span", { class: "meta", text: " ↻" , title: "Reprogramada" }) : null),
+        ...["capital", "interes", "otros", "total"].map(k => el("td", { class: "r num", text: fPeso(num(x.c[k])) })),
+        el("td", { class: "r num", text: x.pagado ? fPeso(x.pagado) : "—" }),
+        el("td", { class: x.estado === "vencida" ? "soon" : x.estado === "pagada" ? "ok-t" : null, text: cap(x.estado) + (x.c.proyectada ? " · proyectada" : "") }),
+        el("td", { class: "act" }, el("span", { class: "cell-acts" },
+          x.estado !== "pagada" ? el("button", { class: "link", type: "button", text: "Pagar", onclick: () => pagoCredDialog(cr, x.c, false) }) : null,
+          el("button", { class: "link", type: "button", text: "Editar", onclick: () => cuotaDialog(cr, x.c) }))))))))
+      : el("p", { class: "empty", text: cr.sistema === "manual" ? "Sin cuotas. Agrégalas o pega el plan del banco." : "Sin cuotas. Usa «Generar plan proyectado»." }),
+    anul.length ? el("button", { class: "more", type: "button", text: (CZ.anuladas ? "Ocultar" : "Ver") + " cuotas proyectadas anuladas (" + anul.length + ")", onclick: () => czSet({ anuladas: !CZ.anuladas }) }) : null,
+    CZ.anuladas && anul.length ? el("ul", { class: "hist" }, ...anul.map(c => el("li", { class: "meta", text: "#" + c.numero + " · " + fechaCorta(c.fecha) + " · " + fPeso(num(c.total)) + " · " + (c.anuladaMotivo || "anulada") }))) : null);
+  const pagos = el("section", { class: "card" }, el("div", { class: "card-h" }, el("h3", { text: "Pagos registrados" })),
+    e.pagos.length ? el("div", { class: "tbl-wrap" }, el("table", {},
+      el("thead", {}, el("tr", {}, ...["Fecha", "Tipo", "Cuota", "Valor", "Capital", "Interés", "Soporte", "Nota"].map((h, i) => el("th", { scope: "col", class: i >= 3 && i <= 5 ? "r" : null, text: h })))),
+      el("tbody", {}, ...e.pagos.map(p => { const c = p.cuota && S.data.cuotas.find(x => x.id === p.cuota), doc = p.soporte && S.data.documentos.find(d => d.id === p.soporte);
+        return el("tr", {},
+          el("td", { class: "num", text: fechaCorta(p.fecha) }), el("td", { text: p.extraordinario ? "Abono extraordinario" : "Pago" }),
+          el("td", { class: "num", text: c ? "#" + c.numero : p.extraordinario ? "—" : "Automático" }),
+          el("td", { class: "r num", text: fPeso(num(p.valor)) }),
+          el("td", { class: "r num", text: p.capital !== "" && p.capital != null ? fPeso(num(p.capital)) : "—" }),
+          el("td", { class: "r num", text: p.interes !== "" && p.interes != null ? fPeso(num(p.interes)) : "—" }),
+          el("td", {}, doc ? el("button", { class: "link", type: "button", text: "Ver", onclick: () => openDoc(doc) }) : el("button", { class: "link", type: "button", text: "Adjuntar", onclick: () => soporteDialog(cr, p) })),
+          el("td", { class: "meta", text: p.nota || "" })); }))))
+      : el("p", { class: "empty", text: "Sin pagos registrados." }));
+  return [ficha, plan, pagos];
+}
+
+const CRED_CAMPOS = { cliente: "De", acreedor: "Acreedor", tipo: "Tipo", referencia: "Referencia", desembolso: "Desembolso", valorInicial: "Valor inicial", tasa: "Tasa", modalidad: "Modalidad", plazo: "Plazo", frecuencia: "Frecuencia", sistema: "Plan", inicio: "Primera cuota", saldoCertificado: "Saldo certificado", fechaCertificado: "Fecha del certificado", estado: "Estado", nota: "Nota" };
+function credDialog(cr) {
+  suggest("acreedores", [], S.data.creditos.map(c => c.acreedor));
+  editor({
+    title: cr ? "Editar crédito" : "Nuevo crédito",
+    fields: [
+      { name: "cliente", label: "De quién es", type: "select", options: esGestor() ? clientOpts() : [["", "La oficina"], ...clientOpts()] },
+      { name: "acreedor", label: "Acreedor (banco o entidad)", req: true, list: "acreedores" },
+      { name: "tipo", label: "Tipo", type: "select", options: TIPOS_CRED },
+      { name: "referencia", label: "Número u obligación", ph: "Últimos dígitos" },
+      { name: "desembolso", label: "Fecha de desembolso", type: "date" },
+      { name: "valorInicial", label: "Valor desembolsado", req: true, ph: "50.000.000" },
+      { name: "tasa", label: "Tasa (%)", ph: "24,5" },
+      { name: "modalidad", label: "Modalidad de la tasa", type: "select", options: MODALIDADES },
+      { name: "frecuencia", label: "Frecuencia de las cuotas", type: "select", options: FREC_C.map(p => [p[0], p[1]]) },
+      { name: "plazo", label: "Número de cuotas", type: "number", min: 1, max: 600 },
+      { name: "inicio", label: "Fecha de la primera cuota", type: "date" },
+      { name: "sistema", label: "Plan de pagos", type: "select", options: SISTEMAS },
+      { name: "saldoCertificado", label: "Saldo certificado por el banco", ph: "Opcional" },
+      { name: "fechaCertificado", label: "Fecha del certificado", type: "date", when: v => !!v.saldoCertificado },
+      { name: "estado", label: "Estado", type: "select", options: ESTADOS_C },
+      { name: "nota", label: "Nota" }
+    ],
+    values: cr ? { ...cr } : { cliente: filter !== "all" ? filter : esGestor() ? defClient() : "", modalidad: "EA", frecuencia: "mensual", sistema: "manual", estado: "vigente", tipo: "comercial" },
+    saveText: cr ? "Guardar" : "Crear",
+    onSave: v => {
+      if (money(v.valorInicial) == null || money(v.valorInicial) <= 0) return "Escribe el valor desembolsado.";
+      if (v.sistema !== "manual" && (!v.plazo || !v.inicio || !v.tasa)) return "Para proyectar el plan hacen falta tasa, número de cuotas y fecha de la primera cuota.";
+      if (v.saldoCertificado && !v.fechaCertificado) return "Indica la fecha del certificado.";
+      if (cr) {
+        if (cr.cliente !== v.cliente && (S.data.cuotas.some(c => c.credito === cr.id) || S.data.pagos.some(p => p.credito === cr.id))) {
+          for (const c of S.data.cuotas) if (c.credito === cr.id) c.cliente = v.cliente;
+          for (const p of S.data.pagos) if (p.credito === cr.id) p.cliente = v.cliente;
+        }
+        const ch = Object.keys(CRED_CAMPOS).filter(k => String(v[k] ?? "") !== String(cr[k] ?? ""));
+        if (ch.length) hist(cr, "Editado", ch.map(k => CRED_CAMPOS[k] + ": " + (k === "cliente" ? propNombre(cr) + " → " + (v.cliente ? cName(v.cliente) : "Oficina") : (cr[k] || "—") + " → " + (v[k] || "—"))).join("; "));
+        Object.assign(cr, v); changed(); return;
+      }
+      const n = { id: uid(), ...v, creada: new Date().toISOString() };
+      hist(n, "Creado", fPeso(num(v.valorInicial)) + " con " + v.acreedor);
+      S.data.creditos.push(n);
+      if (v.sistema !== "manual") crearProyeccion(n, num(v.valorInicial), Number(v.plazo), v.inicio, 1, null, "Plan proyectado inicial");
+      changed(); CZ.cred = n.id; render();
+    },
+    onDelete: cr ? () => toast("Los créditos no se eliminan: márcalo como «Cancelado» para conservar su historia.") : null
+  });
+}
+function crearProyeccion(cr, saldo, n, fecha, desde, cuotaFija, motivo) {
+  const cs = proyectar(cr, saldo, n, fecha, desde, cuotaFija);
+  for (const c of cs) S.data.cuotas.push({ id: uid(), credito: cr.id, cliente: cr.cliente, ...c, proyectada: true });
+  hist(cr, motivo, cs.length + plural(cs.length, " cuota", " cuotas") + (cs[0] ? " desde " + fechaCorta(cs[0].fecha) + " · primera " + fPeso(cs[0].total) : ""));
+  return cs.length;
+}
+// Recalcular las cuotas proyectadas que aún no tienen pagos, a partir del saldo calculado (por ejemplo, tras un abono).
+function proyeccionDialog(cr) {
+  const e = estadoCredito(cr), fut = e.cuotas.filter(x => x.c.proyectada && x.pagado < 0.5 && x.estado !== "pagada");
+  const hechas = e.cuotas.filter(x => !fut.includes(x)), sig = fut[0] ? fut[0].c.fecha : cr.inicio || iso(todayD());
+  const prev = fut[0] ? num(fut[0].c.total) : 0, capK = fut[0] ? num(fut[0].c.capital) : 0;
+  editor({
+    title: (e.cuotas.length ? "Recalcular" : "Generar") + " plan proyectado",
+    fields: [
+      { name: "efecto", label: "Qué mantener", type: "select", options: e.cuotas.length ? [["plazo", "Mismo número de cuotas (baja la cuota)"], ["cuota", "Misma cuota (baja el número de cuotas)"]] : [["plazo", "Número de cuotas del crédito"]] },
+      { name: "desde", label: "Primera cuota recalculada", type: "date", req: true }
+    ],
+    values: { efecto: "plazo", desde: sig },
+    saveText: "Ver y aplicar",
+    preview: v => el("p", { class: "meta", text: "Saldo de capital calculado: " + fPeso(e.saldo) + ". " + (fut.length ? fut.length + plural(fut.length, " cuota proyectada sin pagos se anula", " cuotas proyectadas sin pagos se anulan") + " (quedan guardadas) y se crean las nuevas." : "Se crean las cuotas proyectadas.") + " Las cuotas del banco y las que tienen pagos no se tocan." }),
+    onSave: v => {
+      if (e.saldo <= 0.5) return "El crédito no tiene saldo de capital por proyectar.";
+      let n = fut.length || Number(cr.plazo) - hechas.length || Number(cr.plazo);
+      if (v.efecto === "cuota" && fut.length) { n = cuotasPara(cr, e.saldo, prev, capK); if (!n) return "Con esa cuota no alcanza ni para los intereses."; }
+      if (!(n > 0)) return "Revisa el número de cuotas del crédito.";
+      const motivo = "Proyección recalculada el " + fechaCorta(iso(todayD()));
+      for (const x of fut) { x.c.anulada = true; x.c.anuladaMotivo = motivo; }
+      const desde = hechas.length ? Math.max(...hechas.map(x => x.c.numero)) + 1 : 1;
+      crearProyeccion(cr, e.saldo, n, v.desde, desde, v.efecto === "cuota" && cr.sistema !== "aleman" ? prev : null, (fut.length ? "Recalculado (" + fut.length + " anuladas)" : "Plan proyectado"));
+      changed();
+    }
+  });
+}
+function cuotaDialog(cr, c) {
+  editor({
+    title: c ? "Cuota " + c.numero : "Agregar cuota",
+    fields: [
+      { name: "numero", label: "Número", type: "number", min: 1, req: true }, { name: "fecha", label: "Fecha", type: "date", req: true },
+      { name: "capital", label: "Capital" }, { name: "interes", label: "Interés" }, { name: "otros", label: "Otros (seguros, comisiones)" },
+      { name: "motivo", label: "Motivo del cambio de fecha", when: v => c && v.fecha !== c.fecha, req: !!c }
+    ],
+    values: c ? { ...c } : { numero: cuotasDe(cr.id).length + 1, fecha: iso(todayD()) },
+    saveText: c ? "Guardar" : "Agregar",
+    onSave: v => {
+      const val = { numero: Number(v.numero), fecha: v.fecha, capital: r0(num(v.capital)), interes: r0(num(v.interes)), otros: r0(num(v.otros)) };
+      val.total = val.capital + val.interes + val.otros;
+      if (!val.total) return "La cuota necesita al menos un valor.";
+      if (c) {
+        if (c.fecha !== v.fecha) { if (!v.motivo) return "Escribe el motivo del cambio de fecha."; (c.reprogramaciones = c.reprogramaciones || []).push({ t: new Date().toISOString(), por: S.me, de: c.fecha, a: v.fecha, motivo: v.motivo }); }
+        hist(cr, "Cuota " + c.numero + " editada", ["fecha", "capital", "interes", "otros"].filter(k => String(c[k]) !== String(val[k])).map(k => k + ": " + (k === "fecha" ? fechaCorta(c[k]) + " → " + fechaCorta(val[k]) + " (" + v.motivo + ")" : fPeso(num(c[k])) + " → " + fPeso(val[k]))).join("; ") + (c.proyectada ? " · deja de ser proyectada" : ""));
+        Object.assign(c, val, { proyectada: false });
+      } else {
+        S.data.cuotas.push({ id: uid(), credito: cr.id, cliente: cr.cliente, ...val, proyectada: false });
+        hist(cr, "Cuota agregada", "#" + val.numero + " · " + fechaCorta(val.fecha) + " · " + fPeso(val.total));
+      }
+      changed();
+    }
+  });
+}
+// Pegar el plan del banco desde Excel o PDF: una cuota por línea (fecha, capital, interés y, si hay, otros).
+function pegarPlanDialog(cr) {
+  const ta = el("textarea", { class: "input", rows: 8, name: "plan", placeholder: "15/01/2027\t1.250.000\t480.000\t35.000", "aria-label": "Plan de pagos" });
+  const pv = el("p", { class: "meta" });
+  const leer = () => ta.value.split(/\n/).map(l => l.trim()).filter(Boolean).map(l => {
+    const p = l.split(/\t|;|\s{2,}|\s(?=\$?\d)/).map(s => s.trim()).filter(Boolean);
+    const fi = p.findIndex(s => /^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$|^\d{4}-\d{2}-\d{2}$/.test(s)); if (fi < 0) return null;
+    let f = p[fi]; if (!/^\d{4}/.test(f)) { const [d, m, y] = f.split(/[/-]/).map(Number); f = (y < 100 ? 2000 + y : y) + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0"); }
+    const ns = p.slice(fi + 1).map(money).filter(x => x != null);
+    return ns.length >= 2 ? { fecha: f, capital: r0(ns[0]), interes: r0(ns[1]), otros: r0(ns[2] || 0) } : null;
+  });
+  ta.addEventListener("input", () => { const xs = leer(); pv.textContent = xs.filter(Boolean).length + " cuotas leídas" + (xs.some(x => !x) ? " · " + xs.filter(x => !x).length + " líneas no se entendieron (se ignoran)" : ""); });
+  panelDialog("Pegar plan del banco", [
+    el("p", { class: "meta", text: "Copia las columnas desde Excel (o escríbelas): fecha, capital, interés y, si hay, otros cargos. Una cuota por línea. Se agregan como cuotas reales del banco." }), ta, pv,
+    el("label", { class: "opt-in" }, el("input", { type: "checkbox", name: "anular", checked: true }), el("span", { text: "Anular las cuotas proyectadas sin pagos (quedan guardadas)" }))
+  ], "Agregar cuotas", async form => {
+    const xs = leer().filter(Boolean); if (!xs.length) return "No se leyó ninguna cuota.";
+    if (form.elements.anular.checked) for (const x of estadoCredito(cr).cuotas) if (x.c.proyectada && x.pagado < 0.5) { x.c.anulada = true; x.c.anuladaMotivo = "Reemplazada por el plan del banco"; }
+    let n = Math.max(0, ...cuotasDe(cr.id).map(c => c.numero));
+    for (const x of xs.sort((a, b) => a.fecha.localeCompare(b.fecha))) S.data.cuotas.push({ id: uid(), credito: cr.id, cliente: cr.cliente, numero: ++n, ...x, total: x.capital + x.interes + x.otros, proyectada: false });
+    hist(cr, "Plan del banco agregado", xs.length + plural(xs.length, " cuota", " cuotas"));
+    changed();
+  });
+}
+// Mover todas las cuotas pendientes (por ejemplo, un periodo de gracia) con su motivo.
+function reprogCredDialog(cr) {
+  editor({
+    title: "Reprogramar cuotas pendientes",
+    fields: [{ name: "meses", label: "Mover las cuotas sin pagar", type: "select", options: [1, 2, 3, 6, 12].map(n => [String(n), n + plural(n, " mes después", " meses después")]).concat([["-1", "1 mes antes"]]) },
+      { name: "motivo", label: "Motivo", req: true, ph: "Periodo de gracia, acuerdo con el banco…" }],
+    values: { meses: "1" }, saveText: "Reprogramar",
+    onSave: v => {
+      const n = Number(v.meses), xs = estadoCredito(cr).cuotas.filter(x => x.estado !== "pagada" && x.pagado < 0.5);
+      if (!xs.length) return "No hay cuotas sin pagos para mover.";
+      for (const x of xs) { const a = monthsAdd(x.c.fecha, n); (x.c.reprogramaciones = x.c.reprogramaciones || []).push({ t: new Date().toISOString(), por: S.me, de: x.c.fecha, a, motivo: v.motivo }); x.c.fecha = a; }
+      hist(cr, "Reprogramado", xs.length + plural(xs.length, " cuota movida ", " cuotas movidas ") + (n > 0 ? n + " mes(es) después" : "1 mes antes") + ". Motivo: " + v.motivo);
+      if ((cr.estado || "vigente") === "vigente") { cr.estado = "reestructurado"; hist(cr, "Estado", "Vigente → Reestructurado"); }
+      changed();
+    }
+  });
+}
+// Pago normal (a una cuota o a la más antigua pendiente) o abono extraordinario a capital. Con soporte opcional.
+function pagoCredDialog(cr, cuota, extra) {
+  const e = estadoCredito(cr), pend = e.cuotas.filter(x => x.estado !== "pagada");
+  const sug = cuota ? e.cuotas.find(x => x.c.id === cuota.id) : pend[0];
+  const f = (name, label, attrs) => el("label", { class: "field" }, el("span", { text: label }), el("input", { class: "input", name, ...attrs }));
+  const file = el("input", { type: "file", name: "soporte", class: "input" });
+  const body = [
+    el("p", { class: "meta", text: extra ? "Abono a capital, fuera de las cuotas. Saldo calculado hoy: " + fPeso(e.saldo) + "." : sug ? "Cuota " + sug.c.numero + " del " + fechaCorta(sug.c.fecha) + ": faltan " + fPeso(sug.falta) + "." : "No hay cuotas pendientes: el pago se aplicará a capital." }),
+    f("fecha", "Fecha del pago", { type: "date", value: iso(todayD()), required: true }),
+    f("valor", "Valor pagado", { value: extra ? "" : sug ? String(r0(sug.falta)) : "", required: true, inputmode: "decimal" }),
+    extra ? null : el("label", { class: "field" }, el("span", { text: "Aplicar a" }), el("select", { class: "input", name: "cuota" },
+      el("option", { value: "", text: "La cuota más antigua pendiente (automático)" }), ...pend.map(x => el("option", { value: x.c.id, text: "Cuota " + x.c.numero + " · " + fechaCorta(x.c.fecha) + " · faltan " + fPeso(x.falta), selected: sug && x.c.id === sug.c.id && !!cuota })))),
+    el("details", {}, el("summary", { text: "Desglose del banco (opcional)" }),
+      f("capital", "Capital", { inputmode: "decimal" }), f("interes", "Interés", { inputmode: "decimal" })),
+    extra && e.proyectado ? el("label", { class: "opt-in" }, el("input", { type: "checkbox", name: "recalc", checked: true }), el("span", { text: "Después, recalcular las cuotas proyectadas" })) : null,
+    el("label", { class: "field" }, el("span", { text: "Soporte (opcional)" }), file),
+    f("nota", "Nota", { placeholder: "Banco, referencia, quién pagó…" })];
+  panelDialog((extra ? "Abono extraordinario · " : "Registrar pago · ") + credNombre(cr), body.filter(Boolean), "Registrar", async form => {
+    const valor = money(formVal(form, "valor")), fecha = formVal(form, "fecha");
+    if (!fecha) return "Indica la fecha.";
+    if (!valor || valor <= 0) return "Escribe el valor pagado.";
+    if (extra && valor > e.saldo + 1) return "El abono es mayor que el saldo calculado (" + fPeso(e.saldo) + ").";
+    const capital = formVal(form, "capital"), interes = formVal(form, "interes");
+    const p = { id: uid(), credito: cr.id, cliente: cr.cliente, cuota: extra ? "" : formVal(form, "cuota"), fecha, valor: r0(valor),
+      capital: capital ? r0(num(capital)) : "", interes: interes ? r0(num(interes)) : "", extraordinario: !!extra, nota: formVal(form, "nota"), por: S.me, t: new Date().toISOString() };
+    if (file.files[0]) { const msg = await subirSoporte(cr, p, file.files[0]); if (msg) return msg; }
+    S.data.pagos.push(p);
+    hist(cr, extra ? "Abono extraordinario" : "Pago registrado", fechaCorta(fecha) + " · " + fPeso(valor) + (p.cuota ? " · cuota " + (S.data.cuotas.find(c => c.id === p.cuota) || {}).numero : "") + (p.soporte ? " · con soporte" : ""));
+    if (estadoCredito(cr).saldo <= 0.5 && (cr.estado || "vigente") !== "cancelado") toast("El saldo calculado quedó en cero. Si el banco lo confirma, márcalo como «Cancelado».");
+    changed();
+    if (extra && form.elements.recalc && form.elements.recalc.checked) setTimeout(() => proyeccionDialog(cr), 60);
+  });
+}
+async function subirSoporte(cr, p, f) {
+  if (f.size > MAX_DOC) return "El soporte pesa " + fSize(f.size) + "; el máximo es " + fSize(MAX_DOC) + ".";
+  const id = uid();
+  let up; try { up = await uploadDoc(id, new Uint8Array(await f.arrayBuffer()), cr.cliente); } catch (e) { return "No se pudo subir el soporte: " + e.message; }
+  S.data.documentos.push({ id, cliente: cr.cliente, nombre: "Soporte " + cr.acreedor + " " + p.fecha, fecha: p.fecha, credito: cr.id,
+    archivo: { nombre: f.name, mime: f.type || "application/octet-stream", tamano: f.size, ...up } });
+  p.soporte = id;
+  return "";
+}
+function soporteDialog(cr, p) {
+  const file = el("input", { type: "file", class: "input", name: "soporte" });
+  panelDialog("Adjuntar soporte · pago del " + fechaCorta(p.fecha), [el("label", { class: "field" }, el("span", { text: "Archivo" }), file)], "Adjuntar", async () => {
+    if (!file.files[0]) return "Elige el archivo.";
+    const msg = await subirSoporte(cr, p, file.files[0]); if (msg) return msg;
+    hist(cr, "Soporte adjuntado", "Pago del " + fechaCorta(p.fecha)); changed();
+  });
+}
+
+/* ---------- Personas de la oficina: administradores y gestores ----------
+   Invitar una cuenta nueva sigue siendo del superadministrador (consola). El administrador de la oficina decide el rol,
+   los clientes de cada gestor y le entrega su llave con un CÓDIGO DE INGRESO de un solo uso: el gestor entra con su
+   correo y su clave, escribe el código y desde ese momento su llave queda protegida solo con su clave. */
+let PERS = null;
+async function cargarPersonas() {
+  try { PERS = await rpc("miembros_oficina", { p_id: SB.oficina }); } catch (e) { PERS = { error: e.message }; }
+  if (view === "ajustes") renderPersonas();
+}
+function renderPersonas() {
+  const box = $("personas"); if (!box) return;
+  box.hidden = esGestor();
+  if (esGestor()) return;
+  const lista = $("personas-l");
+  if (!SB.roles) { lista.replaceChildren(el("p", { class: "meta", text: "La nube aún no tiene la actualización de roles (archivo SQL 12). Mientras tanto, todas las personas son administradoras." })); return; }
+  if (!PERS) { lista.replaceChildren(el("p", { class: "meta", text: "Cargando…" })); cargarPersonas(); return; }
+  if (PERS.error) { lista.replaceChildren(el("p", { class: "err", text: "No se pudo leer: " + PERS.error })); return; }
+  lista.replaceChildren(...PERS.map(m => {
+    const llave = S.users.some(u => u.usuario === m.usuario), yo = m.usuario === S.me, g = m.rol === "gestor";
+    const cls = (m.clientes || []).map(id => cName(id));
+    return el("div", { class: "copia" },
+      el("span", {}, el("b", { text: m.usuario }), el("span", { class: "meta", text: " · " + m.correo + " · " + (g ? "Gestor" : "Administrador") + (yo ? " · tú" : "") }),
+        el("span", { class: "meta blk", text: g ? (cls.length ? "Clientes: " + cls.join(", ") : "Sin clientes asignados: no ve nada") : "Ve y administra toda la oficina" }),
+        el("span", { class: "meta blk" + (llave ? "" : " warn"), text: llave ? "Llave entregada" : "Sin llave: entrégale su código de ingreso" })),
+      yo ? null : el("span", { class: "acts" },
+        el("button", { class: "link", type: "button", text: "Permisos", onclick: () => permisosDialog(m) }),
+        el("button", { class: "link", type: "button", text: llave ? "Nuevo código" : "Entregar llave", onclick: () => entregarLlave(m, llave) }),
+        g ? el("button", { class: "link danger", type: "button", text: "Quitar", onclick: () => quitarGestor(m) }) : null));
+  }), el("p", { class: "meta", text: "Para sumar a alguien: el superadministrador lo invita desde la consola; la persona crea su cuenta con «Tengo una invitación» y aparece aquí como gestor sin clientes." }),
+  el("button", { class: "link", type: "button", text: "Historial de accesos", onclick: historialAccesos }));
+}
+function permisosDialog(m) {
+  const rol = el("select", { class: "input", name: "rol" }, el("option", { value: "gestor", text: "Gestor: solo los clientes marcados" }), el("option", { value: "admin", text: "Administrador: toda la oficina" }));
+  rol.value = m.rol;
+  const cl = checks("cli", S.data.clientes.map(c => [c.id, c.nombre]), m.clientes || []);
+  panelDialog("Permisos de " + m.usuario, [
+    el("label", { class: "field" }, el("span", { text: "Rol" }), rol),
+    el("p", { class: "meta", text: "Un gestor solo recibe del servidor los datos de sus clientes (tareas, vencimientos, claves, documentos, créditos). No ve copias, aseo, datos de la oficina ni a los demás clientes." }),
+    cl
+  ], "Guardar", async form => {
+    const r = form.elements.rol.value, cs = formChecks(form, "cli");
+    if (r === "gestor" && !cs.length && !confirm("Sin clientes, " + m.usuario + " no verá nada. ¿Guardar así?")) return "Marca al menos un cliente.";
+    try { await rpc("asignar_acceso", { p_id: SB.oficina, p_usuario: m.usuario, p_rol: r, p_clientes: r === "gestor" ? cs : [] }); } catch (e) { return e.message; }
+    PERS = null; renderPersonas();
+    toast("Permisos de " + m.usuario + " guardados. Se aplican la próxima vez que entre (o al recargar).");
+  });
+}
+// Entregar (o volver a entregar) la llave: par de llaves nuevo protegido con un código de un solo uso y llave de datos
+// nueva para todos. El código se muestra una sola vez.
+async function entregarLlave(m, yaTenia) {
+  confirmDialog(yaTenia ? "Nuevo código para " + m.usuario : "Entregar llave a " + m.usuario,
+    (yaTenia ? "Su llave actual deja de servir y la oficina cambia de llave de datos. " : "La oficina cambia de llave de datos. ") + "Verás un código de ingreso que debes entregarle por un medio seguro (en persona o por teléfono). Solo se muestra una vez.",
+    "Generar código", async () => {
+      if (S.pending) await persist();
+      const codigo = recCodigo(), nu = await makeUser(m.usuario, recNormal(codigo));
+      const i = S.users.findIndex(u => u.usuario === m.usuario);
+      if (i >= 0) S.users[i] = nu; else S.users.push(nu);
+      await rotateKey(); changed(); await persist();
+      if (S.kid !== S.syncedKid) { toast("No se pudo guardar el cambio de llave. Intenta de nuevo; el código no sirve todavía."); return; }
+      const d = $("dlg");
+      d.replaceChildren(el("div", { class: "dlg" }, el("h2", { id: "dlg-t", text: "Código de ingreso de " + m.usuario }),
+        el("p", { class: "rec-code num", text: codigo }),
+        el("p", { class: "meta", text: "Entrégaselo por un medio seguro. " + m.usuario + " entra con su correo (" + m.correo + ") y su clave, y la app le pide este código una sola vez. No lo guardes en el chat ni en correos." }),
+        el("div", { class: "dlg-acts" }, el("span"), el("span", { class: "r" },
+          el("button", { class: "btn alt", type: "button", text: "Copiar", onclick: () => copyText(codigo, "Clave") }),
+          el("button", { class: "btn", type: "button", text: "Ya lo entregué", onclick: () => d.close() })))));
+      openDialog(d); renderPersonas();
+    });
+}
+function quitarGestor(m) {
+  confirmDialog("Quitar a " + m.usuario, m.usuario + " deja de tener acceso. La oficina cambia de llave de datos para que la que conocía ya no abra la información nueva. Sus tareas y registros se conservan (son de los clientes, no de la persona).", "Quitar", async () => {
+    if (S.pending) await persist();
+    const i = S.users.findIndex(u => u.usuario === m.usuario);
+    if (i >= 0) { S.users.splice(i, 1); await rotateKey(); changed(); await persist(); if (S.kid !== S.syncedKid) { toast("No se pudo cambiar la llave. Intenta de nuevo."); return; } }
+    try { await rpc("quitar_gestor", { p_id: SB.oficina, p_usuario: m.usuario }); } catch (e) { toast("La llave cambió, pero no se pudo quitar el acceso en la nube: " + e.message); return; }
+    PERS = null; renderPersonas(); toast(m.usuario + " ya no tiene acceso.");
+  });
+}
+async function historialAccesos() {
+  let hs; try { hs = await rpc("historial_accesos", { p_id: SB.oficina }); } catch (e) { toast(e.message); return; }
+  const nombres = ids => (ids || []).map(cName).join(", ") || "ninguno";
+  panelDialog("Historial de accesos", [hs.length ? el("ol", { class: "hist" }, ...hs.map(h => el("li", {},
+    el("span", { class: "meta num", text: fStamp.format(new Date(h.cuando)) + " · " + h.por }),
+    el("span", { text: h.usuario + ": " + (h.accion === "asignar" ? (h.rol_antes === h.rol ? "" : (h.rol_antes || "—") + " → " + h.rol + " · ") + "clientes " + nombres(h.clientes_antes) + " → " + nombres(h.clientes) : h.accion) }))))
+    : el("p", { class: "meta", text: "Sin cambios registrados." })], null, async () => {});
+}
+
+/* ---------- Primer ingreso del gestor: código de ingreso ---------- */
+function codigoGestorDialog(o, pass) {
+  const env = JSON.parse(o.sobre), entry = (env.usuarios || []).find(u => u.usuario === o.usuario);
+  if (!entry) { loginError("Tu acceso todavía no está listo: pide al administrador de la oficina que te entregue tu código de ingreso."); return; }
+  loginError("Primer ingreso: escribe el código de ingreso que te entregó el administrador.");
+  editor({
+    title: "Código de ingreso",
+    fields: [{ name: "codigo", label: "Código de ingreso (8 grupos de 5)", req: true, ac: "off", ph: "XXXXX-XXXXX-…" }],
+    saveText: "Entrar",
+    onSave: async v => {
+      let pk;
+      try { pk = await dec(await passKey(recNormal(v.codigo), fromB64(entry.sal)), entry.iv, entry.priv); }
+      catch (e) { return "El código no es correcto (o ya se usó: entra solo con tu clave)."; }
+      // Tu llave queda protegida con tu clave; el código deja de servir.
+      const sal = rnd(16), [iv, priv] = await enc(await passKey(pass, sal), pk);
+      env.usuarios = env.usuarios.map(u => u.usuario === o.usuario ? { ...u, sal: toB64(sal), iv, priv } : u);
+      const sobre = JSON.stringify(env);
+      try { await rpc("guardar_llaves", { p_id: o.id, p_sobre: sobre, p_kid: env.kid }); } catch (e) { return "No se pudo guardar tu llave: " + e.message; }
+      try { const kind = await openCloud({ ...o, sobre }, pass); dropPending(); enterApp(kind); if (S.pending) persist(); }
+      catch (e) { return e.message; }
+      loginOk("");
+    }
+  });
+}
+// Cambiar la clave de un gestor: misma llave, protegida con la clave nueva (sin cambiar la llave de la oficina).
+function gestorClaveDialog() {
+  editor({
+    title: "Cambiar mi clave",
+    fields: [
+      { name: "actual", label: "Clave actual", type: "password", req: true, ac: "current-password" },
+      { name: "clave", label: "Clave nueva", type: "password", req: true, ac: "new-password" },
+      { name: "repetir", label: "Repite la clave nueva", type: "password", req: true, ac: "new-password" }
+    ],
+    onSave: async v => {
+      const mine = S.users.find(x => x.usuario === S.me);
+      let pk; try { pk = await dec(await passKey(v.actual, fromB64(mine.sal)), mine.iv, mine.priv); } catch (e) { return "La clave actual no es correcta."; }
+      if (v.clave.length < MIN_PASS) return "La clave nueva debe tener al menos " + MIN_PASS + " caracteres.";
+      if (v.clave !== v.repetir) return "Las claves nuevas no coinciden.";
+      try { await sbSetPass(v.clave); } catch (e) { return "No se pudo cambiar la clave en la nube: " + e.message; }
+      const sal = rnd(16), [iv, priv] = await enc(await passKey(v.clave, sal), pk);
+      Object.assign(mine, { sal: toB64(sal), iv, priv });
+      changed(); toast("Clave cambiada. Úsala la próxima vez que entres.");
+    }
+  });
+}
+
+/* ---------- Consola del superadministrador: invitar a una persona a una oficina ---------- */
+function invitarEnConsola(o) {
+  return el("div", {},
+    el("p", { class: "meta", text: "Invita a una persona: entra como gestor sin clientes. El administrador de la oficina le asigna clientes y le entrega su llave desde Configuración › Personas y permisos." }),
+    el("button", { class: "link", type: "button", text: "Invitar a una persona", onclick: () => editor({
+      title: "Invitar a " + (o.nombre || "la oficina"),
+      fields: [{ name: "usuario", label: "Usuario (nombre corto)", req: true }, { name: "correo", label: "Correo", type: "email", req: true }],
+      saveText: "Invitar",
+      onSave: async v => {
+        const correo = norm(v.correo), u = norm(v.usuario);
+        if (!validMail(correo)) return "Escribe un correo válido.";
+        try { await rpc("invitar_miembro", { p_id: o.id, p_correo: correo, p_usuario: u }); } catch (e) { return e.message; }
+        toast("Invitación creada para " + correo + ". Debe entrar a la página con «Tengo una invitación» y crear su clave.");
+      }
+    }) }));
+}
+
+/* ---------- Documentos: carpeta por cliente ---------- */
+// Si un documento cambia de cliente, su archivo cifrado se copia a la carpeta del cliente nuevo (sin descifrarlo).
+async function moverArchivo(doc) {
+  const a = doc.archivo; if (!a || !a.nube || !a.bk) return;
+  const carpeta = SB.oficina + "/" + (doc.cliente ? doc.cliente + "/" : "");
+  if (a.nube.startsWith(carpeta) && a.nube.slice(carpeta.length).indexOf("/") < 0) return;
+  // Ruta nueva (los archivos nunca se reemplazan): el archivo anterior se conserva.
+  const destino = carpeta + doc.id + "-" + Date.now().toString(36);
+  try {
+    const r = await sbStorage("GET", "authenticated/" + a.bk + "/" + a.nube);
+    await sbStorage("POST", BUCKET + "/" + destino, await r.blob(), "application/octet-stream");
+    a.nube = destino; a.bk = BUCKET; changed();
+  } catch (e) { toast("El documento cambió de cliente, pero su archivo sigue en la carpeta anterior (solo administradores lo pueden abrir)."); }
+}
+
+/* ---------- Fechas oficiales precargadas (quedan SIN VALIDAR al cargarlas) ----------
+   Fuentes en cada calendario. La persona compara y valida antes de generar: la app nunca usa estas fechas por su cuenta. */
+const PRECARGA = [
+  { id: "ret-2026", tipo: "retefuente", anio: 2026, columnas: "digito", nombre: "Retención en la fuente 2026 (periodos enero a diciembre)",
+    fuente: "Decreto 1625 de 2016 (DUR), art. 1.6.1.13.2.33, modificado por el Decreto 2229 de 2023; tabla publicada por Actualícese; julio ajustado según el Comunicado de prensa DIAN 092 del 2 de julio de 2026 (festivo nuevo, Ley 2578 de 2026)", filas: [
+      { periodo: "Enero 2026", fechas: { "1": "2026-02-10", "2": "2026-02-11", "3": "2026-02-12", "4": "2026-02-13", "5": "2026-02-16", "6": "2026-02-17", "7": "2026-02-18", "8": "2026-02-19", "9": "2026-02-20", "0": "2026-02-23" } },
+      { periodo: "Febrero 2026", fechas: { "1": "2026-03-10", "2": "2026-03-11", "3": "2026-03-12", "4": "2026-03-13", "5": "2026-03-16", "6": "2026-03-17", "7": "2026-03-18", "8": "2026-03-19", "9": "2026-03-20", "0": "2026-03-24" } },
+      { periodo: "Marzo 2026", fechas: { "1": "2026-04-13", "2": "2026-04-14", "3": "2026-04-15", "4": "2026-04-16", "5": "2026-04-20", "6": "2026-04-21", "7": "2026-04-22", "8": "2026-04-23", "9": "2026-04-24", "0": "2026-04-27" } },
+      { periodo: "Abril 2026", fechas: { "1": "2026-05-12", "2": "2026-05-13", "3": "2026-05-14", "4": "2026-05-15", "5": "2026-05-19", "6": "2026-05-20", "7": "2026-05-21", "8": "2026-05-22", "9": "2026-05-25", "0": "2026-05-26" } },
+      { periodo: "Mayo 2026", fechas: { "1": "2026-06-10", "2": "2026-06-11", "3": "2026-06-12", "4": "2026-06-16", "5": "2026-06-17", "6": "2026-06-18", "7": "2026-06-19", "8": "2026-06-22", "9": "2026-06-23", "0": "2026-06-24" } },
+      { periodo: "Junio 2026", fechas: { "1": "2026-07-09", "2": "2026-07-10", "3": "2026-07-14", "4": "2026-07-15", "5": "2026-07-16", "6": "2026-07-17", "7": "2026-07-21", "8": "2026-07-22", "9": "2026-07-23", "0": "2026-07-24" } },
+      { periodo: "Julio 2026", fechas: { "1": "2026-08-12", "2": "2026-08-13", "3": "2026-08-14", "4": "2026-08-18", "5": "2026-08-19", "6": "2026-08-20", "7": "2026-08-21", "8": "2026-08-24", "9": "2026-08-25", "0": "2026-08-26" } },
+      { periodo: "Agosto 2026", fechas: { "1": "2026-09-09", "2": "2026-09-10", "3": "2026-09-11", "4": "2026-09-14", "5": "2026-09-15", "6": "2026-09-16", "7": "2026-09-17", "8": "2026-09-18", "9": "2026-09-21", "0": "2026-09-22" } },
+      { periodo: "Septiembre 2026", fechas: { "1": "2026-10-09", "2": "2026-10-13", "3": "2026-10-14", "4": "2026-10-15", "5": "2026-10-16", "6": "2026-10-19", "7": "2026-10-20", "8": "2026-10-21", "9": "2026-10-22", "0": "2026-10-23" } },
+      { periodo: "Octubre 2026", fechas: { "1": "2026-11-11", "2": "2026-11-12", "3": "2026-11-13", "4": "2026-11-17", "5": "2026-11-18", "6": "2026-11-19", "7": "2026-11-20", "8": "2026-11-23", "9": "2026-11-24", "0": "2026-11-25" } },
+      { periodo: "Noviembre 2026", fechas: { "1": "2026-12-10", "2": "2026-12-11", "3": "2026-12-14", "4": "2026-12-15", "5": "2026-12-16", "6": "2026-12-17", "7": "2026-12-18", "8": "2026-12-21", "9": "2026-12-22", "0": "2026-12-23" } },
+      { periodo: "Diciembre 2026", fechas: { "1": "2027-01-13", "2": "2027-01-14", "3": "2027-01-15", "4": "2027-01-18", "5": "2027-01-19", "6": "2027-01-20", "7": "2027-01-21", "8": "2027-01-22", "9": "2027-01-25", "0": "2027-01-26" } }] },
+  { id: "ivab-2026", tipo: "iva-bim", anio: 2026, columnas: "digito", nombre: "IVA bimestral 2026",
+    fuente: "Decreto 1625 de 2016 (DUR), plazos de IVA modificados por el Decreto 2229 de 2023: mismas fechas que la retención de cada mes (comprobado en marzo, mayo y noviembre con DIAN y Forvis Mazars); julio según el Comunicado DIAN 092 de 2026", filas: [
+      { periodo: "Ene–Feb 2026", fechas: { "1": "2026-03-10", "2": "2026-03-11", "3": "2026-03-12", "4": "2026-03-13", "5": "2026-03-16", "6": "2026-03-17", "7": "2026-03-18", "8": "2026-03-19", "9": "2026-03-20", "0": "2026-03-24" } },
+      { periodo: "Mar–Abr 2026", fechas: { "1": "2026-05-12", "2": "2026-05-13", "3": "2026-05-14", "4": "2026-05-15", "5": "2026-05-19", "6": "2026-05-20", "7": "2026-05-21", "8": "2026-05-22", "9": "2026-05-25", "0": "2026-05-26" } },
+      { periodo: "May–Jun 2026", fechas: { "1": "2026-07-09", "2": "2026-07-10", "3": "2026-07-14", "4": "2026-07-15", "5": "2026-07-16", "6": "2026-07-17", "7": "2026-07-21", "8": "2026-07-22", "9": "2026-07-23", "0": "2026-07-24" } },
+      { periodo: "Jul–Ago 2026", fechas: { "1": "2026-09-09", "2": "2026-09-10", "3": "2026-09-11", "4": "2026-09-14", "5": "2026-09-15", "6": "2026-09-16", "7": "2026-09-17", "8": "2026-09-18", "9": "2026-09-21", "0": "2026-09-22" } },
+      { periodo: "Sep–Oct 2026", fechas: { "1": "2026-11-11", "2": "2026-11-12", "3": "2026-11-13", "4": "2026-11-17", "5": "2026-11-18", "6": "2026-11-19", "7": "2026-11-20", "8": "2026-11-23", "9": "2026-11-24", "0": "2026-11-25" } },
+      { periodo: "Nov–Dic 2026", fechas: { "1": "2027-01-13", "2": "2027-01-14", "3": "2027-01-15", "4": "2027-01-18", "5": "2027-01-19", "6": "2027-01-20", "7": "2027-01-21", "8": "2027-01-22", "9": "2027-01-25", "0": "2027-01-26" } }] },
+  { id: "ivac-2026", tipo: "iva-cua", anio: 2026, columnas: "digito", nombre: "IVA cuatrimestral 2026",
+    fuente: "Decreto 1625 de 2016 (DUR), plazos de IVA modificados por el Decreto 2229 de 2023: mismas fechas que la retención de cada mes (comprobado en marzo, mayo y noviembre con DIAN y Forvis Mazars); julio según el Comunicado DIAN 092 de 2026", filas: [
+      { periodo: "Ene–Abr 2026", fechas: { "1": "2026-05-12", "2": "2026-05-13", "3": "2026-05-14", "4": "2026-05-15", "5": "2026-05-19", "6": "2026-05-20", "7": "2026-05-21", "8": "2026-05-22", "9": "2026-05-25", "0": "2026-05-26" } },
+      { periodo: "May–Ago 2026", fechas: { "1": "2026-09-09", "2": "2026-09-10", "3": "2026-09-11", "4": "2026-09-14", "5": "2026-09-15", "6": "2026-09-16", "7": "2026-09-17", "8": "2026-09-18", "9": "2026-09-21", "0": "2026-09-22" } },
+      { periodo: "Sep–Dic 2026", fechas: { "1": "2027-01-13", "2": "2027-01-14", "3": "2027-01-15", "4": "2027-01-18", "5": "2027-01-19", "6": "2027-01-20", "7": "2027-01-21", "8": "2027-01-22", "9": "2027-01-25", "0": "2027-01-26" } }] }
+];
+
+/* ==V12-FIN== */
 prepareLogin();
 </script>
 </body>
