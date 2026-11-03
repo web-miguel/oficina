@@ -882,6 +882,7 @@ footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: 
     <button class="btn" type="submit" id="btn-abrir">Entrar</button>
     <div class="login-alt">
       <button class="link" type="button" id="btn-crear">Tengo una invitación: crear mi cuenta</button>
+      <button class="link" type="button" id="btn-olvide">Olvidé mi clave</button>
     </div>
   </form>
   <div class="primera" id="primera" hidden>
@@ -894,7 +895,7 @@ footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: 
     <button class="btn alt" type="button" id="btn-subir">Subir mi copia</button>
     <input type="file" id="file-in" accept=".json,application/json" class="sr" tabindex="-1" aria-hidden="true">
   </div>
-  <p class="note" id="login-note">Solo pueden crear cuenta los correos invitados. Los datos se cifran en este navegador antes de salir: Supabase guarda solo la copia cifrada y nunca recibe tu clave. Cada día queda una copia en la nube (se conservan las 30 más recientes).</p>
+  <p class="note" id="login-note">Solo pueden crear cuenta los correos invitados. Los datos se cifran en este navegador antes de salir: Supabase guarda solo la copia cifrada y nunca recibe tu clave. Cada día queda una copia en la nube (se conservan las 30 diarias más recientes y las demás durante un año).</p>
 </main>
 
 <!-- Administración: solo gestiona oficinas, usuarios y módulos; no tiene datos propios -->
@@ -1104,7 +1105,6 @@ footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: 
           <label><input type="checkbox" id="exp-tareas" checked> Tareas</label>
           <label><input type="checkbox" id="exp-venc" checked> Vencimientos</label>
           <label><input type="checkbox" id="exp-clientes" checked> Clientes</label>
-          <label><input type="checkbox" id="exp-claves"> Claves y accesos</label>
           <label><input type="checkbox" id="exp-registros" checked> Registros y lista de documentos</label>
         </fieldset>
         <label class="opt">
@@ -1136,7 +1136,16 @@ footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: 
           </span>
         </div>
         <div id="copias-lista"><p class="meta">Cargando…</p></div>
-        <p class="meta">La primera vez que se guarda cada día queda una copia de la versión anterior; también al usar Guardar copia, al importar y antes de restaurar. Se conservan las 30 más recientes, cifradas igual que la copia de trabajo.</p>
+        <p class="meta">La primera vez que se guarda cada día queda una copia de la versión anterior; también al usar Guardar copia, al importar y antes de restaurar. Se conservan las 30 diarias más recientes; las demás (manuales, antes de importar o restaurar…), un año y como mínimo las 20 últimas; la primera subida y la previa a la migración, siempre. Todas cifradas igual que la copia de trabajo.</p>
+      </section>
+
+      <section class="card cfg-wide" aria-labelledby="h-recup" id="recuperacion">
+        <div class="card-h">
+          <h2 id="h-recup">Recuperación de la oficina</h2>
+          <span class="acts"><button class="link" type="button" id="recup-config">Configurar código de recuperación</button></span>
+        </div>
+        <div id="recup-estado"></div>
+        <p class="meta">Si olvidas tu clave, este código es la única forma de volver a abrir la oficina. Se muestra una sola vez y nunca se envía a la nube: guárdalo impreso y en un gestor de contraseñas distinto del de tu clave. El superadministrador no puede usarlo.</p>
       </section>
 
       <section class="card cfg-wide" aria-labelledby="h-usuarios" id="usuarios">
@@ -1189,6 +1198,9 @@ footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: 
 
 <script>
 "use strict";
+// v1.0.1: GitHub Pages no permite la cabecera frame-ancestors; si otra página intenta mostrar Mi Oficina dentro de un
+// marco (para engañar clics), la app no se dibuja ni arranca.
+if (window.top !== window.self) { document.documentElement.style.display = "none"; throw new Error("Mi Oficina no se puede abrir dentro de otra página."); }
 /* ---------- Utilidades ---------- */
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => {
@@ -1273,9 +1285,18 @@ async function rotateKey() {
   const wraps = [];
   for (const u of users) wraps.push(await enc(await sharedKey(eph.privateKey, await pubKey(u.pub)), raw));
   // Todo se cambia de una vez, para que un guardado en curso no mezcle la llave vieja con la nueva.
-  const rec = S.recPub ? await wrapFor(raw, S.recPub) : null;
+  const rec = S.recPub ? await wrapFor(raw, S.recPub) : null, kid = newKid();
+  // La recuperación de la oficina recibe la llave nueva solo si su huella coincide con la guardada en los datos cifrados.
+  let recOf = S.recOf;
+  if (recOf) { try { recOf = await recEnvolver(raw, kid, recOf, recHuellaDatos()); } catch (e) { S.recAlerta = e.message; } }
+  // Llavero: la llave que sale queda guardada dentro de los datos (cifrada con la nueva) para abrir copias anteriores.
+  if (S.data && S.raw && S.kid) {
+    const ll = Array.isArray(S.data.llavesAnteriores) ? S.data.llavesAnteriores : [];
+    if (!ll.some(x => x.kid === S.kid)) ll.push({ kid: S.kid, raw: toB64(S.raw), hasta: new Date().toISOString() });
+    S.data.llavesAnteriores = ll;
+  }
   users.forEach((u, i) => { [u.ivLlave, u.llave] = wraps[i]; });
-  S.raw = raw; S.key = key; S.epk = epk; S.rec = rec; S.kid = newKid();
+  S.raw = raw; S.key = key; S.epk = epk; S.rec = rec; S.kid = kid; S.recOf = recOf;
 }
 const newKid = () => toB64(rnd(9)).replace(/[+/=]/g, "x");
 // Recuperación: la llave de datos también va cifrada con la llave pública de recuperación del administrador,
@@ -1295,6 +1316,58 @@ async function ensureRecovery() {
 const usersAad = users => te.encode(JSON.stringify(users.map(u => [u.usuario, u.pub])));
 // Formato 1: la llave de los datos iba cifrada directamente con la clave de cada usuario.
 const unwrapV1 = async (u, pass) => dec(await passKey(pass, fromB64(u.sal)), u.iv, u.llave);
+
+/* ==RECUPERACION-INICIO== ---------- Llave de recuperación de la oficina (v1.0.1) ----------
+   Par de llaves propio de la oficina. La privada va cifrada con un código de 200 bits que se muestra una sola vez y nunca
+   sale del navegador. Cada llave de datos nueva se entrega también a la pública de recuperación, pero solo si su huella
+   coincide con la guardada DENTRO de los datos cifrados: un servidor manipulado no puede poner su propia llave. */
+const REC_ABC = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function recCodigo() {
+  let out = "", val = 0, bits = 0;
+  for (const x of rnd(25)) { val = ((val << 8) | x) & 0xfff; bits += 8; while (bits >= 5) { bits -= 5; out += REC_ABC[(val >>> bits) & 31]; } }
+  return out.match(/.{5}/g).join("-");
+}
+const recNormal = s => String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+async function recHuella(pub) { return [...new Uint8Array(await crypto.subtle.digest("SHA-256", te.encode(pub)))].map(b => b.toString(16).padStart(2, "0")).join(""); }
+const recHuellaDatos = () => S.data && S.data.recuperacionHuella ? S.data.recuperacionHuella.huella : null;
+async function recCrear(raw, kid) {
+  const kp = await crypto.subtle.generateKey(EC, true, ["deriveKey"]);
+  const codigo = recCodigo(), sal = rnd(16);
+  const [iv, ct] = await enc(await passKey(recNormal(codigo), sal), await crypto.subtle.exportKey("pkcs8", kp.privateKey));
+  const pub = toB64(new Uint8Array(await crypto.subtle.exportKey("raw", kp.publicKey)));
+  const recOf = { ...(await wrapFor(raw, pub)), kid, privada: { sal: toB64(sal), iv, ct }, creada: new Date().toISOString() };
+  return { recOf, codigo, huella: await recHuella(pub) };
+}
+async function recEnvolver(raw, kid, recOf, huella) {
+  if (!huella || await recHuella(recOf.pub) !== huella)
+    throw new Error("La llave de recuperación guardada en la nube no coincide con la registrada en tus datos: no se le entregó la llave nueva. Genera un código nuevo.");
+  return { ...recOf, ...(await wrapFor(raw, recOf.pub)), kid };
+}
+async function recAbrir(recOf, codigo, kid) {
+  if (!recOf || !recOf.privada) throw new Error("Esta oficina no tiene código de recuperación configurado.");
+  let priv;
+  try { priv = await crypto.subtle.importKey("pkcs8", await dec(await passKey(recNormal(codigo), fromB64(recOf.privada.sal)), recOf.privada.iv, recOf.privada.ct), EC, false, ["deriveKey"]); }
+  catch (e) { throw new Error("El código de recuperación no es correcto."); }
+  if (kid && recOf.kid !== kid) throw new Error("La recuperación está desactualizada para la llave vigente de la oficina.");
+  try { return await dec(await sharedKey(priv, await pubKey(recOf.epk)), recOf.iv, recOf.llave); }
+  catch (e) { throw new Error("La envoltura de recuperación está dañada."); }
+}
+// Si la llave de datos cambió en otro dispositivo, la recuperación se pone al día (con la misma verificación de huella).
+async function ensureOfficeRecovery() {
+  await verificarRecuperacion();
+  if (!S.recOf || !S.raw || S.recOf.kid === S.kid) return false;
+  try { S.recOf = await recEnvolver(S.raw, S.kid, S.recOf, recHuellaDatos()); return true; }
+  catch (e) { S.recAlerta = e.message; return false; }
+}
+// Al abrir la oficina se comprueba que la llave de recuperación del sobre sea la registrada en los datos cifrados. Si no
+// coincide (un cambio de código que se interrumpió entre los dos guardados, o una manipulación), se avisa y no se usa.
+async function verificarRecuperacion() {
+  S.recVerif = S.recOf ? (await recHuella(S.recOf.pub)) === recHuellaDatos() : null;
+  if (S.recVerif === true) S.recAlerta = "";
+  if (S.recVerif === false) S.recAlerta = "La llave de recuperación guardada en la nube no coincide con la registrada en tus datos (pudo interrumpirse un cambio de código). Genera un código nuevo.";
+  return S.recVerif;
+}
+/* ==RECUPERACION-FIN== */
 
 /* ---------- Nube (Supabase) ----------
    Supabase guarda el sobre ya cifrado (el mismo formato de mi-oficina.json) y lleva un número de versión:
@@ -1378,12 +1451,11 @@ const ACT_MOD = { "Nuevo acceso": "claves", "Ir al calendario": "calendario", "I
 function applyModules() {
   $("tab-cal").hidden = !MOD("calendario"); $("tab-aseo").hidden = !MOD("aseo"); $("tab-reg").hidden = !MOD("registros");
   $("kpi-aseo").hidden = !MOD("aseo"); $("claves").hidden = !MOD("claves");
-  const ec = $("exp-claves"); ec.closest("label").hidden = !MOD("claves"); if (!MOD("claves")) ec.checked = false;
 }
 const limitMsg = n => "Tu plan permite hasta " + n + plural(n, " cliente", " clientes") + ". Pide al administrador ampliar el límite.";
 
 /* ---------- Estado ---------- */
-const S = { data: null, users: [], raw: null, key: null, epk: null, rec: null, recPub: null, priv: null, kid: null, syncedKid: null, syncedEnv: "", base: new Map(), rev: 0, vseen: 0, dirty: 0, saving: false, me: "", dir: null, handle: null, mod: null, conflict: "", notes: [], fileName: "", savedAt: null, saveErr: "", pending: false };
+const S = { data: null, users: [], raw: null, key: null, epk: null, rec: null, recPub: null, recOf: null, recAlerta: "", recVerif: null, priv: null, kid: null, syncedKid: null, syncedEnv: "", base: new Map(), rev: 0, vseen: 0, dirty: 0, saving: false, me: "", dir: null, handle: null, mod: null, conflict: "", notes: [], fileName: "", savedAt: null, saveErr: "", pending: false };
 const WORK = "mi-oficina.json", INIT = "mi-oficina-inicial.json", COPIES = "copias";
 let filter = "all";
 const expanded = new Set();
@@ -1416,7 +1488,7 @@ async function seal(k = S, data = S.data) {
   return JSON.stringify({
     formato: "mi-oficina", version: 2, guardado: new Date().toISOString(),
     cifrado: { alg: "AES-GCM 256", llaves: "ECDH P-256", kdf: "PBKDF2 SHA-256", iteraciones: ITER },
-    usuarios: k.users, efimera: k.epk, recuperacion: k.rec || undefined, iv, datos
+    usuarios: k.users, efimera: k.epk, recuperacion: k.rec || undefined, recuperacionOficina: k.recOf || undefined, iv, datos
   }, null, 1);
 }
 /* ---------- Guardado por elementos ----------
@@ -1461,13 +1533,14 @@ async function encRow(v, base) {
 }
 async function decRow(row, key = S.key) { return JSON.parse(td.decode(await dec(key, row.iv, row.datos, rowAad(row.col, row.id, row.kid)))); }
 // Llaves de la oficina (sin datos): lo que se guarda en oficinas.sobre.
-const keyEnv = () => JSON.stringify({ formato: "mi-oficina", version: 3, kid: S.kid, usuarios: S.users, efimera: S.epk, recuperacion: S.rec || undefined });
+const keyEnv = () => JSON.stringify({ formato: "mi-oficina", version: 3, kid: S.kid, usuarios: S.users, efimera: S.epk, recuperacion: S.rec || undefined, recuperacionOficina: S.recOf || undefined });
 async function openKeys(env, usuario, pass) {
   const entry = (env.usuarios || []).find(u => u.usuario === usuario);
   const wrong = new Error("El usuario o la clave no corresponden a esta oficina.");
   if (!entry) throw wrong;
   let priv;
-  try { priv = await userPriv(entry, pass); } catch (e) { throw wrong; }
+  // Si la clave ya no abre la llave del usuario (la restableció), se puede entrar con el código de recuperación.
+  try { priv = await userPriv(entry, pass); } catch (e) { throw Object.assign(wrong, { recuperable: !!env.recuperacionOficina }); }
   S.priv = priv; S.me = usuario;
   applyKeys(await decryptKeys(env));
 }
@@ -1478,10 +1551,10 @@ async function decryptKeys(env) {
   let raw;
   try { raw = await dec(await sharedKey(S.priv, await pubKey(env.efimera)), entry.ivLlave, entry.llave); }
   catch (e) { throw lost("Tu clave fue cambiada. Vuelve a entrar con la clave nueva."); }
-  return { raw, key: await dataKey(raw), users: env.usuarios, epk: env.efimera, rec: env.recuperacion || null, kid: env.kid };
+  return { raw, key: await dataKey(raw), users: env.usuarios, epk: env.efimera, rec: env.recuperacion || null, recOf: env.recuperacionOficina || null, kid: env.kid };
 }
 function applyKeys(k) {
-  Object.assign(S, { raw: k.raw, key: k.key, users: k.users, epk: k.epk, rec: k.rec, kid: k.kid, syncedKid: k.kid });
+  Object.assign(S, { raw: k.raw, key: k.key, users: k.users, epk: k.epk, rec: k.rec, recOf: k.recOf, kid: k.kid, syncedKid: k.kid });
   S.syncedEnv = keyEnv();
 }
 // Carga todas las filas (al entrar o cuando cambió la llave).
@@ -1607,7 +1680,7 @@ function rtConnect() {
   RT.ws = ws;
   ws.onopen = () => {
     if (RT.ws !== ws) return;
-    rtSend({ topic: RT.topic, event: "phx_join", payload: { config: { broadcast: { self: false, ack: false }, presence: { key: "" }, postgres_changes: [], private: false }, access_token: SB.access }, join_ref: "1" });
+    rtSend({ topic: RT.topic, event: "phx_join", payload: { config: { broadcast: { self: false, ack: false }, presence: { key: "" }, postgres_changes: [], private: true }, access_token: SB.access }, join_ref: "1" });
     RT.hb = setInterval(() => rtSend({ topic: "phoenix", event: "heartbeat", payload: {} }), 25000);
   };
   ws.onmessage = ev => {
@@ -1648,6 +1721,7 @@ async function openCloud(o, pass) {
   if (pass != null) await openKeys(env, o.usuario, pass); else applyKeys(await decryptKeys(env));
   await loadAllRows();
   if (await ensureRecovery()) { S.pending = true; }
+  if (await ensureOfficeRecovery()) { S.pending = true; }
   return "ok";
 }
 
@@ -1736,10 +1810,14 @@ $("login-form").addEventListener("submit", async e => {
     let admin = false;
     try { admin = !!(await rpc("soy_admin")); } catch (err) {}
     if (admin) { enterAdmin(); return; }
-    try { S.recPub = await rpc("llave_recuperacion"); } catch (err) { S.recPub = null; }
+    // v1.0.1: la llave de recuperación de plataforma ya no se usa (el navegador no puede verificar la que entrega el
+    // servidor). La recuperación es por oficina, con código propio.
+    S.recPub = null;
     const o = (await rpc("abrir_oficina"))[0];
     if (!o) { showFirst(c); return; }
-    const kind = await openCloud(o, c.p);
+    let kind;
+    try { kind = await openCloud(o, c.p); }
+    catch (err) { if (err.recuperable) { recoveryDialog(o, c.p); return; } throw err; }
     dropPending();
     try { localStorage.removeItem(LS_WORK); } catch (err) {}
     enterApp(kind);
@@ -1754,6 +1832,65 @@ function showFirst(c) {
   $("login-sub").textContent = "Primera vez en la nube.";
   if (!$("usuario").value) $("usuario").value = c.u.split("@")[0].replace(/[^a-z0-9._-]/g, "");
   $("usuario").focus();
+}
+
+/* ---------- Recuperar el acceso (v1.0.1) ----------
+   1) «Olvidé mi clave»: Supabase envía al correo un enlace para elegir una clave nueva (nadie más la conoce).
+   2) Al entrar con esa clave, la llave del usuario ya no abre: se pide el código de recuperación de la oficina, que abre la
+      llave de datos; con ella se crean las llaves nuevas del usuario y se cambia la llave de datos. */
+$("btn-olvide").addEventListener("click", async () => {
+  const u = norm($("correo").value);
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(u)) { loginError("Escribe tu correo y vuelve a pulsar «Olvidé mi clave».", "correo"); return; }
+  try { await sbFetch("/auth/v1/recover?redirect_to=" + encodeURIComponent(siteUrl()), { method: "POST", body: JSON.stringify({ email: u }) }, false); }
+  catch (e) { loginError(e.message); return; }
+  loginOk("Si " + u + " tiene cuenta, le llegó un enlace para elegir una clave nueva. Después necesitarás el código de recuperación de la oficina.");
+});
+async function newPassDialog(h) {
+  sbSession({ access_token: h.get("access_token"), refresh_token: h.get("refresh_token"), expires_in: Number(h.get("expires_in")) || 3600 });
+  try { const u = await sbFetch("/auth/v1/user"); SB.email = norm(u.email || ""); }
+  catch (e) { loginError("El enlace venció o ya se usó. Pide otro con «Olvidé mi clave»."); return; }
+  $("correo").value = SB.email;
+  editor({
+    title: "Elige tu clave nueva",
+    fields: passFields(),
+    saveText: "Guardar clave",
+    onSave: async v => {
+      const bad = passCheck(v); if (bad) return bad;
+      try { await sbSetPass(v.clave); } catch (e) { return "No se pudo cambiar la clave: " + e.message; }
+      sbLogout(); SB.access = SB.refresh = "";
+      loginOk("Clave cambiada. Entra con tu correo y la clave nueva: te pediremos el código de recuperación de la oficina para volver a abrir tus datos.");
+    }
+  });
+}
+function recoveryDialog(o, pass) {
+  loginError("Tu clave ya no abre tus llaves (por ejemplo, porque la restableciste). Usa el código de recuperación de la oficina.");
+  editor({
+    title: "Recuperar el acceso con el código",
+    fields: [{ name: "codigo", label: "Código de recuperación (8 grupos de 5)", req: true, ac: "off", ph: "XXXXX-XXXXX-…" }],
+    saveText: "Recuperar",
+    onSave: async v => { try { await recoverWithCode(o, pass, v.codigo); } catch (e) { return e.message; } }
+  });
+}
+async function recoverWithCode(o, pass, codigo) {
+  const env = JSON.parse(o.sobre), recOf = env.recuperacionOficina;
+  const raw = await recAbrir(recOf, codigo, env.kid);
+  Object.assign(S, { raw, key: await dataKey(raw), users: env.usuarios.map(u => ({ ...u })), epk: env.efimera, rec: env.recuperacion || null,
+    recOf, kid: env.kid, syncedKid: env.kid, me: o.usuario });
+  S.syncedEnv = keyEnv();
+  await loadAllRows();
+  // El código abrió esta llave de recuperación, así que es la auténtica: si la huella registrada quedó desfasada (un
+  // cambio de código interrumpido), se vuelve a registrar la de esta llave antes de cambiar la llave de datos.
+  S.data.recuperacionHuella = { huella: await recHuella(recOf.pub), creada: recOf.creada || new Date().toISOString() };
+  S.recAlerta = ""; S.recVerif = true;
+  const i = S.users.findIndex(u => u.usuario === S.me);
+  if (i < 0) throw new Error("Tu usuario no está en esta oficina.");
+  S.users[i] = await makeUser(S.me, pass);
+  S.priv = await userPriv(S.users[i], pass);
+  await rotateKey();
+  S.pending = true;
+  dropPending(); try { localStorage.removeItem(LS_WORK); } catch (e) {}
+  enterApp("recuperada");
+  persist();
 }
 // Crea la oficina en la nube a partir de una copia (cifrada o inicial). Solo funciona con invitación para crear oficina.
 async function createOffice(text, b, label) {
@@ -1841,7 +1978,7 @@ async function restoreSession() {
     const rec = await idb("readonly", st => st.get("ses:" + ss.id));
     if (!rec || !rec.priv) throw new Error("sin llave");
     S.priv = rec.priv;
-    try { S.recPub = await rpc("llave_recuperacion"); } catch (e) { S.recPub = null; }
+    S.recPub = null; // v1.0.1: sin recuperación de plataforma (ver el ingreso)
     const o = (await rpc("abrir_oficina"))[0];
     if (!o) throw new Error("sin oficina");
     S.notes = [];
@@ -1859,8 +1996,10 @@ async function restoreSession() {
 function prepareLogin() {
   // Al volver del enlace de confirmación, Supabase deja datos en la dirección: se limpian.
   if (/access_token|error_description/.test(location.hash)) {
-    const ok = !/error/.test(location.hash);
+    const h = new URLSearchParams(location.hash.slice(1)), ok = !/error/.test(location.hash);
     history.replaceState(null, "", siteUrl());
+    // Enlace de «Olvidé mi clave»: se elige la clave nueva aquí mismo.
+    if (ok && h.get("type") === "recovery" && h.get("access_token")) { newPassDialog(h); return; }
     if (ok) loginOk("Correo confirmado. Ya puedes entrar con tu correo y clave.");
   }
   if (sessionStorage.getItem(SS_SES)) {
@@ -1883,19 +2022,18 @@ function enterApp(kind) {
   const h0 = location.hash.slice(1); if (S.data.clientes.some(c => c.id === h0)) filter = h0;
   renderStatus(); armLock(); setView(view);
   if (kind === "nueva") S.notes.unshift("Oficina creada: desde ahora se guarda cifrada en la nube con tu usuario y clave.");
+  else if (kind === "recuperada") S.notes.unshift("Acceso recuperado con el código de recuperación. Tu clave nueva ya abre la oficina; vuelve a guardar el código en su lugar seguro.");
   else if (kind === "migrada-nube") S.notes.unshift("Tu oficina se actualizó: ahora cada cambio viaja solo y llega a los demás dispositivos al instante. La versión anterior quedó en Copias en la nube.");
   else if (kind === "subida") S.notes.unshift("Tu copia quedó en la nube. Desde ahora cada cambio se guarda ahí, cifrado.");
   else if (kind === "pendiente") S.notes.unshift("Se subieron los cambios de este navegador que habían quedado pendientes (" + fStamp.format(new Date(S.pendAt)) + ").");
   else if (kind === "pendiente-conflicto") S.notes.unshift("Se recuperaron los cambios de este navegador del " + fStamp.format(new Date(S.pendAt)) + ". La versión que había en la nube quedó en Configuración › Copias en la nube.");
-  const loans = dropLoans();
-  if (loans) S.notes.push(loans);
   const filled = fillMissingPast();
   if (filled) S.notes.push(filled);
   const made = syncRecurring();
   if (made) S.notes.push(made + plural(made, " tarea frecuente nueva", " tareas frecuentes nuevas") + " para el próximo mes.");
-  if (made || loans || filled) { S.data.actualizado = new Date().toISOString(); S.data.actualizadoPor = S.me; render(); }
+  if (made || filled) { S.data.actualizado = new Date().toISOString(); S.data.actualizadoPor = S.me; render(); }
   if (kind === "pendiente-conflicto") persist("antes de recuperar pendientes");
-  else if (made || loans || filled || (kind !== "ok" && kind !== "admin")) persist();
+  else if (made || filled || (kind !== "ok" && kind !== "admin")) persist();
   // Documentos que estaban aparte en documentos/: pasan a la copia y esa carpeta se borra.
   if (S.dir && !S.data.documentos.some(d => d.archivo && !d.archivo.datos)) S.dir.removeEntry(DOCS, { recursive: true }).catch(() => {});
   else if (S.dir) inlineFileDocs().then(n => { if (n) { render(); toast(n + plural(n, " documento pasó", " documentos pasaron") + " a la copia cifrada; la carpeta " + DOCS + " ya no hace falta."); } }).catch(() => {});
@@ -1920,23 +2058,6 @@ function fillMissingPast() {
   }
   return n ? n + plural(n, " fecha que faltaba de una tarea frecuente se agregó como atrasada.", " fechas que faltaban de tareas frecuentes se agregaron como atrasadas.") : "";
 }
-// Una sola vez por copia: fuera todo lo de préstamos a empleados (la tabla traída de Notion, la tarea frecuente y sus tareas).
-const isLoan = s => /\bprestamo/.test(nkey(s));
-function dropLoans() {
-  const D = S.data;
-  D.migraciones = Array.isArray(D.migraciones) ? D.migraciones : [];
-  if (D.migraciones.includes("sin-prestamos")) return "";
-  D.migraciones.push("sin-prestamos");
-  const recs = new Set(D.frecuentes.filter(f => isLoan(f.titulo)).map(f => f.id));
-  const nR = D.registros.length, nF = D.frecuentes.length, nT = D.tareas.length;
-  D.registros = D.registros.filter(r => !isLoan(r.nombre));
-  D.frecuentes = D.frecuentes.filter(f => !recs.has(f.id));
-  D.tareas = D.tareas.filter(t => !recs.has(t.frecuente) && !isLoan(t.titulo));
-  const parts = [[nR - D.registros.length, "tabla", "tablas"], [nF - D.frecuentes.length, "tarea frecuente", "tareas frecuentes"], [nT - D.tareas.length, "tarea", "tareas"]]
-    .filter(p => p[0]).map(([n, a, b]) => n + " " + plural(n, a, b));
-  return parts.length ? "Se quitó lo de préstamos: " + parts.join(", ") + "." : "";
-}
-
 /* ---------- Guardado ---------- */
 function changed() {
   S.data.actualizado = new Date().toISOString(); S.data.actualizadoPor = S.me;
@@ -2085,6 +2206,7 @@ async function reloadKeys() {
   applyKeys(k);
   if (await ensureRecovery()) S.pending = true;
   await applyRemote(rows, true);
+  if (await ensureOfficeRecovery()) S.pending = true;
   keepFocus(render); renderStatus();
 }
 let pollTimer = null;
@@ -2154,31 +2276,79 @@ async function loadCopias() {
       el("button", { class: "link", type: "button", text: "Descargar", "aria-label": "Descargar la copia del " + fStamp.format(new Date(r.creada)), onclick: () => bajarCopia(r) }),
       el("button", { class: "link", type: "button", text: "Restaurar", "aria-label": "Restaurar la copia del " + fStamp.format(new Date(r.creada)), onclick: () => restaurarCopia(r) })))));
 }
+/* v1.0.1 · Copias y llaves anteriores
+   Cada vez que cambia la llave de datos, la anterior queda en el llavero (S.data.llavesAnteriores), cifrado con la
+   nueva. Así quien hoy abre la oficina (con su clave o con el código de recuperación vigente) abre también las copias
+   de cualquier llave anterior. Restaurar ya no cambia las llaves de la oficina: se trae el CONTENIDO de la copia y se
+   guarda con las llaves vigentes, de modo que la clave y el código de hoy siguen sirviendo después de restaurar. */
+async function rawDeCopia(llaves) {
+  if (llaves.kid && llaves.kid === S.kid) return S.raw;
+  const ll = (S.data && Array.isArray(S.data.llavesAnteriores) ? S.data.llavesAnteriores : []).find(x => x.kid && x.kid === llaves.kid);
+  if (ll) return fromB64(ll.raw);
+  try { return (await decryptKeys(llaves)).raw; } catch (e) { return null; } // la clave propia de esa fecha
+}
+// Datos de una copia (de la nube o descargada). Si su llave no está a mano, se pide el código de recuperación de esa fecha.
+async function datosDeCopia(texto, codigo) {
+  const j = JSON.parse(texto);
+  if (j.formato !== "mi-oficina-filas" && !(j.formato === "mi-oficina" && typeof j.datos === "string")) throw new Error("Formato de copia no reconocido.");
+  const llaves = j.formato === "mi-oficina-filas" ? j.llaves : j;
+  let raw = await rawDeCopia(llaves);
+  if (!raw && codigo) raw = await recAbrir(llaves.recuperacionOficina, codigo, null);
+  if (!raw) throw Object.assign(new Error(llaves.recuperacionOficina
+    ? "Esta copia usa una llave que ya no está a mano: escribe el código de recuperación que estaba vigente en su fecha."
+    : "Esta copia es anterior al código de recuperación y tu clave de entonces ya no es la de hoy: ábrela con esa clave en la herramienta local."), { pideCodigo: !!llaves.recuperacionOficina });
+  const key = await dataKey(raw);
+  let d = {};
+  if (j.formato === "mi-oficina-filas") { for (const f of j.filas) setRow(d, f.col, f.id, await decRow(f, key)); }
+  else d = JSON.parse(td.decode(await dec(key, j.iv, j.datos, usersAad(j.usuarios))));
+  return normalize(d);
+}
+// Contenido a guardar al restaurar: lo de la copia, conservando las llaves, la recuperación y los ajustes vigentes.
+function contenidoRestaurado(d) {
+  const llavero = new Map([...(d.llavesAnteriores || []), ...(S.data.llavesAnteriores || [])].map(x => [x.kid, x]));
+  return normalize({ ...d, ajustes: S.data.ajustes, recuperacionHuella: S.data.recuperacionHuella,
+    llavesAnteriores: [...llavero.values()], migraciones: [...new Set([...(d.migraciones || []), ...(S.data.migraciones || [])])] });
+}
+const pedirCodigo = titulo => new Promise(res => {
+  $("dlg").addEventListener("close", () => res(null), { once: true });
+  editor({ title: titulo, fields: [{ name: "codigo", label: "Código de recuperación de esa fecha", req: true, ac: "off" }], saveText: "Abrir la copia", onSave: v => { res(v.codigo); } });
+});
+async function abrirCopiaNube(r) {
+  const t = await rpc("leer_copia", { p_copia: r.id });
+  try { return { t, d: await datosDeCopia(t) }; }
+  catch (e) {
+    if (!e.pideCodigo) throw e;
+    const c = await pedirCodigo("Abrir la copia del " + fStamp.format(new Date(r.creada)));
+    if (!c) return null;
+    return { t, d: await datosDeCopia(t, c) };
+  }
+}
 async function bajarCopia(r) {
   try {
-    let t = await rpc("leer_copia", { p_copia: r.id });
-    const j = JSON.parse(t);
-    if (j.formato === "mi-oficina-filas") {
-      // Copia por filas: se arma el archivo de siempre (se abre con la clave de cualquier usuario de esa fecha).
-      const k = await decryptKeys(j.llaves), d = {};
-      for (const f of j.filas) setRow(d, f.col, f.id, await decRow(f, k.key));
-      t = await seal(k, d);
-    }
-    download(new Blob([t], { type: "application/json" }), copyName(new Date(r.creada)));
+    const t0 = await rpc("leer_copia", { p_copia: r.id });
+    // Las copias del formato anterior (archivo único) se bajan tal cual: su huella debe coincidir con la de la nube.
+    if (JSON.parse(t0).formato !== "mi-oficina-filas") { download(new Blob([t0], { type: "application/json" }), copyName(new Date(r.creada))); return; }
+    const res = await abrirCopiaNube(r); if (!res) return;
+    // El archivo se arma con las llaves de HOY: se abre con tu clave actual o con el código de recuperación vigente.
+    download(new Blob([await seal(S, res.d)], { type: "application/json" }), copyName(new Date(r.creada)));
   } catch (e) { toast("No se pudo descargar: " + e.message); }
 }
 function restaurarCopia(r) {
   const d = $("dlg");
   d.replaceChildren(el("div", { class: "dlg" },
     el("h2", { id: "dlg-t", text: "Restaurar la copia del " + fStamp.format(new Date(r.creada)) }),
-    el("p", { class: "meta", text: "La versión actual se guarda primero como copia, así que puedes volver a ella. Después de restaurar entras de nuevo para ver la copia restaurada." }),
+    el("p", { class: "meta", text: "Se trae el contenido de esa copia y se guarda con las llaves de hoy: tu clave y tu código de recuperación siguen sirviendo. La versión actual se guarda antes como copia, así que puedes volver a ella." }),
     el("div", { class: "dlg-acts" }, el("span", { class: "r" },
       el("button", { class: "btn alt", type: "button", text: "Cancelar", onclick: () => d.close() }),
       el("button", { class: "btn", type: "button", text: "Restaurar", onclick: async () => {
         d.close();
         if (S.pending) await persist();
-        try { await rpc("restaurar_copia", { p_copia: r.id }); S.pending = false; toast("Copia restaurada. Vuelve a entrar para verla."); setTimeout(() => { sbLogout(); location.reload(); }, 2500); }
-        catch (e) { toast("No se pudo restaurar: " + e.message); }
+        try {
+          const res = await abrirCopiaNube(r); if (!res) return;
+          await rpc("copia_manual", { p_id: SB.oficina }); // la versión actual queda como copia antes de cambiar nada
+          S.data = contenidoRestaurado(res.d); changed();
+          toast("Copia del " + fStamp.format(new Date(r.creada)) + " restaurada con las llaves vigentes. La versión anterior quedó en Copias en la nube.");
+        } catch (e) { toast("No se pudo restaurar: " + e.message); }
       } })))));
   openDialog(d, true); d.querySelector(".btn:not(.alt)").focus();
 }
@@ -2319,14 +2489,13 @@ async function usersDialog(o) {
   d.replaceChildren(el("div", { class: "dlg" },
     el("h2", { id: "dlg-t", text: "Usuarios de " + (o.nombre || "la oficina") }),
     ...(ms.length ? ms.map(m => el("div", { class: "copia" },
-      el("span", {}, el("b", { text: m.usuario }), el("span", { class: "meta", text: " · " + m.correo })),
-      el("span", { class: "acts" },
-        el("button", { class: "link", type: "button", text: "Restablecer clave", onclick: () => { d.close(); resetDialog(o, m); } }),
-        el("button", { class: "link", type: "button", text: "Cambiar correo", onclick: () => { d.close(); mailDialog(o, m); } }),
-        ms.length > 1 ? el("button", { class: "link", type: "button", text: "Quitar", onclick: () => { d.close(); removeDialog(o, m); } }) : null)))
+      el("span", {}, el("b", { text: m.usuario }), el("span", { class: "meta", text: " · " + m.correo }))))
       : [el("p", { class: "meta", text: "Sin usuarios." })]),
-    el("div", { class: "dlg-acts" }, el("button", { class: "link", type: "button", text: "Agregar usuario", onclick: () => { d.close(); addUserDialog(o); } }),
-      el("span", { class: "r" }, el("button", { class: "btn alt", type: "button", text: "Cerrar", onclick: () => d.close() })))));
+    // v1.0.1: el administrador ya no fija claves ajenas ni cambia correos o usuarios desde aquí (todas esas acciones
+    // dependían de conocer la clave de la persona). La administración de usuarios completa llega en la v1.1.0;
+    // mientras tanto, cada persona restablece su acceso con «Olvidé mi clave» y el código de recuperación de su oficina.
+    el("p", { class: "meta", text: "La administración de usuarios (agregar, quitar, restablecer) llega en la v1.1.0. Hoy cada persona recupera su acceso con «Olvidé mi clave» y el código de recuperación de su oficina." }),
+    el("div", { class: "dlg-acts" }, el("span", { class: "r" }, el("button", { class: "btn alt", type: "button", text: "Cerrar", onclick: () => d.close() })))));
   openDialog(d, true); d.querySelector(".btn").focus();
 }
 const passFields = () => [
@@ -3125,10 +3294,19 @@ $("csv-in").addEventListener("change", async () => {
     usuario: (r[ci.usuario] || "").trim(), clave: (r[ci.clave] || "").trim(), nota: ci.nota >= 0 ? (r[ci.nota] || "").trim() : ""
   })).filter(k => k.usuario || k.clave);
   S.data.claves.push(...added); changed();
-  toast(added.length + plural(added.length, " acceso importado.", " accesos importados."), () => { S.data.claves = S.data.claves.filter(k => !added.includes(k)); changed(); });
+  toast(added.length + plural(added.length, " acceso importado.", " accesos importados.") + " Borra el archivo CSV: trae las claves sin cifrar.", () => { S.data.claves = S.data.claves.filter(k => !added.includes(k)); changed(); });
 });
+// Una clave copiada no se queda en el portapapeles: a los 30 s se borra, pero solo si sigue siendo esa misma clave
+// (si el navegador no deja leer el portapapeles, no se toca, para no borrar algo que la persona copió después).
+const CLIP_SECS = 30;
+function forgetClip(text) {
+  setTimeout(async () => {
+    try { if (document.hasFocus() && (await navigator.clipboard.readText()) === text) await navigator.clipboard.writeText(""); } catch (e) {}
+  }, CLIP_SECS * 1000);
+}
 async function copyText(text, what) {
-  try { await navigator.clipboard.writeText(text); toast(what + " copiado."); } catch (e) { toast("No se pudo copiar. Usa Mostrar y selecciona el texto."); }
+  try { await navigator.clipboard.writeText(text); toast(what + " copiado." + (what === "Clave" ? " Se borra del portapapeles en " + CLIP_SECS + " s." : "")); if (what === "Clave") forgetClip(text); }
+  catch (e) { toast("No se pudo copiar. Usa Mostrar y selecciona el texto."); }
 }
 
 /* ---------- Usuarios de la copia ---------- */
@@ -3193,7 +3371,7 @@ $("cambiar-acceso").addEventListener("click", () => editor({
 const AVISO = [7, 15, 30, 45, 60], BLOQUEO = [5, 10, 20, 30, 60];
 const fillSelect = (s, opts, value) => { s.replaceChildren(...opts.map(([v, l]) => el("option", { value: v, text: l }))); s.value = String(value); };
 function renderSettings() {
-  renderUsers(); renderAlertSettings();
+  renderUsers(); renderAlertSettings(); renderRecovery();
   const c = cfg();
   $("cfg-terminados").checked = c.verTerminados;
   fillSelect($("cfg-aviso"), AVISO.map(n => [n, n + " días o menos"]), c.diasAviso);
@@ -3232,9 +3410,6 @@ function exportSets() {
     rows: S.data.clientes.filter(c => o.cliente === "all" || c.id === o.cliente)
       .map(c => [c.nombre, c.corto || "", c.tipo || "", c.nit || "", c.correo || "", c.representante || "", c.periodicidadIva || "",
         c.responsabilidades || "", c.ciiu || "", c.pila || "", S.data.tareas.filter(t => t.cliente === c.id && t.estado !== "hecha").length]) });
-  if ($("exp-claves").checked) sets.push({ name: "Claves",
-    cols: [["Cliente", 30], ["Entidad", 24], ["Tipo", 16], ["Usuario", 24], ["Clave", 20], ["Enlace", 30], ["Nota", 30]],
-    rows: S.data.claves.filter(mine).map(k => [cName(k.cliente), k.entidad, k.tipo || "", k.usuario, k.clave, k.enlace || "", k.nota || ""]) });
   if ($("exp-registros").checked) {
     const ds = S.data.documentos.filter(mine);
     if (ds.length) sets.push({ name: "Documentos", cols: [["Cliente", 30], ["Documento", 36], ["Fecha", 12, "date"], ["Archivo", 40], ["Enlace", 30], ["Nota", 30]],
@@ -3652,6 +3827,7 @@ function renderKeys() {
 async function copyBtn(b, text, what) {
   try { await navigator.clipboard.writeText(text); }
   catch (e) { toast("No se pudo copiar. Abre la ficha del acceso y usa Mostrar."); return; }
+  if (/^Clave/.test(what)) forgetClip(text);
   if (!b._label) b._label = b.textContent;
   b.classList.add("done"); b.textContent = /^Clave/.test(what) ? "Copiada" : "Copiado";
   $("sr-live").textContent = what + " copiado.";
@@ -3667,8 +3843,42 @@ function renderUsers() {
       el("span", {}, el("b", { text: u.usuario }), me ? el("span", { class: "meta", text: " · tú" }) : null),
       me ? el("span", { class: "meta", text: "Sesión abierta" }) : null));
   }
-  box.append(el("p", { class: "meta", text: "Los usuarios los agrega, quita y restablece el administrador del servicio." + (S.rec ? " Si alguien pierde su clave, el administrador puede restablecerla." : "") }));
+  box.append(el("p", { class: "meta", text: "Si alguien olvida su clave, la restablece con «Olvidé mi clave» y el código de recuperación de la oficina. Nadie más conoce ni fija la clave de otra persona." }));
 }
+// Estado y configuración del código de recuperación de la oficina.
+function renderRecovery() {
+  const h = recHuellaDatos(), ok = !!(S.recOf && h && S.recVerif !== false);
+  $("recup-estado").replaceChildren(el("div", { class: "copia" }, el("span", {},
+      el("b", { text: ok ? "Configurada" : S.recOf ? "No verificada" : "Sin configurar" }),
+      el("span", { class: "meta", text: ok
+        ? " · desde el " + fStamp.format(new Date(S.data.recuperacionHuella.creada)) + " · huella " + h.slice(0, 8).toUpperCase() + (S.recOf.kid === S.kid ? " · al día" : " · se actualiza al guardar")
+        : " · si pierdes tu clave no habrá forma de abrir la información" }))),
+    ...(S.recAlerta ? [el("p", { class: "err", text: S.recAlerta })] : []));
+  $("recup-config").textContent = ok ? "Generar un código nuevo" : "Configurar código de recuperación";
+}
+$("recup-config").addEventListener("click", async () => {
+  if (S.pending) await persist();
+  const { recOf, codigo, huella } = await recCrear(S.raw, S.kid);
+  const d = $("dlg"), err = el("p", { class: "err", role: "alert" });
+  const conf = el("input", { class: "input", id: "f-recconf", autocomplete: "off", spellcheck: "false", placeholder: "Último grupo de 5" });
+  d.replaceChildren(el("form", { class: "dlg", novalidate: true, onsubmit: e => {
+      e.preventDefault();
+      if (recNormal(conf.value) !== recNormal(codigo).slice(-5)) { err.textContent = "No coincide: revisa que lo hayas anotado completo."; return; }
+      // El código anterior deja de recibir las llaves nuevas; las copias ya guardadas siguen abriendo con él.
+      S.recOf = recOf; S.recAlerta = ""; S.recVerif = true;
+      S.data.recuperacionHuella = { huella, creada: recOf.creada };
+      d.close(); changed(); renderSettings();
+      toast("Código de recuperación configurado. Guárdalo en dos lugares seguros.");
+    } },
+    el("h2", { id: "dlg-t", text: "Tu código de recuperación" }),
+    el("p", { class: "meta", text: "Anótalo ahora: no se vuelve a mostrar y no se guarda en ningún lado. Con él, y sin tu clave, se puede abrir toda la oficina." }),
+    el("p", { class: "num", style: "font-size:19px;letter-spacing:.05em;word-break:break-word;margin:6px 0", text: codigo }),
+    el("label", { class: "field" }, el("span", { text: "Para confirmar, escribe el último grupo" }), conf), err,
+    el("div", { class: "dlg-acts" }, el("span", { class: "r" },
+      el("button", { class: "btn alt", type: "button", text: "Cancelar", onclick: () => d.close() }),
+      el("button", { class: "btn", type: "submit", text: "Ya lo guardé" })))));
+  openDialog(d); conf.focus();
+});
 
 /* ---------- Documentos ----------
    Los documentos van dentro de la copia cifrada, así la carpeta de datos tiene solo la copia de trabajo y copias/.
