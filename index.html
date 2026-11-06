@@ -8,33 +8,39 @@
 <!-- La página no carga nada de afuera. Solo se conecta a Supabase, y lo que envía ya va cifrado en el navegador. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src https://neqivchshshsltjmqxob.supabase.co wss://neqivchshshsltjmqxob.supabase.co; base-uri 'none'; form-action 'none'">
 <title>Mi oficina</title>
-<!-- Mi Oficina v1.2.0 -->
+<!-- Mi Oficina v2.27.0 -->
 <style>
-/* Galería blanca (modelo: página de producto de Apple). Lo de arriba —barra, pestañas y la cifra grande— va sobre blanco;
-   el trabajo va en una banda gris claro (#f5f5f7) con tarjetas blancas de 28px, sin sombras.
-   El texto es casi negro; el azul solo marca enlaces (#0066cc) y botones (#0071e3); el naranja, solo lo urgente.
-   App: barra superior, cifra grande, tareas + clientes (1fr + 400px), calendario tributario, claves y usuarios a lo ancho. */
+/* Estilo Ready, adaptado a una app de uso diario (guía DESIGN(3).md): lienzo papel, tarjetas blancas,
+   un solo acento violeta (#db4c3f) para foco, pestaña activa y enlaces; botón principal en tinta (#202020).
+   Sin hero ni degradados; tracking amplio solo en etiquetas. */
 :root {
   color-scheme: light;
-  --ground: #f5f5f7;     /* Studio Mist: banda de trabajo y pie */
-  --canvas: #ffffff;     /* Gallery White: barra, portada e ingreso */
-  --surface: #ffffff;    /* tarjetas */
-  --raised: #f5f5f7;     /* hover y panel anidado dentro de una tarjeta */
-  --control: #e8e8ed;    /* pista de controles segmentados y chip elegido */
-  --rule: #d6d6d6;       /* Hairline Silver: líneas de 1px */
-  --steel: #86868b;      /* bordes de campos y controles */
-  --bone: #1d1d1f;       /* Ink: títulos y nombres */
-  --ash: #1d1d1f;        /* texto corriente */
-  --muted: #6e6e73;      /* secundario (4,6:1 sobre #f5f5f7) */
-  --on-ink: #ffffff;     /* texto sobre relleno oscuro o azul */
-  --link: #0066cc;       /* Apple Blue: enlaces de texto */
-  --accent: #0071e3;     /* Pricing Blue: botones */
-  --ember: #b64400;      /* urgente y atrasado */
-  --ok: #248a3d;         /* guardado correcto */
-  --font: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", system-ui, Arial, sans-serif;
-  --display: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", system-ui, Arial, sans-serif;
+  --ground: #fafafa;     /* Warm Linen: lienzo de la página */
+  --canvas: #fafafa;     /* igual que el lienzo */
+  --surface: #ffffff;    /* Paper White: tarjetas y barra */
+  --raised: #fafafa;     /* hover y paneles anidados */
+  --control: #e5e5e5;    /* Linen Stone: pistas de controles */
+  --rule: #e5e5e5;       /* líneas de 1 px */
+  --border: #e5e5e5;     /* bordes de tarjetas */
+  --steel: #8c8c8c;      /* Fog: bordes de campos (3:1 sobre blanco) */
+  --bone: #202020;       /* Ink: títulos */
+  --ash: #202020;        /* texto corriente */
+  --muted: #6f6f6f;      /* secundario (AA sobre blanco y lienzo) */
+  --on-ink: #ffffff;     /* texto sobre relleno oscuro */
+  --accent: #db4c3f;     /* Periwinkle: foco, pestaña activa, enlaces al pasar */
+  --link: #202020;       /* enlaces en tinta con subrayado */
+  --primary: #202020;    /* botón principal */
+  --primary-hover: #b93a2e;
+  --lavender: #fbe9e6;   /* Lavender Mist: fondo de pestaña y filtro activos */
+  --ember: #a33a2a;      /* urgente y atrasado */
+  --ok: #2e6b3d;         /* correcto */
+  --positive: #2e6b3d;
+  --negative: #a33a2a;
+  /* v2.27.0: la fuente es la del sistema (Segoe UI en Windows, San Francisco en Mac): Inter casi nunca está instalada y la página no puede cargarla desde fuera. */
+  --font: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --display: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
   --gap: 16px;
-  --r-card: 22px;
+  --r-card: 16px;        /* tarjetas (la guía dice 32; 16 da mejor densidad) */
 }
 * { box-sizing: border-box; }
 html { scroll-padding-top: 120px; }
@@ -65,7 +71,7 @@ button, input, select { font: inherit; color: inherit; letter-spacing: inherit; 
   border: 0; border-radius: 9999px; background: var(--accent); color: var(--on-ink); font-weight: 400; font-size: 14px; letter-spacing: -0.016em;
   white-space: nowrap; cursor: pointer; text-decoration: none; transition: background-color .15s, box-shadow .15s, transform .1s;
 }
-.btn:hover { background: #0077ed; }
+.btn:hover { background: #b93a2e; }
 .btn:active { transform: scale(.98); }
 .btn.alt { background: transparent; color: var(--bone); box-shadow: inset 0 0 0 1px var(--steel); }
 .btn.alt:hover { background: var(--raised); box-shadow: inset 0 0 0 1px var(--bone); }
@@ -75,6 +81,7 @@ button, input, select { font: inherit; color: inherit; letter-spacing: inherit; 
 }
 .link:hover { text-decoration: underline; }
 .link.danger { color: var(--ember); } /* borrar no se ve como un enlace más */
+.login .link, .login .link:hover { color: var(--ember) !important; } /* v2.27.0: enlaces de entrada con contraste de 4,5:1 o más */
 .field { display: grid; gap: 6px; }
 .field > span { font-size: 12px; color: var(--muted); letter-spacing: -0.01em; }
 .input, select.input {
@@ -90,12 +97,12 @@ button, input, select { font: inherit; color: inherit; letter-spacing: inherit; 
 
 /* Ingreso: como la portada de producto —nombre pequeño arriba, titular enorme centrado y el formulario debajo. */
 .login { min-height: 100vh; display: grid; align-content: center; justify-items: center; text-align: center; padding-block: 64px; }
-.login-brand { display: flex; align-items: center; gap: 8px; color: var(--bone); font: 600 21px/1 var(--display); letter-spacing: .011em; margin-bottom: 16px; }
+.login-brand { display: flex; align-items: center; gap: 8px; color: var(--bone); font: 700 21px/1 var(--display); letter-spacing: .011em; margin-bottom: 16px; }
 .login form { width: 100%; text-align: left; }
 .login-alt { justify-items: center !important; text-align: center; }
 .mark { width: 14px; height: 14px; border-radius: 50%; background: var(--ember); flex: none; }
 .login h1 {
-  margin: 0; color: var(--bone); font: 600 clamp(48px, 9vw, 80px)/1.05 var(--display); letter-spacing: -0.015em;
+  margin: 0; color: var(--bone); font: 700 clamp(28px, 4vw, 32px)/1.1 var(--display); letter-spacing: -0.015em;
 }
 .login-sub { margin: 20px 0 48px; max-width: 46ch; color: var(--muted); font-size: 21px; line-height: 1.38; letter-spacing: .011em; }
 .login form { display: grid; gap: 16px; max-width: 400px; }
@@ -119,8 +126,8 @@ button, input, select { font: inherit; color: inherit; letter-spacing: inherit; 
 }
 .bar.scrolled::after { opacity: 1; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--canvas); }
-.bar-in { display: flex; align-items: center; gap: 12px 16px; min-height: 52px; flex-wrap: wrap; padding-block: 8px; }
-.brand { display: flex; align-items: center; gap: 8px; color: var(--bone); font: 600 19px/1.21 var(--display); letter-spacing: .012em; }
+.bar-in { display: flex; align-items: center; gap: 12px 16px; min-height: 44px; flex-wrap: wrap; padding-block: 4px; }
+.brand { display: flex; align-items: center; gap: 8px; color: var(--bone); font: 700 19px/1.21 var(--display); letter-spacing: .012em; }
 .filters { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
 .chip {
   border: 0; background: transparent; border-radius: 9999px; padding: 5px 12px; font-size: 14px;
@@ -143,11 +150,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 /* Tarjetas: blancas, 28px de radio, sin borde ni sombra, sobre la banda gris. */
 .grid { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: var(--gap); align-items: start; }
+#importar, #imp-claves { display: none !important; }
 .card { background: var(--surface); padding: 20px 22px; min-width: 0; border-radius: var(--r-card); }
 .stack { display: grid; gap: var(--gap); margin-top: var(--gap); }
 .card-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
 .card-h .acts { display: flex; gap: 16px; }
-h2 { margin: 0; color: var(--bone); font: 600 22px/1.2 var(--display); letter-spacing: .005em; }
+h2 { margin: 0; color: var(--bone); font: 700 22px/1.2 var(--display); letter-spacing: .005em; }
 .meta { font-size: 14px; line-height: 1.29; color: var(--muted); letter-spacing: -0.016em; }
 .empty { color: var(--muted); padding: 16px 0 4px; margin: 0; }
 
@@ -202,19 +210,19 @@ details.sub summary:hover { text-decoration: underline; text-underline-offset: 3
 }
 .client:hover { background: var(--raised); border-top-color: transparent; }
 .client:hover + .client { border-top-color: transparent; }
-.client-n { color: var(--bone); font-weight: 600; font-size: 15px; display: block; }
+.client-n { color: var(--bone); font-weight: 700; font-size: 15px; display: block; }
 .client > .meta { font-size: 12px; }
 .client-f { display: flex; justify-content: space-between; gap: 12px; margin-top: 2px; font-size: 13px; color: var(--muted); }
-.client-f .v { color: var(--bone); font-weight: 600; }
+.client-f .v { color: var(--bone); font-weight: 700; }
 .user { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; border-top: 1px solid var(--rule); }
-.user b { color: var(--bone); font-weight: 600; }
+.user b { color: var(--bone); font-weight: 700; }
 .copia { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--rule); }
 .copia .acts { display: flex; gap: 16px; flex-shrink: 0; }
 .login .ok-msg { color: var(--ok); }
 .adm-h { font-size: 15px; margin: 24px 0 4px; color: var(--bone); }
 .adm { display: grid; gap: var(--gap); padding-block: 16px 64px; }
 .adm-bar { display: flex; align-items: center; gap: 16px; padding: 8px 0 16px; border-bottom: 1px solid var(--rule); }
-.adm-bar .brand { font-weight: 600; }
+.adm-bar .brand { font-weight: 700; }
 .adm-bar .sp { flex: 1; }
 .adm .copia .acts .link { white-space: nowrap; }
 .offline { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 24px; background: rgba(245, 245, 247, .94); backdrop-filter: blur(6px); }
@@ -230,7 +238,7 @@ details.sub summary:hover { text-decoration: underline; text-underline-offset: 3
 .tick-m { position: absolute; bottom: 0; transform: translateX(-50%); font-size: 12px; color: var(--muted); white-space: nowrap; }
 .tick-m::before { content: ""; position: absolute; left: 50%; bottom: 22px; width: 1px; height: 8px; background: var(--rule); }
 .strip .today { position: absolute; bottom: 28px; top: 0; width: 1px; background: var(--bone); }
-.strip .today span { position: absolute; top: -4px; left: 6px; font-size: 12px; font-weight: 600; color: var(--bone); white-space: nowrap; }
+.strip .today span { position: absolute; top: -4px; left: 6px; font-size: 12px; font-weight: 700; color: var(--bone); white-space: nowrap; }
 .mk { position: absolute; bottom: 29px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .mk-n { font-size: 12px; color: var(--bone); white-space: nowrap; }
 .mk-bar { width: 10px; border-radius: 5px 5px 0 0; background: var(--steel); }
@@ -239,7 +247,7 @@ details.sub summary:hover { text-decoration: underline; text-underline-offset: 3
 table { width: 100%; border-collapse: collapse; font-size: 14px; letter-spacing: -0.016em; }
 th { text-align: left; font-weight: 400; font-size: 12px; color: var(--muted); padding: 0 12px 10px 0; white-space: nowrap; }
 td { padding: 9px 12px 9px 0; border-top: 1px solid var(--rule); vertical-align: middle; }
-td.ob button { border: 0; background: transparent; padding: 0; color: var(--bone); font-weight: 600; cursor: pointer; text-align: left; }
+td.ob button { border: 0; background: transparent; padding: 0; color: var(--bone); font-weight: 700; cursor: pointer; text-align: left; }
 td.ob button:hover { text-decoration: underline; text-underline-offset: 3px; }
 td.r, th.r { text-align: right; }
 td.when { white-space: nowrap; }
@@ -249,7 +257,7 @@ td.st select, td.st .st-btn { height: 30px; width: auto; padding: 0 12px; border
 .st-c { color: var(--muted); font-size: 11px; }
 td.act { width: 1%; white-space: nowrap; padding-right: 0; }
 .sums { margin: 0; font-size: 14px; color: var(--muted); }
-.sums b { color: var(--bone); font-weight: 600; }
+.sums b { color: var(--bone); font-weight: 700; }
 .sums b.late { color: var(--ember); }
 .secret { font-variant-numeric: tabular-nums; letter-spacing: .04em; color: var(--bone); }
 .cell-acts { display: inline-flex; gap: 12px; flex-wrap: wrap; }
@@ -257,7 +265,7 @@ td.act { width: 1%; white-space: nowrap; padding-right: 0; }
 .key-note { max-width: 32ch; white-space: pre-line; overflow-wrap: anywhere; }
 /* Registros: tablas de muchas columnas; se desplazan a lo ancho en vez de apilarse. */
 table.rec td { white-space: nowrap; }
-table.rec tfoot td { border-top: 1px solid var(--bone); color: var(--bone); font-weight: 600; }
+table.rec tfoot td { border-top: 1px solid var(--bone); color: var(--bone); font-weight: 700; }
 
 /* Diálogo y aviso */
 /* El diálogo crece un poco mientras aparece y sale por el mismo camino; el fondo se oscurece y aclara con él.
@@ -287,7 +295,7 @@ dialog[open]::backdrop { background: rgba(0, 0, 0, .4); transition-duration: .22
 /* El aviso sube desde abajo y se va por donde vino. */
 .toast[hidden] { opacity: 0; transform: translate(-50%, 16px); transition-duration: .16s; transition-timing-function: ease-in; }
 @starting-style { .toast:not([hidden]) { opacity: 0; transform: translate(-50%, 16px); } }
-.toast button { position: relative; border: 0; background: transparent; color: #2997ff; font-weight: 600; cursor: pointer; padding: 4px; }
+.toast button { position: relative; border: 0; background: transparent; color: #db4c3f; font-weight: 700; cursor: pointer; padding: 4px; }
 
 /* Ventanas emergentes: tres formas según lo que se abre y dónde.
    · pop: ficha anclada al ítem que se tocó, a su lado (o debajo), en material translúcido; la página sigue a la vista.
@@ -309,25 +317,25 @@ dialog.sheet[open] { transform: none; transition-duration: .32s; }
 @starting-style { dialog.sheet[open] { transform: translateY(100%); } }
 dialog.sheet .dlg { padding-top: 4px; }
 .grab { position: sticky; top: 0; z-index: 2; height: 28px; display: grid; place-items: center; cursor: grab; touch-action: none; background: inherit; }
-.grab::before { content: ""; width: 36px; height: 5px; border-radius: 3px; background: #c7c7cc; }
+.grab::before { content: ""; width: 36px; height: 5px; border-radius: 3px; background: #e5e5e5; }
 .pop-x {
   position: absolute; top: 16px; right: 16px; width: 30px; height: 30px; border: 0; border-radius: 50%; background: var(--control);
   color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; transition: background-color .12s, color .12s;
 }
-.pop-x:hover { background: #dcdce1; color: var(--bone); }
+.pop-x:hover { background: #e5e5e5; color: var(--bone); }
 dialog.sheet .pop-x { top: 30px; }
 /* Mover a otro día: cápsulas grises, un toque cada una. */
 .pp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .pp > span { font-size: 12px; color: var(--muted); margin-right: 2px; }
 .pp button { border: 0; background: var(--control); color: var(--bone); border-radius: 9999px; padding: 6px 12px; font-size: 13px; cursor: pointer; transition: background-color .12s; }
-.pp button:hover { background: #dcdce1; }
+.pp button:hover { background: #e5e5e5; }
 .pp button:active { transform: scale(.95); transition-duration: 0s; }
 .stats { display: flex; gap: 28px; padding: 4px 0 2px; }
-.stats b { display: block; font: 600 28px/1.1 var(--display); color: var(--bone); }
+.stats b { display: block; font: 700 28px/1.1 var(--display); color: var(--bone); }
 .stats b.late { color: var(--ember); }
 .stats span { font-size: 12px; color: var(--muted); }
 .mini { display: grid; }
-.mini h3 { margin: 6px 0 4px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.mini h3 { margin: 6px 0 4px; font-size: 12px; font-weight: 700; color: var(--muted); }
 .mini-r { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; padding: 6px 0; border-top: 1px solid var(--rule); font-size: 14px; }
 .mini-r > :first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mini-r button.lbl { border: 0; background: transparent; padding: 0; color: var(--bone); cursor: pointer; text-align: left; font-size: 14px; }
@@ -340,7 +348,7 @@ dialog.sheet .pop-x { top: 30px; }
 .spot-in { flex: 1; min-width: 0; border: 0; background: transparent; padding: 0; font: 400 21px/1.3 var(--display); letter-spacing: .01em; color: var(--bone); outline: none; }
 .spot-in::-webkit-search-cancel-button { display: none; }
 .spot-list { overflow: auto; max-height: calc(72vh - 112px); padding: 6px 8px 8px; }
-.spot-g { font-size: 12px; font-weight: 600; color: var(--muted); padding: 10px 12px 4px; }
+.spot-g { font-size: 12px; font-weight: 700; color: var(--muted); padding: 10px 12px 4px; }
 .spot-o { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 10px; cursor: pointer; }
 .spot-o .ic { flex: none; width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: var(--control); color: var(--bone); font-size: 15px; }
 .spot-o .tx { display: grid; min-width: 0; }
@@ -362,16 +370,16 @@ kbd { font: 500 11px/1 var(--font); letter-spacing: 0; padding: 3px 6px; border-
   background: transparent; color: var(--bone); cursor: pointer; transition: background-color .15s;
 }
 .icon-btn:hover { background: var(--control); }
-.icon-btn:disabled { color: #c7c7cc; background: transparent; cursor: default; }
+.icon-btn:disabled { color: #e5e5e5; background: transparent; cursor: default; }
 .mc-h .icon-btn { font-size: 22px; line-height: 1; }
 .icon-btn:active { transform: scale(.92); transition-duration: 0s; }
 .badge {
   position: absolute; top: -1px; right: -3px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9999px;
-  background: var(--ember); color: var(--on-ink); font: 600 11px/18px var(--font); letter-spacing: 0; text-align: center; box-shadow: 0 0 0 2px var(--canvas);
+  background: var(--ember); color: var(--on-ink); font: 700 11px/18px var(--font); letter-spacing: 0; text-align: center; box-shadow: 0 0 0 2px var(--canvas);
 }
 /* Lista de avisos */
 .al { display: grid; }
-.al h3 { margin: 10px 0 2px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.al h3 { margin: 10px 0 2px; font-size: 12px; font-weight: 700; color: var(--muted); }
 .al h3.late { color: var(--ember); }
 .al-r {
   display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 6px 8px; margin: 0 -8px; width: calc(100% + 16px);
@@ -398,10 +406,17 @@ kbd { font: 500 11px/1 var(--font); letter-spacing: 0; padding: 3px 6px; border-
 }
 /* Fila de contexto bajo la barra: sesión a la izquierda, filtro de cliente a la derecha. */
 .ctx { display: flex; align-items: center; justify-content: space-between; gap: 8px 20px; flex-wrap: wrap; padding: 14px 0 12px; }
-.ctx .who { margin: 0; font: 600 17px/1.24 var(--display); color: var(--bone); letter-spacing: .01em; }
+.ctx .who { margin: 0; font: 700 17px/1.24 var(--display); color: var(--bone); letter-spacing: .01em; }
 .ctx .who span { font-family: var(--font); font-weight: 400; color: var(--muted); }
 .ctx .filters { margin-right: -12px; }
 /* Resumen: tarjetas blancas de 20px que se leen de un vistazo; cada una abre su detalle. */
+.cfg-row { display: grid; gap: 6px; padding: 14px 0; border-top: 1px solid var(--rule); }
+.cfg-row:first-child { border-top: 0; padding-top: 4px; }
+.cfg-row-t { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.cfg-row-a { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.cli-pick { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.cli-pick select { height: 36px; min-width: 180px; padding: 0 12px; border: 1px solid var(--steel); border-radius: 10px; background-color: var(--canvas); color: var(--bone); font-size: 15px; }
+.cli-pick select:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0, 113, 227, .25); }
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--gap); margin-bottom: var(--gap); }
 .kpi {
   display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 16px 20px; border: 0; border-radius: 20px;
@@ -411,18 +426,18 @@ button.kpi { cursor: pointer; }
 button.kpi:hover { box-shadow: 0 0 0 1px var(--rule); }
 button.kpi:active { transform: scale(.985); transition-duration: 0s; }
 .kpi .k { font-size: 12px; color: var(--muted); }
-.kpi .v { color: var(--bone); font: 600 30px/1.15 var(--display); letter-spacing: -0.005em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.kpi .v.sm { font-size: 21px; line-height: 1.33; }
+.kpi .v { color: var(--bone); font: 700 30px/1.15 var(--display); letter-spacing: -0.005em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kpi .v.sm { font-size: 21px; line-height: 1.33; white-space: normal; overflow: visible; text-overflow: clip; }
 .kpi .v.late { color: var(--ember); }
 .kpi .v.ok { color: var(--ok); }
 .kpi .s { font-size: 13px; line-height: 1.3; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.kpi .s b { color: var(--bone); font-weight: 600; }
+.kpi .s b { color: var(--bone); font-weight: 700; }
 .kpi .row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-.kpi .row .late { color: var(--ember); font-weight: 600; font-size: 14px; white-space: nowrap; }
+.kpi .row .late { color: var(--ember); font-weight: 700; font-size: 14px; white-space: nowrap; }
 .kpi-hoy { flex-direction: row; align-items: center; gap: 16px; }
 .kpi-hoy svg { width: 52px; height: 52px; flex: none; transform: rotate(-90deg); }
 .kpi-hoy .tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.kpi-hoy b { color: var(--bone); font: 600 21px/1.24 var(--display); }
+.kpi-hoy b { color: var(--bone); font: 700 21px/1.24 var(--display); }
 .kpi-hoy.full .ring-p { stroke: var(--ok); }
 /* Tablero: tareas · claves · clientes. Las claves quedan fijas al bajar, siempre a la mano. */
 .board { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(330px, 1fr) minmax(300px, .85fr); gap: var(--gap); align-items: start; }
@@ -436,12 +451,12 @@ button.kpi:active { transform: scale(.985); transition-duration: 0s; }
 .qk-find input { flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 15px; color: var(--bone); }
 .qk-find input::-webkit-search-cancel-button { cursor: pointer; }
 .qk-list { overflow: auto; margin: 0 -8px; padding: 0 8px; overscroll-behavior: contain; }
-.qk-g { display: flex; align-items: center; gap: 8px; margin: 12px 0 2px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.qk-g { display: flex; align-items: center; gap: 8px; margin: 12px 0 2px; font-size: 12px; font-weight: 700; color: var(--muted); }
 .qk-g:first-child { margin-top: 4px; }
 .qk-r { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 48px; padding: 4px 8px; margin: 0 -8px; border-radius: 10px; transition: background-color .12s; }
 .qk-r:hover { background: var(--raised); }
 .qk-r .who-k { display: grid; min-width: 0; border: 0; background: transparent; padding: 0; text-align: left; cursor: pointer; }
-.qk-r .who-k b { font-size: 15px; font-weight: 600; color: var(--bone); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qk-r .who-k b { font-size: 15px; font-weight: 700; color: var(--bone); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .qk-r .who-k span { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .qk-r .acts { display: flex; gap: 4px; }
 /* Copiar: cápsulas pequeñas; al copiar cambian a «Copiado» un momento, en el mismo lugar del toque. */
@@ -449,10 +464,10 @@ button.kpi:active { transform: scale(.985); transition-duration: 0s; }
   position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 28px; padding: 0 10px; border: 0; border-radius: 9999px;
   background: var(--control); color: var(--bone); font-size: 12px; cursor: pointer; white-space: nowrap; transition: background-color .15s, color .15s, transform .1s;
 }
-.cp:hover { background: #dcdce1; }
+.cp:hover { background: #e5e5e5; }
 .cp:active { transform: scale(.94); transition-duration: 0s; }
 .cp.key { background: var(--accent); color: var(--on-ink); }
-.cp.key:hover { background: #0077ed; }
+.cp.key:hover { background: #b93a2e; }
 .cp.done { background: var(--ok); color: var(--on-ink); }
 .cp.go { width: 28px; padding: 0; color: var(--link); background: transparent; box-shadow: inset 0 0 0 1px var(--rule); text-decoration: none; }
 .cp::after { content: ""; position: absolute; inset: -8px -2px; }
@@ -479,14 +494,14 @@ button.kpi:active { transform: scale(.985); transition-duration: 0s; }
 .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; }
 .cal-wd { background: var(--surface); padding: 10px; font-size: 12px; color: var(--muted); }
 .cal-day { background: var(--surface); min-height: 124px; padding: 6px 6px 8px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.cal-day.out { background: #fafafc; }
+.cal-day.out { background: #fafafa; }
 .cal-day.out .cal-n { color: var(--muted); }
 .cal-n {
   align-self: flex-start; border: 0; background: transparent; color: var(--ash); font-size: 14px; min-width: 28px; height: 28px;
   padding: 0 8px; border-radius: 9999px; cursor: pointer; margin-bottom: 2px; transition: background-color .12s, color .12s;
 }
 .cal-n:hover { background: var(--raised); color: var(--bone); }
-.cal-day.today .cal-n { background: var(--bone); color: var(--on-ink); font-weight: 600; }
+.cal-day.today .cal-n { background: var(--bone); color: var(--on-ink); font-weight: 700; }
 .cal-it {
   display: flex; align-items: flex-start; gap: 6px; min-width: 0; width: 100%; border: 0; background: transparent; text-align: left;
   padding: 3px 6px; border-radius: 8px; font-size: 12px; line-height: 1.33; letter-spacing: -0.01em; color: var(--ash); cursor: pointer; transition: background-color .12s, color .12s;
@@ -521,7 +536,7 @@ button.kpi:active { transform: scale(.985); transition-duration: 0s; }
 .wk-head { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-top: 0; border-right: 0; background: transparent; color: var(--muted); cursor: pointer; transition: background-color .12s; }
 .wk-head:hover { background: var(--raised); }
 .wk-wd { font-size: 12px; }
-.wk-num { color: var(--bone); font: 600 21px/1.2 var(--display); min-width: 34px; padding: 2px 6px; border-radius: 9999px; }
+.wk-num { color: var(--bone); font: 700 21px/1.2 var(--display); min-width: 34px; padding: 2px 6px; border-radius: 9999px; }
 .wk-head.today .wk-num { background: var(--bone); color: var(--on-ink); }
 .wk-label { font-size: 12px; color: var(--muted); padding: 6px 6px 6px 0; text-align: right; line-height: 1.2; }
 .wk-allday { display: flex; flex-direction: column; gap: 2px; padding: 4px; min-height: 36px; }
@@ -530,7 +545,7 @@ button.kpi:active { transform: scale(.985); transition-duration: 0s; }
 .wk-hours span:first-child { transform: none; }
 .wk-col { position: relative; cursor: copy;
   background: repeating-linear-gradient(to bottom, transparent 0, transparent 47px, var(--rule) 47px, var(--rule) 48px); }
-.wk-col.today, .wk-allday.today { background-color: #fafafc; }
+.wk-col.today, .wk-allday.today { background-color: #fafafa; }
 /* Tarea con hora: bloque del color de su cliente que cubre un cuadro por hora, con la línea de cada hora a la vista. */
 .cal-it.wk-ev { position: absolute; z-index: 1; align-items: flex-start; overflow: hidden; padding: 4px 6px; border-radius: 6px;
   background: linear-gradient(color-mix(in srgb, var(--c) 16%, var(--surface)), color-mix(in srgb, var(--c) 16%, var(--surface)));
@@ -550,7 +565,7 @@ button.kpi:active { transform: scale(.985); transition-duration: 0s; }
 .wk-now { position: absolute; left: 0; right: 0; height: 2px; background: var(--ember); z-index: 2; pointer-events: none; }
 .wk-now::before { content: ""; position: absolute; left: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--ember); }
 .ag-day { padding: 14px 0; border-top: 1px solid var(--rule); }
-.ag-day h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; color: var(--bone); display: flex; justify-content: space-between; gap: 12px; }
+.ag-day h3 { margin: 0 0 6px; font-size: 17px; font-weight: 700; color: var(--bone); display: flex; justify-content: space-between; gap: 12px; }
 .ag-day h3 .link { font-weight: 400; }
 .ag-day .cal-it { font-size: 15px; padding: 8px 6px; }
 .day-list { display: grid; gap: 2px; }
@@ -566,14 +581,14 @@ dialog .cal-it.mv { cursor: pointer; }
 .cal-it.ghost:not(.wk-ev) { background: var(--canvas); }
 .ghost-n {
   position: absolute; top: -9px; right: -9px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 9999px;
-  background: var(--accent); color: var(--on-ink); font: 600 12px/20px var(--font); text-align: center;
+  background: var(--accent); color: var(--on-ink); font: 700 12px/20px var(--font); text-align: center;
 }
 body.is-dragging, body.is-dragging * { cursor: grabbing !important; -webkit-user-select: none; user-select: none; }
 body.is-dragging .rs { cursor: ns-resize !important; }
 .cal-day.drop-on, .ag-day.drop-on, .wk-allday.drop-on, .wk-head.drop-on { background: rgba(0, 113, 227, .08); box-shadow: inset 0 0 0 2px var(--accent); }
 .drop-slot {
   position: absolute; left: 2px; right: 2px; z-index: 3; pointer-events: none; padding: 2px 6px;
-  border: 2px dashed var(--accent); border-radius: 6px; background: rgba(0, 113, 227, .07); color: var(--accent); font-size: 11px; font-weight: 600;
+  border: 2px dashed var(--accent); border-radius: 6px; background: rgba(0, 113, 227, .07); color: var(--accent); font-size: 11px; font-weight: 700;
 }
 /* Borde para estirar una tarea con hora: aparece una rayita al pasar por encima. */
 .rs { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; z-index: 2; cursor: ns-resize; }
@@ -587,7 +602,7 @@ body.is-dragging .rs { cursor: ns-resize !important; }
   background: rgba(255, 255, 255, .88); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, .06), 0 18px 50px rgba(0, 0, 0, .16); font-size: 14px;
 }
-.selbar b { font-weight: 600; color: var(--bone); }
+.selbar b { font-weight: 700; color: var(--bone); }
 .selbar .pop-x { position: static; }
 body:has(#selbar:not([hidden])) .toast { bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
 
@@ -601,7 +616,7 @@ body:has(#selbar:not([hidden])) .toast { bottom: calc(110px + env(safe-area-inse
 .recur.paused .rt { color: var(--muted); }
 
 /* Ficha del evento */
-.det-k { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 12px; font-weight: 600; color: var(--muted); }
+.det-k { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 12px; font-weight: 700; color: var(--muted); }
 .det { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 12px 20px; margin: 0; padding-top: 16px; border-top: 1px solid var(--rule); font-size: 15px; }
 .det dt { color: var(--muted); font-size: 14px; padding-top: 1px; }
 .det dd { margin: 0; color: var(--bone); overflow-wrap: anywhere; white-space: pre-line; }
@@ -623,7 +638,7 @@ body:has(#selbar:not([hidden])) .toast { bottom: calc(110px + env(safe-area-inse
    que vino; debajo, el libro de movimientos (días = cargos, pagos = abonos) con el saldo acumulado. */
 .as-top { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: var(--gap); align-items: stretch; }
 .as-hero { display: flex; flex-direction: column; }
-.as-big { margin: 14px 0 0; color: var(--bone); font: 600 clamp(48px, 7vw, 76px)/1.05 var(--display); letter-spacing: -0.015em; }
+.as-big { margin: 14px 0 0; color: var(--bone); font: 700 clamp(32px, 4.2vw, 44px)/1.05 var(--display); letter-spacing: -0.015em; }
 .as-big.debe { color: var(--ember); }
 .as-big.ok { color: var(--ok); }
 .as-sub { margin: 6px 0 0; font-size: 21px; line-height: 1.38; letter-spacing: .011em; color: var(--muted); }
@@ -632,13 +647,13 @@ body:has(#selbar:not([hidden])) .toast { bottom: calc(110px + env(safe-area-inse
 .as-acts .btn:disabled { background: var(--control); color: var(--muted); cursor: default; box-shadow: none; }
 .as-stats { display: flex; flex-wrap: wrap; gap: 16px 36px; margin-top: auto; padding-top: 28px; }
 .as-stats > div { padding-top: 14px; border-top: 1px solid var(--rule); min-width: 140px; }
-.as-stats b { display: block; font: 600 21px/1.2 var(--display); color: var(--bone); }
+.as-stats b { display: block; font: 700 21px/1.2 var(--display); color: var(--bone); }
 .as-stats b.late { color: var(--ember); }
 .as-stats span { font-size: 12px; color: var(--muted); }
 .as-foot { margin-top: 18px; display: flex; gap: 16px; flex-wrap: wrap; }
 /* Mes para marcar días: un toque marca el día; azul = sin pagar, gris = pagado. */
 .mc-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
-.mc-h b { color: var(--bone); font: 600 21px/1.2 var(--display); }
+.mc-h b { color: var(--bone); font: 700 21px/1.2 var(--display); }
 .mc-h .r { display: flex; gap: 4px; }
 .mc { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; text-align: center; }
 .mc-wd { font-size: 11px; color: var(--muted); padding-bottom: 4px; }
@@ -649,9 +664,9 @@ body:has(#selbar:not([hidden])) .toast { bottom: calc(110px + env(safe-area-inse
 .mc-d:hover { background: var(--raised); }
 .mc-d:active { transform: scale(.9); transition-duration: 0s; }
 .mc-d.today { box-shadow: inset 0 0 0 1.5px var(--bone); }
-.mc-d.on { background: var(--accent); color: var(--on-ink); font-weight: 600; }
+.mc-d.on { background: var(--accent); color: var(--on-ink); font-weight: 700; }
 .mc-d.on.paid { background: var(--control); color: var(--bone); }
-.mc-d:disabled { color: #c7c7cc; cursor: default; background: transparent; }
+.mc-d:disabled { color: #e5e5e5; cursor: default; background: transparent; }
 .mc-d.pop-in { animation: mc-pop .45s cubic-bezier(.3, 1.5, .5, 1); }
 @keyframes mc-pop { from { transform: scale(.55); } to { transform: none; } }
 .mc-leg { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 14px; font-size: 12px; color: var(--muted); }
@@ -659,7 +674,7 @@ body:has(#selbar:not([hidden])) .toast { bottom: calc(110px + env(safe-area-inse
 .mc-leg i.paid { background: var(--control); }
 /* Libro de movimientos */
 .lg-m { padding-top: 18px; }
-.lg-m h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0 0 6px; color: var(--bone); font: 600 17px/1.24 var(--display); }
+.lg-m h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0 0 6px; color: var(--bone); font: 700 17px/1.24 var(--display); }
 .lg-m h3 .meta { font-family: var(--font); font-weight: 400; }
 .lg-r {
   display: grid; grid-template-columns: 110px minmax(0, 1fr) auto auto; gap: 12px; align-items: center; width: calc(100% + 24px); min-height: 48px;
@@ -685,18 +700,18 @@ body:has(#selbar:not([hidden])) .toast { bottom: calc(110px + env(safe-area-inse
   text-align: left; cursor: pointer; transition: background-color .12s, box-shadow .12s;
 }
 .scope-o:hover { background: var(--control); }
-.scope-o b { color: var(--bone); font-weight: 600; font-size: 15px; }
+.scope-o b { color: var(--bone); font-weight: 700; font-size: 15px; }
 .scope-o span { color: var(--muted); font-size: 13px; line-height: 1.35; }
 .scope-o.pri { box-shadow: inset 0 0 0 2px var(--accent); }
 
 /* Fechas de una repetición */
 .rep-pv { display: grid; gap: 6px; padding: 12px 14px; border-radius: 12px; background: var(--raised); margin: 0; }
 .rep-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0; font-size: 14px; }
-.rep-h b { color: var(--bone); font-weight: 600; }
+.rep-h b { color: var(--bone); font-weight: 700; }
 .rep-dates { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 2px 14px; max-height: 232px; overflow: auto; }
 .rep-dates li { display: flex; align-items: baseline; gap: 6px; min-height: 26px; font-size: 14px; color: var(--bone); }
 .rep-dates .n { min-width: 2.4em; color: var(--muted); font-size: 12px; }
-.rep-dates li.cur { color: var(--accent); font-weight: 600; }
+.rep-dates li.cur { color: var(--accent); font-weight: 700; }
 .rep-dates li.done { color: var(--muted); text-decoration: line-through; }
 .rep-dates li.past { color: var(--muted); }
 .rep-dates .add-occ { display: inline-flex; gap: 8px; margin-left: auto; }
@@ -704,7 +719,7 @@ body:has(#selbar:not([hidden])) .toast { bottom: calc(110px + env(safe-area-inse
 .rep-dates li:has(.add-occ) { grid-column: 1 / -1; }
 .rep-dates li.late { color: var(--ember); }
 .rep-dates li.done .tag, .rep-dates li.done .meta { text-decoration: none; display: inline-block; }
-.rep-dates .tag { font-size: 11px; font-weight: 600; color: var(--on-ink); background: var(--accent); border-radius: 9999px; padding: 1px 7px; text-decoration: none; }
+.rep-dates .tag { font-size: 11px; font-weight: 700; color: var(--on-ink); background: var(--accent); border-radius: 9999px; padding: 1px 7px; text-decoration: none; }
 .rep-pv .more { justify-self: start; padding-top: 2px; }
 
 .chk-list { display: grid; max-height: 232px; overflow: auto; padding: 4px 14px; border: 1px solid var(--steel); border-radius: 12px; }
@@ -721,7 +736,7 @@ body:has(#selbar:not([hidden])) .toast { bottom: calc(110px + env(safe-area-inse
 .cfg-wide { grid-column: 1 / -1; }
 .cfg-note { margin: 6px 0 12px; }
 .opt { display: flex; gap: 12px; align-items: flex-start; padding: 16px 0; border-top: 1px solid var(--rule); cursor: pointer; }
-.opt b { display: block; color: var(--bone); font-weight: 600; }
+.opt b { display: block; color: var(--bone); font-weight: 700; }
 .opt .meta { display: block; margin-top: 2px; }
 .opt input, .exp-what input { flex: none; width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--accent); cursor: pointer; }
 .opt-f { padding: 16px 0; border-top: 1px solid var(--rule); }
@@ -735,28 +750,30 @@ body:has(#selbar:not([hidden])) .toast { bottom: calc(110px + env(safe-area-inse
 #print { display: none; }
 @media print {
   @page { margin: 14mm; }
-  body { background: #fff; color: #000; }
+  body { background: #fff; color: #202020; }
   body::before, body > :not(#print) { display: none !important; }
-  #print { display: block; font: 10pt/1.35 var(--font); color: #000; }
-  #print h1 { margin: 0 0 2mm; font-size: 18pt; color: #000; }
-  #print .p-meta { margin: 0 0 4mm; color: #555; }
-  #print h2 { margin: 7mm 0 2mm; font-size: 12pt; color: #000; }
+  #print { display: block; font: 10pt/1.35 var(--font); color: #202020; }
+  #print h1 { margin: 0 0 2mm; font-size: 18pt; color: #202020; }
+  #print .p-meta { margin: 0 0 4mm; color: #202020; }
+  #print h2 { margin: 7mm 0 2mm; font-size: 12pt; color: #202020; }
   #print table { font-size: 9pt; }
-  #print th { color: #000; font-weight: 700; font-size: 9pt; white-space: normal; border-bottom: 1px solid #000; padding: 1.5mm 3mm 1.5mm 0; }
-  #print td { border-top: 1px solid #ccc; padding: 1.5mm 3mm 1.5mm 0; }
+  #print th { color: #202020; font-weight: 700; font-size: 9pt; white-space: normal; border-bottom: 1px solid #202020; padding: 1.5mm 3mm 1.5mm 0; }
+  #print td { border-top: 1px solid #e5e5e5; padding: 1.5mm 3mm 1.5mm 0; }
   #print tr { break-inside: avoid; }
   #print .r { text-align: right; }
-  #print .p-empty { color: #555; }
+  #print .p-empty { color: #202020; }
 }
 
 footer { padding-block: 40px 32px; font-size: 12px; line-height: 1.33; color: var(--muted); }
-footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: block; margin-bottom: 6px; }
+footer .name { color: var(--bone); font: 700 17px/1.24 var(--display); display: block; margin-bottom: 6px; }
+.ver-app { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); letter-spacing: .02em; }
+.login .ver-app { text-align: center; margin-top: 18px; }
 
 /* Respuesta al tocar: todo lo que se toca reacciona al presionar, sin esperar a soltar.
    Al presionar el cambio es inmediato (duración 0); al soltar vuelve con la transición normal. */
 .chip:active, .cal-n:active, .tick:active, .x:active, .more:active, .cal-more:active, .st-btn:active, .toast button:active { transform: scale(.94); }
 .task:has(.task-t:active), .client:active, .cal-it:active, td.ob button:active, .views button:active, details.sub summary:active { background: var(--raised); }
-.link:active, .more:active, .cal-more:active, details.sub summary:active { color: #004c99; }
+.link:active, .more:active, .cal-more:active, details.sub summary:active { color: #db4c3f; }
 :is(.chip, .cal-n, .tick, .x, .more, .cal-more, .st-btn, .toast button, .client, .cal-it, td.ob button, .views button, .link):active,
 .task:has(.task-t:active) { transition-duration: 0s; }
 .chip, .tick, .x, .cal-n, .more, .cal-more, .st-btn { transition-property: color, background-color, border-color, opacity, transform; }
@@ -867,22 +884,22 @@ footer .name { color: var(--bone); font: 600 17px/1.24 var(--display); display: 
 .vz-kpis { margin-top: var(--gap); }
 .vz-kpis .kpi { text-align: left; }
 .vz-grupos { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--gap); margin-top: var(--gap); }
-.vz-grupos h3, .stack h3, #v-venc h3, #v-cred h3 { margin: 0; font: 600 19px/1.25 var(--display); color: var(--bone); }
+.vz-grupos h3, .stack h3, #v-venc h3, #v-cred h3 { margin: 0; font: 700 19px/1.25 var(--display); color: var(--bone); }
 #v-venc > .card, #v-cred > .card, #v-venc > .kpis, #v-cred > .kpis { margin-top: var(--gap); }
 #v-venc > .card:first-child, #v-cred > .card:first-child { margin-top: 0; }
 .vz-list { list-style: none; margin: 0; padding: 0; }
 .vz-it { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; border-top: 1px solid var(--rule); background: transparent; padding: 10px 0; text-align: left; cursor: pointer; color: inherit; }
 .vz-it:hover { background: var(--raised); }
 .vz-it .t { display: grid; min-width: 0; flex: 1; }
-.vz-it .t b { font-weight: 600; color: var(--bone); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vz-it .t b { font-weight: 700; color: var(--bone); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vz-it .w { font-size: 14px; white-space: nowrap; color: var(--muted); }
-.vz-it .w.late { color: var(--ember); font-weight: 600; }
+.vz-it .w.late { color: var(--ember); font-weight: 700; }
 .pct { display: inline-flex; align-items: center; gap: 8px; }
 .pct i { display: inline-block; width: 56px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--ok) var(--p), var(--control) var(--p)); }
 .vz-semana { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
 .vz-dia { border: 1px solid var(--rule); border-radius: 14px; padding: 8px; min-height: 120px; }
 .vz-dia.today { border-color: var(--bone); }
-.vz-dia h4 { margin: 0 0 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.vz-dia h4 { margin: 0 0 6px; font-size: 13px; font-weight: 700; color: var(--muted); }
 .vz-agenda-movil { display: none; }
 .ok-t { color: var(--ok); }
 td.soon, .soon { color: var(--ember); }
@@ -904,7 +921,7 @@ dialog:has(.cal-tbl), dialog:has(.gen-tbl) { width: min(1180px, calc(100vw - 24p
 .warn { color: var(--ember); }
 .meta.warn { color: var(--ember); }
 .blk { display: block; }
-.rec-code { font: 600 22px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; color: var(--bone); background: var(--raised); padding: 14px 16px; border-radius: 12px; overflow-wrap: anywhere; }
+.rec-code { font: 700 22px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; color: var(--bone); background: var(--raised); padding: 14px 16px; border-radius: 12px; overflow-wrap: anywhere; }
 tr.c-pag td { color: var(--muted); }
 textarea.input { height: auto; padding: 10px 12px; font: 14px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
 /* Filtros de pendientes */
@@ -920,7 +937,7 @@ textarea.input { height: auto; padding: 10px 12px; font: 14px/1.4 ui-monospace, 
 .prio-alta { background: #fde7dc; color: var(--ember); }
 .prio-baja { color: var(--muted); }
 /* Gestor: lo que no le corresponde no se muestra */
-body.gestor #add-cliente, body.gestor #copias, body.gestor #recuperacion, body.gestor #importar, body.gestor #tab-aseo, body.gestor #kpi-aseo { display: none !important; }
+body.gestor #e5e5e5-cliente, body.gestor #copias, body.gestor #recuperacion, body.gestor #importar, body.gestor #tab-aseo, body.gestor #kpi-aseo { display: none !important; }
 @media (max-width: 900px) {
   .vz-semana { grid-template-columns: 1fr; }
   .vz-dia { min-height: 0; }
@@ -931,6 +948,385 @@ body.gestor #add-cliente, body.gestor #copias, body.gestor #recuperacion, body.g
   .fl { min-width: 0; flex: 1 1 140px; }
   .vz-grupos { grid-template-columns: 1fr; }
 }
+/* ==V13-INICIO== Tablas (v1.3.0): encabezado fijo, orden al hacer clic y ancho de columnas ajustable. */
+.tbl-wrap { max-height: min(68vh, 680px); overflow: auto; overscroll-behavior: contain; }
+thead th { position: sticky; top: 0; z-index: 1; background: var(--surface); box-sizing: border-box; padding-top: 8px; padding-bottom: 8px; box-shadow: inset 0 -1px 0 var(--rule); }
+th.ord13 { cursor: pointer; user-select: none; }
+th.ord13:hover, th.ord13-asc, th.ord13-desc { color: var(--bone); }
+th.ord13-asc::after { content: " \25B2"; font-size: 10px; }
+th.ord13-desc::after { content: " \25BC"; font-size: 10px; }
+.tirador13 { position: absolute; right: 0; top: 0; bottom: 0; width: 8px; cursor: col-resize; touch-action: none; }
+.tirador13:hover, .tirador13:active { box-shadow: inset -2px 0 0 var(--muted); }
+/* ==V13-FIN== */
+
+
+
+/* ==V26-INICIO== Ajustes de uso (auditoría): interlineado de controles y etiquetas, foco visible,
+   movimiento reducido. Sin cambios de estructura ni de función. */
+button, .btn, .chip, .link, .views button, .views [role="tab"], .kpi .k, .kpi .s, .cli-pick, .cli-pick select, .input {
+  line-height: 1.3;
+}
+.input:focus-visible, select:focus-visible, textarea:focus-visible, .kpi:focus-visible, .client:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; box-shadow: none;
+}
+.kpis button.kpi { cursor: pointer; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+/* ==V26-FIN== */
+
+/* ==V27-INICIO== Arreglos tras revisar el tablero con sesión: botones de copiar con el mismo contorno
+   que el resto; cifras de resumen sin partirse; etiquetas del resumen en dos líneas como máximo. */
+.cp, .cp.key { background: transparent !important; color: var(--bone) !important; border: 1px solid var(--control) !important; border-radius: 6px !important; height: 28px; padding: 0 10px; }
+.cp:hover, .cp.key:hover { background: var(--raised) !important; }
+.kpi .v { white-space: nowrap; }
+#kpi-venc b, #kpi-late b { white-space: nowrap; }
+.kpi .s { overflow-wrap: anywhere; }
+#kpi-venc .s, #kpi-late .s { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* ==V27-FIN== */
+
+/* ==V28-INICIO== Revisión con sesión: lista de clientes compacta en pantallas medianas y grandes; barra
+   superior en celular con pestañas que se deslizan dentro de la barra. Sin cambios de función. */
+@media (min-width: 560px) {
+  .cfg-row { grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; align-items: center; }
+  .cfg-row > .cfg-row-t, .cfg-row > .meta { grid-column: 1; }
+  .cfg-row > .cfg-row-a { grid-column: 2; grid-row: 1 / span 2; justify-content: flex-end; }
+}
+@media (max-width: 640px) {
+  .bar-in { padding: 8px 10px; }
+  .bar-in .views { order: 3; width: 100%; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .bar-in .views::-webkit-scrollbar { display: none; }
+}
+/* ==V28-FIN== */
+
+/* ==V29-INICIO== Tipografía y orden: una sola familia sans para todo (sin serif), cifras de resumen con
+   peso 600 y cifras tabulares; el calendario tributario va antes de las tareas frecuentes en el tablero;
+   en Configuración, primero Clientes y Vista, luego Avisos, Copias, Recuperación, Exportar, Personas y Usuarios. */
+:root {
+}
+body { font-family: var(--font); letter-spacing: -0.005em; }
+h1.brand { font: 700 18px/1.2 var(--display); letter-spacing: -0.01em; }
+h2 { font: 700 17px/1.3 var(--display); letter-spacing: -0.01em; }
+.ctx .who { font: 700 16px/1.3 var(--display); letter-spacing: -0.01em; }
+.kpi .v { font: 700 28px/1.1 var(--display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.kpi-hoy b, .stats b, .as-stats b, .mc-h b, .wk-num { font-family: var(--display); font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.as-big { font-family: var(--display); font-weight: 700; letter-spacing: -0.02em; }
+.stack { display: grid; }
+#vencimientos { order: -1; }
+.cfg { display: flex; flex-direction: column; gap: 16px; }
+#cfg-clientes-card { order: 0; }
+[aria-labelledby="h-vista"] { order: 1; }
+[aria-labelledby="h-avisos"] { order: 2; }
+#copias { order: 3; }
+#recuperacion { order: 4; }
+[aria-labelledby="h-exportar"] { order: 5; }
+#personas { order: 6; }
+#usuarios { order: 7; }
+/* ==V29-FIN== */
+
+
+
+/* ==V212-INICIO== Revisión con sesión (celular): cabecera más baja; cifra de «Próximo vencimiento» con el
+   mismo tamaño que las demás cifras del resumen; etiquetas del resumen de 13 px. Sin cambios de función. */
+@media (max-width: 640px) { .bar { padding-bottom: 6px; } .bar-in { padding: 6px 10px; } }
+#kpi-venc .k { display: block; }
+#kpi-venc .v, #kpi-venc b { font-size: 22px; line-height: 1.2; }
+.kpi .s { font-size: 13px; }
+/* ==V212-FIN== */
+/* ==V213-INICIO== Estilo Ready adaptado: cabecera blanca con borde papel; navegación en píldora (la activa,
+   con fondo lavanda y texto en tinta); botón principal en tinta; tarjetas blancas de 1 px sin sombra; títulos
+   sans 700; el violeta solo marca foco, pestaña activa y enlaces al pasar el puntero. */
+body { background: var(--ground); color: var(--ash); font: 400 16px/1.5 var(--font); letter-spacing: 0; }
+.bar, .bar.scrolled { background: var(--surface); box-shadow: none; border-bottom: 1px solid var(--ground); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.bar::after { display: none; }
+body::before { background: var(--surface); }
+.bar-in { min-height: 52px; padding-block: 8px; }
+.brand, h1.brand { font: 700 18px/1.2 var(--font); letter-spacing: -0.01em; color: var(--bone); }
+.brand .mark { background: var(--accent); }
+.views button, .views [role="tab"] { border: 0; border-radius: 9999px; background: transparent; color: var(--ash); font: 500 14px/1.3 var(--font); letter-spacing: 0.02em; box-shadow: none; }
+.views button:hover, .views [role="tab"]:hover { color: var(--accent); }
+.views button[aria-selected="true"], .views [role="tab"][aria-selected="true"] { background: var(--lavender); color: var(--ash); box-shadow: none; }
+.chip { border-radius: 9999px; color: var(--muted); font: 500 14px/1.3 var(--font); letter-spacing: 0.02em; }
+.chip:hover { color: var(--accent); background: transparent; }
+.chip[aria-pressed="true"] { color: var(--ash); background: var(--lavender); box-shadow: none; }
+.btn { height: 40px; padding: 0 16px; border: 1px solid var(--primary); border-radius: 10px; background: var(--primary); color: var(--on-ink); font: 500 15px/1 var(--font); letter-spacing: 0; box-shadow: none; }
+.btn:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn.alt { background: transparent; color: var(--bone); border: 1px solid var(--steel); box-shadow: none; }
+.btn.alt:hover { background: var(--ground); border-color: var(--bone); }
+.btn.danger { background: transparent; color: var(--ember); border: 1px solid var(--ember); }
+.bar .btn { height: 34px; padding: 0 14px; font-size: 14px; }
+.link { color: var(--link); font: 500 14px/1.3 var(--font); text-decoration: underline; text-decoration-color: var(--steel); text-underline-offset: 3px; }
+.link:hover { color: var(--accent); text-decoration-color: var(--accent); }
+.link.danger { color: var(--ember); }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card); box-shadow: none; padding: 20px 22px; }
+.card-h { margin-bottom: 10px; }
+h2 { font: 700 18px/1.25 var(--font); letter-spacing: -0.01em; color: var(--bone); }
+.kpis { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-card); box-shadow: none; overflow: hidden; }
+.kpi { border-right: 1px solid var(--rule); padding: 14px 18px; }
+button.kpi:hover { background: var(--ground); }
+.kpi .k { font: 500 12px/1.3 var(--font); letter-spacing: 0.167em; text-transform: uppercase; color: var(--muted); }
+.kpi .v { font: 700 28px/1.1 var(--font); letter-spacing: -0.02em; color: var(--bone); font-variant-numeric: tabular-nums; }
+.kpi .s { font: 400 13px/1.4 var(--font); color: var(--muted); }
+.input, select.input, textarea.input { background: var(--surface); border: 1px solid var(--steel); border-radius: 10px; height: 40px; padding: 0 12px; color: var(--bone); box-shadow: none; }
+.input:hover { border-color: var(--bone); }
+.input:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(219, 76, 63, .25); }
+.client { border-radius: 10px; }
+.dlg, dialog { border-radius: var(--r-card); border: 1px solid var(--rule); box-shadow: 11px 11px 40px rgba(0, 0, 0, .1); }
+.empty { font: 400 15px/1.5 var(--font); letter-spacing: 0; color: var(--muted); }
+.login h1 { font: 700 clamp(44px, 8vw, 64px)/1 var(--font); letter-spacing: 0; }
+.login-brand { font: 700 20px/1 var(--font); letter-spacing: -0.01em; }
+.login-sub { font-size: 18px; line-height: 1.5; letter-spacing: 0; color: var(--muted); }
+/* Tablero: resumen, tareas y clientes, luego calendario y frecuentes, con la misma separación entre secciones.
+   «Hoy» lleva el resaltado lavanda de la guía (una sola frase destacada). */
+#v-tablero { display: flex; flex-direction: column; gap: 24px; }
+#v-tablero > * { margin: 0; }
+.kpi-hoy .k { display: inline-block; background: var(--lavender); color: var(--ash); padding: 2px 8px; border-radius: 8px; justify-self: start; }
+.prio-alta { background: #f6e4e0; }/* Ver cliente: el filtro ya está en las pestañas de cliente (con su color). Se oculta el selector duplicado;
+   sigue en el marcado para que la lógica no cambie. */
+.cli-pick { display: none; }/* ==V213-FIN== */
+/* Inicio y página de cada cliente (v2.20.0): ya no hay pestañas de cliente arriba; al elegir un cliente,
+   su nombre y su ficha quedan en la parte de arriba y sus pestañas son sus páginas. */
+.ctx .filters { display: none; }
+.cli-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; width: 100%; }
+.cli-head .cli-name { font: 700 22px/1.2 var(--font); color: var(--bone); letter-spacing: -0.01em; display: inline-flex; align-items: center; gap: 8px; }
+.cli-head .meta { font-size: 14px; }
+.cli-head #cli-back { margin-right: 8px; }
+.cli-head #cli-edit { margin-left: auto; }/* Diseño tipo Todoist (v2.20.0): barra lateral clara con tus páginas y tus clientes; columna central limpia
+   con títulos grandes; secciones separadas por líneas finas; botones rojos. En celular vuelve la barra de arriba. */
+:root { --ground: #ffffff; --canvas: #ffffff; --surface: #ffffff; --raised: #f5f5f5; --accent: #db4c3f; --primary: #db4c3f; --primary-hover: #b93a2e; --lavender: #fbe9e6; --side: #fafafa; --muted: #6f6f6f; --r-card: 8px; }
+body { background: #ffffff; }
+.card { background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
+.card-h { border-bottom: 1px solid var(--rule); padding: 0 0 8px; margin-bottom: 8px; }
+h2 { font: 600 16px/1.3 var(--font); color: var(--bone); letter-spacing: 0; }
+.kpis { background: transparent; border: 0; border-bottom: 1px solid var(--rule); border-radius: 0; overflow: visible; }
+.kpi { padding: 12px 16px 12px 0; border-right: 0; }
+.btn { border-radius: 6px; font-weight: 500; }
+.btn.alt { background: #ffffff; border: 1px solid var(--control); color: var(--ash); box-shadow: none; }
+.btn.alt:hover { background: #f5f5f5; }
+.link { color: var(--accent); }
+.link:hover { color: #b93a2e; }
+.bar-exit { color: var(--muted) !important; }
+.ctx .who { font: 700 28px/1.2 var(--font); letter-spacing: -0.01em; }
+.ctx .who span { font: 400 15px/1.3 var(--font); }
+.cli-head .cli-name { font: 700 28px/1.2 var(--font); }
+.side-cli { display: none; }
+@media (min-width: 901px) {
+  #app { display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr); align-items: start; min-height: 100vh; }
+  #app > header.bar { grid-column: 1; grid-row: 1 / span 2; position: sticky; top: 0; height: 100vh; overflow-y: auto; background: var(--side); border-bottom: 0; border-right: 1px solid var(--rule); box-shadow: none; }
+  #app > main { grid-column: 2; grid-row: 1; min-width: 0; }
+  #app > footer { grid-column: 2; grid-row: 2; max-width: 980px; margin: 0 auto; padding: 0 40px 40px; }
+  #app > header.bar .bar-in { flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: 4px; min-height: 0; max-width: none; padding: 16px 12px 12px; width: 100%; }
+  .brand { order: 1; padding: 4px 8px 10px; font: 700 18px/1.2 var(--font); }
+  .bar-actions { order: 2; flex-direction: column; align-items: stretch; gap: 4px; }
+  .bar-actions .btn { width: 100%; justify-content: flex-start; }
+  .bar-actions #btn-nueva { background: var(--accent); border-color: var(--accent); color: #ffffff; }
+  .bar-actions #btn-nueva:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+  .bar-actions .icon-btn { align-self: flex-start; }
+  .bar .srch .lbl { display: inline; }
+  .views { order: 3; flex-direction: column; align-items: stretch; gap: 1px; width: 100%; overflow: visible; }
+  .views button, .views [role="tab"] { width: 100%; justify-content: flex-start; text-align: left; padding: 7px 10px; border-radius: 6px; font: 500 15px/1.3 var(--font); color: var(--ash); letter-spacing: 0; }
+  .views button:hover, .views [role="tab"]:hover { background: #f0f0f0; color: var(--ash); }
+  .views button[aria-selected="true"], .views [role="tab"][aria-selected="true"] { background: var(--lavender); color: var(--accent); }
+  .side-cli { order: 4; display: grid; gap: 1px; margin-top: 16px; }
+  .side-cli-h { font: 600 13px/1.3 var(--font); color: var(--muted); padding: 6px 10px; }
+  .side-cli button { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: transparent; border-radius: 6px; padding: 6px 10px; font: 500 15px/1.3 var(--font); color: var(--ash); text-align: left; cursor: pointer; }
+  .side-cli button:hover { background: #f0f0f0; }
+  .side-cli button[aria-pressed="true"] { background: var(--lavender); color: var(--accent); }
+  .spacer { order: 5; flex: 1; min-height: 16px; }
+  .bar .status { order: 6; justify-items: start; padding: 0 10px; }
+  .bar .status .s1 { display: block; }
+  .bar-exit { order: 7; align-self: flex-start; margin: 4px 10px 0; }
+  #app > main.wrap { max-width: 980px; margin: 0 auto; padding: 32px 40px 80px; }
+  .board, .stack { gap: 24px; }
+}/* v2.20.0: barra lateral plegable a iconos, tareas a todo el ancho en Inicio, filtros simples de tareas,
+   ficha del cliente ordenada. */
+:root { --side-w: 264px; }
+.side-toggle { display: none; }
+.lbl { }
+@media (min-width: 901px) {
+  .side-toggle { display: inline-flex; align-items: center; justify-content: center; align-self: flex-end; order: 0; width: 32px; height: 32px; margin-bottom: 2px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; }
+  .side-toggle:hover { background: #f0f0f0; color: var(--ash); }
+  #app { transition: grid-template-columns .18s ease; }
+  #app.side-min { --side-w: 72px; }
+  .views button, .views [role="tab"] { display: flex; align-items: center; gap: 10px; }
+  .views button svg, .bar-actions svg, .side-toggle svg { flex: none; }
+  #app.side-min > header.bar .lbl { display: none; }
+  #app.side-min > header.bar .bar-in { padding: 12px 8px; }
+  #app.side-min .brand { justify-content: center; padding: 4px 0 10px; }
+  #app.side-min .side-toggle { align-self: center; }
+  #app.side-min .views button, #app.side-min .views [role="tab"] { justify-content: center; gap: 0; padding: 9px 0; }
+  #app.side-min .side-cli-h, #app.side-min .status, #app.side-min .bar-exit { display: none; }
+  #app.side-min .side-cli button { justify-content: center; padding: 8px 0; gap: 0; }
+  #app.side-min .bar-actions .btn { justify-content: center; padding: 0; gap: 0; }
+  #app.side-min .srch kbd { display: none; }
+/* v2.27.0: barra plegada (solo iconos): «Accesos» queda como un botón cuadrado de icono, sin el texto cortado. */
+#app.side-min .acc-fab { width: 40px; height: 40px; padding: 0; gap: 0; justify-content: center; border-radius: 10px; }
+#app.side-min .acc-fab .acc-txt { display: none; }
+  #v-tablero.is-all .board { grid-template-columns: minmax(0, 1fr); }
+  #v-tablero.is-all .board > .side { display: grid; gap: 24px; }
+}
+.tfx-seg { display: flex; flex-wrap: wrap; gap: 2px; border-bottom: 1px solid var(--rule); margin-bottom: 10px; }
+.tfx-tab { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; color: var(--muted); padding: 8px 10px; margin-bottom: -1px; font: 500 14px/1.3 var(--font); cursor: pointer; }
+.tfx-tab:hover { color: var(--ash); }
+.tfx-tab[aria-pressed="true"] { color: var(--ash); border-bottom-color: var(--accent); }
+.tfx-tab.late .cnt { color: var(--ember); }
+.tfx-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-bottom: 6px; }
+.tfx-row .tf-q { flex: 1 1 240px; }
+.tfx-row .fl { min-width: 150px; }
+dialog:has(.ficha) { width: min(760px, calc(100vw - 32px)); }
+.ficha { display: grid; gap: 18px; }
+.ficha .det-k { margin: 0; }
+.ficha-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ficha-stats > div { border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; min-width: 0; }
+.ficha-stats b { font: 700 20px/1.2 var(--font); color: var(--bone); overflow-wrap: anywhere; }
+.ficha-stats span { font-size: 13px; color: var(--muted); }
+.ficha-stats .late { color: var(--ember); }
+.ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 28px; }
+.ficha-sec h3 { margin: 0 0 8px; font: 600 12px/1.3 var(--font); color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.ficha-sec dl { display: grid; grid-template-columns: minmax(120px, .9fr) minmax(0, 1.1fr); gap: 8px 14px; margin: 0; }
+.ficha-sec dt { color: var(--muted); font-size: 14px; }
+.ficha-sec dd { margin: 0; font-size: 14px; color: var(--ash); overflow-wrap: anywhere; }
+.ficha-mods { display: flex; flex-wrap: wrap; gap: 6px; }
+.ficha-mods span { border: 1px solid var(--rule); border-radius: 999px; padding: 3px 10px; font-size: 13px; color: var(--muted); }
+.ficha-mods span.on { border-color: var(--accent); color: var(--accent); background: var(--lavender); }
+.ficha-foot { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; border-top: 1px solid var(--rule); padding-top: 14px; }
+@media (max-width: 640px) {
+  .ficha-grid { grid-template-columns: 1fr; }
+  .ficha-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ficha-sec dl { grid-template-columns: 1fr; gap: 2px 0; }
+  .ficha-sec dd { margin-bottom: 8px; }
+}/* v2.20.0: en la página de un cliente, Tareas ocupa el ancho y Claves va a la derecha (la tercera columna
+   de Clientes está oculta ahí). Los filtros de tareas se acomodan en filas. */
+@media (min-width: 901px) {
+  #v-tablero:not(.is-all) .board { grid-template-columns: minmax(0, 1fr) minmax(320px, 400px); }
+}
+.tfx-row .tf-q { flex: 1 1 100%; }
+.tfx-row .fl { flex: 1 1 150px; min-width: 0; }
+.tfx-row .link { align-self: center; }
+.tfx-seg { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.tfx-tab { white-space: nowrap; }/* v2.20.0: botones como en el Conciliador. Blancos con borde fino; el botón principal es negro y, en cada
+   grupo, solo el elemento seleccionado se marca en negro. */
+:root { --negro: #0a0a0a; --negro-texto: #fafafa; }
+.btn { background: var(--negro); color: var(--negro-texto); border: 1px solid var(--negro); }
+.btn:hover { background: #262626; border-color: #262626; }
+.btn.alt { background: #ffffff; color: var(--ash); border: 1px solid var(--linea, #e5e5e5); }
+.btn.alt:hover { background: #fafafa; border-color: #a3a3a3; }
+.bar-actions #btn-nueva { background: var(--negro); border-color: var(--negro); color: var(--negro-texto); }
+.views button, .views [role="tab"] { background: transparent; }
+.views button[aria-selected="true"], .views [role="tab"][aria-selected="true"] { background: var(--negro); color: var(--negro-texto); }
+.side-cli button[aria-pressed="true"] { background: var(--negro); color: var(--negro-texto); }
+.chip { background: #ffffff; border: 1px solid var(--linea, #e5e5e5); border-radius: 999px; }
+.chip[aria-pressed="true"] { background: var(--negro); color: var(--negro-texto); border-color: var(--negro); }
+.tfx-seg { border-bottom: 0; gap: 6px; margin-bottom: 12px; }
+.tfx-tab { background: #ffffff; border: 1px solid var(--linea, #e5e5e5); border-radius: 999px; padding: 6px 12px; margin-bottom: 0; }
+.tfx-tab:hover { border-color: #a3a3a3; }
+.tfx-tab[aria-pressed="true"] { background: var(--negro); color: var(--negro-texto); border-color: var(--negro); }
+.tfx-tab[aria-pressed="true"] .cnt { color: var(--negro-texto); }/* v2.20.0: Accesos en un panel flotante; Tareas a todo el ancho; filtros en dos filas compactas. */
+.acc-fab { position: relative; flex: none; z-index: 39; display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border: 1px solid var(--negro); border-radius: 999px; background: var(--negro); color: var(--negro-texto); font: 500 15px/1 var(--font); cursor: pointer; box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
+.acc-fab:hover { background: #262626; }
+/* v2.27.0: «Accesos» es una acción secundaria (contorno); la principal sigue siendo «Nueva tarea». */
+.acc-fab { background: #ffffff; color: var(--negro); border-color: var(--control); }
+.acc-fab:hover { background: #f5f5f5; }
+.acc-fab[aria-expanded="true"] { background: #ffffff; color: var(--negro); }
+.acc-fab:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+#claves.drawer { position: fixed; top: 96px; right: 24px; bottom: 96px; width: min(420px, calc(100vw - 48px)); z-index: 40; display: none; flex-direction: column; background: #ffffff; border: 1px solid var(--linea, #e5e5e5); border-radius: 18px; box-shadow: 0 16px 48px rgba(0, 0, 0, .18); padding: 16px; max-height: none; position-anchor: none; }
+#claves.drawer.acc-open { display: flex; }
+#claves.drawer .qk-list { flex: 1 1 auto; min-height: 0; max-height: none; }
+#v-tablero:not(.is-all) .board { grid-template-columns: minmax(0, 1fr); }
+.tfx-top { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.tfx-top .tfx-seg { border: 0; margin: 0; }
+.tfx-top .tf-q { flex: 1 1 240px; max-width: 340px; min-width: 200px; }
+.tfx-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.tfx-row .fl { flex: 0 1 200px; min-width: 150px; }
+.tfx-row .fl .input { height: 36px; }
+.tfx-row .link { margin-left: auto; }
+@media (max-width: 900px) {
+  #claves.drawer { left: 12px; right: 12px; width: auto; top: 80px; bottom: 88px; }
+  .acc-fab { font-size: 0; padding: 0 12px; } /* v2.27.0: en el celular solo el icono; el nombre queda en aria-label */
+}/* v2.21.0: Accesos desde cualquier vista (claves y usuarios); calendario más ancho; eventos en cuadros con fondo;
+   tareas agrupadas por día con la categoría en una etiqueta pequeña. */
+.acc-tabs { display: flex; gap: 6px; margin: 0 0 12px; }
+.acc-tabs button { border: 1px solid var(--linea, #e5e5e5); background: #ffffff; color: var(--ash); border-radius: 999px; padding: 5px 12px; font: 500 13px/1.2 var(--font); cursor: pointer; }
+.acc-tabs button:hover { border-color: #a3a3a3; }
+.acc-tabs button[aria-pressed="true"] { background: var(--negro); color: var(--negro-texto); border-color: var(--negro); }
+#users-pop { display: none; flex: 1 1 auto; min-height: 0; overflow: auto; }
+#claves.acc-users #users-pop { display: block; }
+#claves.acc-users .qk-find, #claves.acc-users #keys, #claves.acc-users #add-clave, #claves.acc-users #imp-claves, #claves.acc-users #csv-in { display: none; }
+.tag-c { display: inline-flex; align-items: center; height: 20px; margin-left: 6px; padding: 0 8px; border-radius: 6px; background: var(--raised, #f0f0f0); color: var(--ash); font-size: 11px; font-weight: 500; line-height: 1; vertical-align: middle; white-space: nowrap; }
+@media (min-width: 901px) {
+  #app > main.wrap:has(#v-cal:not([hidden])) { max-width: 1480px; }
+}
+.cal-it { background: color-mix(in srgb, var(--c, #8b8c96) 16%, var(--surface)); padding: 4px 7px; }
+.cal-it:hover { background: color-mix(in srgb, var(--c, #8b8c96) 28%, var(--surface)); color: var(--bone); }
+.cal-it.done { background: color-mix(in srgb, var(--c, #8b8c96) 8%, var(--surface)); }
+.cal-it.prog { background: transparent; box-shadow: inset 0 0 0 1px var(--c, var(--muted)); }
+.cal-it.sel, .cal-it.sel:hover { background: rgba(0, 113, 227, .12); }
+/* v2.22.0: tarjetas del resumen de Inicio con color propio; cada una abre su ventana con la información. */
+#v-tablero > .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; background: transparent; border: 0; border-radius: 0; padding: 0; }
+#v-tablero > .kpis > .kpi { display: flex; flex-direction: column; gap: 4px; align-items: stretch; text-align: left; border: 0; border-radius: 14px; padding: 14px 16px; min-height: 104px; background: var(--kt, #f3f3f3); color: var(--ki, #222); font: inherit; cursor: pointer; transition: transform .12s, box-shadow .12s; }
+#v-tablero > .kpis > .kpi[hidden] { display: none; }
+#v-tablero > .kpis > .kpi:hover { background: var(--kt, #f3f3f3); box-shadow: 0 6px 18px rgba(0, 0, 0, .08); transform: translateY(-1px); }
+#v-tablero > .kpis > .kpi:focus-visible { outline: 2px solid var(--ki, #222); outline-offset: 2px; }
+#v-tablero > .kpis > .kpi .k { color: var(--ki, #222); opacity: .85; font: 600 12px/1.3 var(--font); letter-spacing: .08em; text-transform: uppercase; background: none; padding: 0; }
+#v-tablero > .kpis > .kpi .v, #v-tablero > .kpis > .kpi .v.late, #v-tablero > .kpis > .kpi .v.ok, #v-tablero > .kpis > .kpi .late, #v-tablero > .kpis > .kpi .row .late { color: var(--ki, #222); }
+#v-tablero > .kpis > .kpi .s, #v-tablero > .kpis > .kpi .s b { color: var(--ki, #222); opacity: .85; }
+#v-tablero > .kpis > .kpi .row { color: var(--ki, #222); }
+#kpi-late { --kt: #fde7e3; --ki: #8a2b1d; }
+#ring { --kt: #e6eefc; --ki: #1f4b99; flex-direction: row; align-items: center; gap: 14px; }
+#ring .k { display: inline-block; }
+#ring .ring-t { stroke: rgba(31, 75, 153, .18); }
+#ring .ring-p { stroke: var(--ki); }
+#ring.full .ring-p { stroke: #1d6434; }
+#ring .tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+#ring b { color: var(--ki); }
+#kpi-venc { --kt: #fff2d4; --ki: #7a4d00; }
+#kpi-aseo { --kt: #e2f5e9; --ki: #1d6434; }
+#kpi-clientes { --kt: #efe9ff; --ki: #4a2fa0; }
+#kpi-pend { --kt: #e9eef4; --ki: #26364a; }
+.kpi-pop .mini-r .lbl { text-align: left; }
+@media (max-width: 640px) {
+  #v-tablero > .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  #v-tablero > .kpis > .kpi { padding: 12px; min-height: 96px; }
+}
+/* v2.23.0: módulos del cliente editables en su ficha; categorías con color, editables en Configuración. */
+.mod-ed { display: grid; gap: 8px; }
+.mod-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; border: 1px solid var(--rule); border-radius: 12px; padding: 10px 14px; cursor: pointer; }
+.mod-row:hover { background: var(--raised, #f5f5f5); }
+.mod-t { display: grid; gap: 2px; min-width: 0; }
+.mod-t b { font: 600 15px/1.3 var(--font); color: var(--bone); }
+.mod-sw { appearance: none; -webkit-appearance: none; flex: none; width: 42px; height: 24px; margin: 0; border-radius: 999px; background: #c4c3c1; position: relative; cursor: pointer; transition: background-color .15s; }
+.mod-sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 2px rgba(0, 0, 0, .2); transition: transform .15s; }
+.mod-sw:checked { background: var(--negro, #0a0a0a); }
+.mod-sw:checked::after { transform: translateX(18px); }
+.mod-sw:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tag-c { background: color-mix(in srgb, var(--cc, #9b958d) 16%, #ffffff); color: color-mix(in srgb, var(--cc, #9b958d) 62%, #000000); }
+.cat-add { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; }
+.cat-add #cat-nueva { flex: 1 1 220px; }
+.cat-r { display: grid; grid-template-columns: 12px minmax(0, 1fr) 130px auto auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.cat-sw { width: 12px; height: 12px; border-radius: 50%; background: var(--cc, #9b958d); }
+@media (max-width: 640px) {
+  .cat-r { grid-template-columns: 12px minmax(0, 1fr) 120px; }
+  .cat-r > .meta { grid-column: 2; }
+  .cat-r > .link { grid-column: 3; justify-self: end; }
+}
+/* v2.24.0: la casilla hecha muestra un check; la lista de tareas puede verse completa («Todas»). */
+.tick.on { background-color: var(--accent); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); background-size: 13px 13px; background-repeat: no-repeat; background-position: center; border-color: var(--accent); box-shadow: none; }
+/* v2.25.0: ventanas movibles (barra de arriba) y redimensionables (esquina inferior derecha). */
+dialog.win, dialog.pop { resize: both; overflow: auto; min-width: 260px; min-height: 140px; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); }
+dialog.win { max-height: calc(100vh - 32px); }
+dialog.win.wide { width: min(880px, calc(100vw - 32px)); }
+dialog.win .pop-x, dialog.pop .pop-x { top: 28px; }
+.wbar { position: sticky; top: 0; z-index: 3; flex: none; height: 22px; display: grid; place-items: center; cursor: move; touch-action: none; user-select: none; background: inherit; border-radius: inherit; }
+.wbar::before { content: ""; width: 44px; height: 4px; border-radius: 2px; background: #d4d4d4; }
+.wbar:hover::before, .wbar.on::before { background: #8f8f8f; }
+/* v2.26.0: en la barra lateral, debajo de cada cliente aparecen sus módulos activos. */
+.side-grp { display: grid; }
+.side-mods { display: flex; flex-wrap: wrap; gap: 2px 4px; padding: 0 8px 8px 34px; }
+.side-cli .side-mod { width: auto; padding: 3px 8px; border-radius: 6px; font: 400 12px/1.4 var(--font); color: var(--muted); }
+.side-cli .side-mod:hover { background: #f0f0f0; color: var(--bone); }
+.side-cli .side-mod[aria-pressed="true"] { background: var(--lavender); color: var(--accent); }
+#app.side-min .side-mods { display: none; }
 </style>
 </head>
 <body>
@@ -974,7 +1370,8 @@ body.gestor #add-cliente, body.gestor #copias, body.gestor #recuperacion, body.g
     <button class="btn alt" type="button" id="btn-subir">Subir mi copia</button>
     <input type="file" id="file-in" accept=".json,application/json" class="sr" tabindex="-1" aria-hidden="true">
   </div>
-  <p class="note" id="login-note">Solo pueden crear cuenta los correos invitados. Los datos se cifran en este navegador antes de salir: Supabase guarda solo la copia cifrada y nunca recibe tu clave. Cada día queda una copia en la nube (se conservan las 30 diarias más recientes y las demás durante un año).</p>
+  <p class="note" id="login-note">Solo pueden crear cuenta los correos invitados. Tus datos se cifran en tu navegador antes de guardarse: nadie, ni el servidor, puede leerlos sin tu clave. Cada día se guarda una copia de seguridad en la nube.</p>
+  <p class="ver-app">Versión 2.27.0</p>
 </main>
 
 <!-- Administración: solo gestiona oficinas, usuarios y módulos; no tiene datos propios -->
@@ -1011,17 +1408,21 @@ body.gestor #add-cliente, body.gestor #copias, body.gestor #recuperacion, body.g
 <div id="app" hidden>
   <header class="bar">
     <div class="wrap bar-in">
-      <span class="brand"><span class="mark" aria-hidden="true"></span>Mi oficina</span>
+      <button class="side-toggle" type="button" id="side-toggle" aria-expanded="true" aria-label="Ocultar o mostrar la barra lateral" title="Ocultar la barra lateral"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
+      <h1 class="brand"><span class="mark" aria-hidden="true"></span><span class="lbl">Mi oficina</span></h1>
       <div class="views" role="tablist" aria-label="Vista">
-        <button type="button" role="tab" id="tab-tablero" aria-controls="v-tablero" aria-selected="true">Tablero</button>
-        <button type="button" role="tab" id="tab-cal" aria-controls="v-cal" aria-selected="false" tabindex="-1">Calendario</button>
-        <button type="button" role="tab" id="tab-venc" aria-controls="v-venc" aria-selected="false" tabindex="-1">Vencimientos</button>
-        <button type="button" role="tab" id="tab-cred" aria-controls="v-cred" aria-selected="false" tabindex="-1">Créditos</button>
-        <button type="button" role="tab" id="tab-aseo" aria-controls="v-aseo" aria-selected="false" tabindex="-1">Aseo</button>
-        <button type="button" role="tab" id="tab-reg" aria-controls="v-reg" aria-selected="false" tabindex="-1">Registros</button>
-        <button type="button" role="tab" id="tab-cfg" aria-controls="v-cfg" aria-selected="false" tabindex="-1">Configuración</button>
+        <button type="button" role="tab" id="tab-tablero" title="Inicio" aria-controls="v-tablero" aria-selected="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span class="lbl">Inicio</span></button>
+        <button type="button" role="tab" id="tab-cal" title="Calendario" aria-controls="v-cal" aria-selected="false" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg><span class="lbl">Calendario</span></button>
+        <button type="button" role="tab" id="tab-venc" title="Vencimientos" aria-controls="v-venc" aria-selected="false" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="lbl">Vencimientos</span></button>
+        <button type="button" role="tab" id="tab-cred" title="Créditos" aria-controls="v-cred" aria-selected="false" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg><span class="lbl">Créditos</span></button>
+        <button type="button" role="tab" id="tab-aseo" title="Aseo" aria-controls="v-aseo" aria-selected="false" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2"/></svg><span class="lbl">Aseo</span></button>
+        <button type="button" role="tab" id="tab-reg" title="Registros" aria-controls="v-reg" aria-selected="false" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="lbl">Registros</span></button>
+        <button type="button" role="tab" id="tab-cfg" title="Configuración" aria-controls="v-cfg" aria-selected="false" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg><span class="lbl">Configuración</span></button>
       </div>
+      <div class="side-cli" id="side-cli"></div>
       <span class="spacer"></span>
+      <!-- v2.27.0: el botón de Accesos vive en la barra de arriba, ya no flota sobre las tareas ni los botones. -->
+      <button class="acc-fab" type="button" id="acc-fab" aria-expanded="false" aria-label="Accesos" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/></svg> <span class="acc-txt">Accesos</span></button>
       <div class="status" aria-live="polite">
         <span class="s1" id="st-save"></span>
         <span class="s2 num" id="st-copy" hidden></span>
@@ -1035,28 +1436,37 @@ body.gestor #add-cliente, body.gestor #copias, body.gestor #recuperacion, body.g
           <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M5 8a5 5 0 0 1 10 0c0 4 1.5 5.5 2 6H3c.5-.5 2-2 2-6z"/><path d="M8.2 17a2 2 0 0 0 3.6 0"/></svg>
           <span class="badge num" id="avisos-n" hidden></span>
         </button>
-        <button class="btn alt" type="button" id="btn-nueva" aria-keyshortcuts="N" title="Nueva tarea (N)">Nueva tarea</button>
+        <button class="btn alt" type="button" id="btn-nueva" aria-keyshortcuts="N" title="Nueva tarea (N)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">Nueva tarea</span></button>
       </div>
-      <button class="link bar-exit" type="button" id="btn-salir" title="Guarda, cierra la sesión y bloquea la copia">Salir</button>
+      <button class="link bar-exit" type="button" id="btn-salir" title="Guarda, cierra la sesión y bloquea la copia"><span class="lbl">Salir</span></button>
     </div>
   </header>
 
   <main class="wrap">
     <!-- Contexto: quién está y para qué cliente se ve todo (el filtro vale en todas las vistas). -->
     <div class="ctx">
+      <div class="cli-head" id="cli-head" hidden>
+        <button class="link" type="button" id="cli-back">← Todos los clientes</button>
+        <span class="cli-name" id="cli-name"></span>
+        <span class="meta" id="cli-meta"></span>
+        <button class="btn alt" type="button" id="cli-edit">Ficha del cliente</button>
+      </div>
       <p class="who" id="who"></p>
+      <label class="cli-pick"><span>Ver cliente</span><select id="cli-sel"></select></label>
       <nav class="filters" aria-label="Filtrar por cliente" id="filters"></nav>
     </div>
     <div id="v-tablero" role="tabpanel" aria-labelledby="tab-tablero">
     <!-- Resumen: cuatro tarjetas que se leen de un vistazo y llevan a su detalle. -->
     <section class="kpis" aria-label="Resumen">
       <button class="kpi" type="button" id="kpi-late"></button>
-      <div class="kpi kpi-hoy" id="ring">
+      <button class="kpi kpi-hoy" type="button" id="ring">
         <svg viewBox="0 0 56 56" aria-hidden="true"><circle class="ring-t" cx="28" cy="28" r="24.5"/><circle class="ring-p" id="ring-p" cx="28" cy="28" r="24.5" stroke-dasharray="153.94" stroke-dashoffset="153.94"/></svg>
         <span class="tx"><span class="k">Hoy</span><b id="ring-n"></b><span class="s" id="ring-s"></span></span>
-      </div>
+      </button>
       <button class="kpi" type="button" id="kpi-venc"></button>
       <button class="kpi" type="button" id="kpi-aseo"></button>
+      <button class="kpi" type="button" id="kpi-clientes"></button>
+      <button class="kpi" type="button" id="kpi-pend"></button>
     </section>
 
     <!-- Tablero: tareas · claves a mano · clientes. En pantallas medianas, claves y clientes van juntas a la derecha. -->
@@ -1071,23 +1481,8 @@ body.gestor #add-cliente, body.gestor #copias, body.gestor #recuperacion, body.g
       </section>
 
       <div class="side">
-        <section class="card qk" aria-labelledby="h-claves" id="claves">
-          <div class="card-h">
-            <h2 id="h-claves">Claves</h2>
-            <span class="acts">
-              <button class="link" type="button" id="imp-claves">Importar CSV</button>
-              <button class="link" type="button" id="add-clave">Agregar</button>
-            </span>
-          </div>
-          <input type="file" id="csv-in" accept=".csv,text/csv" class="sr" tabindex="-1" aria-hidden="true">
-          <label class="qk-find">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
-            <input type="search" id="qk-q" placeholder="Buscar portal, cliente o usuario" aria-label="Buscar en las claves" aria-keyshortcuts="C" autocomplete="off" spellcheck="false">
-          </label>
-          <div class="qk-list" id="keys"></div>
-        </section>
 
-        <section class="card" aria-labelledby="h-clientes">
+        <section class="card" id="clientes-card" aria-labelledby="h-clientes">
           <div class="card-h">
             <h2 id="h-clientes">Clientes</h2>
             <button class="link" type="button" id="add-cliente">Agregar</button>
@@ -1110,7 +1505,7 @@ body.gestor #add-cliente, body.gestor #copias, body.gestor #recuperacion, body.g
       <section class="card" aria-labelledby="h-cal" id="vencimientos">
         <div class="card-h">
           <h2 id="h-cal">Calendario tributario</h2>
-          <span class="acts"><button class="link" type="button" onclick="setView('vencimientos')">Panel de vencimientos</button><button class="link" type="button" id="add-venc">Agregar vencimiento</button></span>
+          <span class="acts"><button class="link" type="button" id="btn-panel-venc" onclick="setView('vencimientos')">Panel de vencimientos</button><button class="link" type="button" id="add-venc">Agregar vencimiento</button></span>
         </div>
         <p class="sums num" id="due-sum" hidden></p>
         <div class="strip" id="strip" role="img"></div>
@@ -1149,6 +1544,26 @@ body.gestor #add-cliente, body.gestor #copias, body.gestor #recuperacion, body.g
     </div>
 
     <div class="cfg" id="v-cfg" role="tabpanel" aria-labelledby="tab-cfg" hidden>
+      <section class="card" aria-labelledby="h-cfg-cli" id="cfg-clientes-card">
+        <div class="card-h">
+          <h2 id="h-cfg-cli">Clientes</h2>
+          <button class="btn" type="button" id="cfg-add-cli">Agregar cliente</button>
+        </div>
+        <p class="meta cfg-note">Cada cliente tiene sus datos, los módulos que usa y sus impuestos. Editar un cliente no cambia sus tareas ni sus claves.</p>
+        <div id="cfg-clientes"></div>
+      </section>
+      <section class="card" aria-labelledby="h-cats" id="categorias">
+        <div class="card-h">
+          <h2 id="h-cats">Categorías</h2>
+        </div>
+        <p class="meta cfg-note">Cada categoría tiene su color, que se ve en las tareas. Si cambias el nombre, también cambian las tareas que la tienen. Una categoría que tiene tareas no se puede quitar: primero cambia esas tareas.</p>
+        <div id="cat-lista"></div>
+        <div class="cat-add">
+          <input class="input" id="cat-nueva" placeholder="Nueva categoría" aria-label="Nombre de la nueva categoría" autocomplete="off">
+          <select class="input" id="cat-nuevo-color" aria-label="Color de la nueva categoría"></select>
+          <button class="btn" type="button" id="cat-add-btn">Agregar categoría</button>
+        </div>
+      </section>
       <section class="card" aria-labelledby="h-vista">
         <h2 id="h-vista">Vista</h2>
         <p class="meta cfg-note">Estos ajustes son tuyos: cada usuario tiene los suyos y viajan dentro de la copia.</p>
@@ -1204,7 +1619,7 @@ body.gestor #add-cliente, body.gestor #copias, body.gestor #recuperacion, body.g
         <p class="meta">Para el PDF se abre la ventana de impresión: en Destino elige Guardar como PDF.</p>
       </section>
 
-      <section class="card" aria-labelledby="h-importar" id="importar">
+      <section class="card" aria-labelledby="h-importar" id="importar" hidden>
         <h2 id="h-importar">Importar datos</h2>
         <p class="meta cfg-note">Combina un archivo de importación (por ejemplo, el preparado desde Notion) con lo que ya tienes. No borra nada: lo que ya existe se completa y no se duplica. Antes de importar se guarda una copia en la nube.</p>
         <input type="file" id="imp-in" accept=".json,application/json" class="sr" tabindex="-1" aria-hidden="true">
@@ -1276,10 +1691,31 @@ body.gestor #add-cliente, body.gestor #copias, body.gestor #recuperacion, body.g
 
   <footer class="wrap">
     <span class="name">Mi oficina</span>
+    <span class="ver-app">Versión 2.27.0</span>
     <span id="foot"></span>
   </footer>
 </div>
 
+<section class="card qk drawer" aria-labelledby="h-claves" id="claves">
+  <div class="card-h">
+    <h2 id="h-claves">Claves</h2>
+    <span class="acts">
+      <button class="link" type="button" id="imp-claves" hidden>Importar CSV</button>
+      <button class="link" type="button" id="acc-close">Cerrar</button><button class="link" type="button" id="add-clave">Agregar</button>
+    </span>
+  </div>
+  <div class="acc-tabs" role="group" aria-label="Qué ver">
+    <button type="button" id="acc-t-claves" aria-pressed="true">Claves</button>
+    <button type="button" id="acc-t-users" aria-pressed="false">Usuarios</button>
+  </div>
+  <input type="file" id="csv-in" accept=".csv,text/csv" class="sr" tabindex="-1" aria-hidden="true">
+  <label class="qk-find">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
+    <input type="search" id="qk-q" placeholder="Buscar portal, cliente o usuario" aria-label="Buscar en las claves" aria-keyshortcuts="C" autocomplete="off" spellcheck="false">
+  </label>
+  <div class="qk-list" id="keys"></div>
+  <div class="qk-list" id="users-pop"></div>
+</section>
 <dialog id="dlg" aria-labelledby="dlg-t"></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
 <p class="sr" id="sr-live" role="status" aria-live="polite"></p>
@@ -1320,7 +1756,9 @@ const days = s => Math.round((parse(s) - todayD()) / 864e5);
 const short = s => { const d = parse(s); return d.getDate() + " " + MES[d.getMonth()]; };
 const whenText = s => { const d = days(s); return d < 0 ? "Hace " + (-d) + plural(-d, " día", " días") : d === 0 ? "Hoy" : d === 1 ? "Mañana" : "En " + d + " días"; };
 const leftText = n => n < 0 ? "Venció hace " + (-n) + plural(-n, " día", " días") : n === 0 ? "Vence hoy" : n === 1 ? "Mañana" : n + " días";
-const fMoney = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
+const fMoneyRaw = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
+// v2.27.0: sin espacio después del signo («$0», no «$ 0»), como pide la guía de cifras.
+const fMoney = { format: n => fMoneyRaw.format(n).replace(/^(-?)\$\s/, "$1$") };
 const fMonthName = new Intl.DateTimeFormat("es-CO", { month: "long" });
 // Lee valores escritos a mano: "1.250.000", "$ 350000", "1,250,000" o "1250000,50".
 function money(s) {
@@ -1538,9 +1976,20 @@ const maxClientes = () => SB.config && Number(SB.config.maxClientes) > 0 ? Numbe
 const VIEW_MOD = { calendario: "calendario", aseo: "aseo", registros: "registros" };
 const ACT_MOD = { "Nuevo acceso": "claves", "Ir al calendario": "calendario", "Ir a registros y documentos": "registros",
   "Vino el aseo hoy": "aseo", "Registrar pago de aseo": "aseo", "Ir al aseo": "aseo" };
+// El aseo es de un solo cliente (el que paga): solo se ve cuando ese cliente está seleccionado.
+// Cada cliente que paga el aseo tiene su propio control (S.data.aseos). aseo() es el control del cliente seleccionado.
+const aseosAll = () => (S.data.aseos || (S.data.aseos = []));
+const controlDe = cid => cid ? aseosAll().find(x => x.cliente === cid) || null : null;
+const nuevoControl = cid => { const c = { id: uid(), cliente: cid, prestador: "", lugar: "", valorDia: 30000, dias: [], pagos: [] }; aseosAll().push(c); return c; };
+const aseo = () => controlDe(filter) || { id: "", cliente: "", prestador: "", lugar: "", valorDia: 30000, dias: [], pagos: [] };
+// Módulos de cada cliente (todos activos si no se ha configurado).
+const modCliente = (cid, m) => { if (!m || !cid || cid === "all") return true; const c = S.data && S.data.clientes.find(x => x.id === cid); return !c || !c.modulos || c.modulos[m] !== false; };
+const aseoOn = () => MOD("aseo") && modCliente(filter, "aseo") && !!(S.data && controlDe(filter));
 function applyModules() {
-  $("tab-cal").hidden = !MOD("calendario"); $("tab-aseo").hidden = !MOD("aseo"); $("tab-reg").hidden = !MOD("registros");
-  $("kpi-aseo").hidden = !MOD("aseo"); $("claves").hidden = !MOD("claves");
+  $("tab-cal").hidden = !MOD("calendario") || !modCliente(filter, "calendario"); $("tab-aseo").hidden = !aseoOn(); $("tab-reg").hidden = !MOD("registros") || !modCliente(filter, "registros");
+  $("kpi-aseo").hidden = !aseoOn(); $("claves").hidden = !MOD("claves") || !modCliente(filter, "claves");
+  $("tab-venc").hidden = filter === "all"; $("tab-cred").hidden = filter === "all";
+  $("tab-reg").hidden = filter === "all" || !MOD("registros") || !modCliente(filter, "registros");
 }
 const limitMsg = n => "Tu plan permite hasta " + n + plural(n, " cliente", " clientes") + ". Pide al administrador ampliar el límite.";
 
@@ -1554,8 +2003,20 @@ let saveTimer = null, lockTimer = null;
 function normalize(d) {
   d = d && typeof d === "object" ? d : {};
   for (const k of ["clientes", "tareas", "vencimientos", "claves", "frecuentes", "documentos", "registros"]) if (!Array.isArray(d[k])) d[k] = [];
-  if (d.aseo) for (const k of ["dias", "pagos"]) if (!Array.isArray(d.aseo[k])) d.aseo[k] = [];
+  if (!Array.isArray(d.aseos)) d.aseos = [];
+  // Formato anterior: una sola cuenta de aseo (d.aseo). Pasa a ser el control de su cliente dentro de d.aseos.
+  if (typeof d.aseo === "object" && d.aseo !== null && !Array.isArray(d.aseo)) {
+    const a = d.aseo, cid = typeof a.cliente === "string" ? a.cliente : "";
+    if (cid && !d.aseos.some(x => x.cliente === cid)) {
+      d.aseos.push({ id: "aseo-" + cid, cliente: cid, prestador: a.prestador || "", lugar: a.lugar || "", valorDia: a.valorDia || 30000,
+        dias: Array.isArray(a.dias) ? a.dias : [], pagos: Array.isArray(a.pagos) ? a.pagos : [] });
+      delete d.aseo; S.aseoMigrado = true;
+    }
+  }
   for (const k of XCOLLS) if (!Array.isArray(d[k])) d[k] = [];
+  // Categorías: la lista inicial se crea una sola vez; después solo se suman las que usan las tareas.
+  if (!d.categoriasSembradas && !d.categorias.length) { d.categorias = CATEGORIAS.map((n, i) => ({ id: catSlug(n), nombre: n, color: CAT_PAL[i % CAT_PAL.length][0] })); d.categoriasSembradas = true; }
+  catAddFromData(d);
   if (!("ultimaCopia" in d)) d.ultimaCopia = null;
   if (!d.ajustes || typeof d.ajustes !== "object") d.ajustes = {};
   // Cada cliente conserva su color aunque se agreguen o borren otros.
@@ -1566,6 +2027,20 @@ function normalize(d) {
 // Pasado el sexto cliente se usa gris: el nombre del cliente siempre acompaña al color.
 const COLORS = [["#3987e5", "Azul"], ["#c98500", "Ámbar"], ["#d55181", "Magenta"], ["#008300", "Verde"], ["#199e70", "Aguamarina"], ["#9085e9", "Violeta"]];
 const GRAY = "#9b958d";
+// Paleta de categorías (y de sus colores en Configuración). El id sale del nombre: así dos dispositivos no crean la misma dos veces.
+const CAT_PAL = [["#3987e5", "Azul"], ["#c98500", "Ámbar"], ["#d55181", "Magenta"], ["#008300", "Verde"], ["#9085e9", "Violeta"], ["#e0662b", "Naranja"], ["#0f8b8d", "Turquesa"], ["#a33a2a", "Rojo"], ["#6b7f1a", "Oliva"], ["#7d6b5d", "Café"]];
+const catSlug = n => "cat-" + norm(n).normalize("NFD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+// Suma a la lista las categorías que tienen tareas o frecuentes y todavía no están.
+function catAddFromData(D) {
+  if (!D || !Array.isArray(D.categorias)) return;
+  for (const t of [...(D.tareas || []), ...(D.frecuentes || [])]) {
+    const n = (t.categoria || "").trim();
+    if (!n || D.categorias.some(c => nkey(c.nombre) === nkey(n))) continue;
+    D.categorias.push({ id: catSlug(n), nombre: n, color: CAT_PAL[D.categorias.length % CAT_PAL.length][0] });
+  }
+}
+const catColor = n => { const k = nkey(n || ""), c = ((S.data && S.data.categorias) || []).find(x => nkey(x.nombre) === k); return c ? c.color : GRAY; };
+const catNames = () => ((S.data && S.data.categorias) || []).map(c => c.nombre).sort((a, b) => a.localeCompare(b, "es"));
 const nextColor = cs => (COLORS.find(([h]) => !cs.some(c => c.color === h)) || [GRAY])[0];
 const cColor = id => (S.data.clientes.find(c => c.id === id) || {}).color || GRAY;
 const dot = (color, venc) => el("i", { class: "m" + (venc ? " sq" : ""), style: "--c:" + color, "aria-hidden": "true" });
@@ -1587,7 +2062,7 @@ async function seal(k = S, data = S.data) {
    usuario y dato suelto va cifrado por separado (AES-GCM con la llave de datos; el nombre de la fila va autenticado).
    Al guardar solo viajan las filas que cambiaron; al llegar cambios de otro dispositivo, solo esas filas. */
 const SEP = "\u0001";
-const COLLS = ["clientes", "tareas", "vencimientos", "claves", "frecuentes", "documentos", "registros"];
+const COLLS = ["clientes", "tareas", "vencimientos", "claves", "frecuentes", "documentos", "registros", "aseos"];
 const FORCE = new Set(["meta" + SEP + "actualizado", "meta" + SEP + "actualizadoPor"]); // se pisan sin control de versión
 const hasIds = a => Array.isArray(a) && a.every(x => isObj(x) && x.id != null && x.id !== "");
 const rowAad = (col, id, kid) => te.encode(col + SEP + id + SEP + kid);
@@ -1667,7 +2142,7 @@ async function loadAllRows() {
 }
 // Aplica filas que llegaron de la nube. Si aquí también se cambió la misma fila, se combina campo por campo.
 async function applyRemote(rows, full) {
-  const cur = splitData(S.data), seen = new Set();
+  const cur = splitData(S.data), seen = new Set(), choquesAntes = CHOQUES;
   for (const r of rows) {
     const k = r.col + SEP + r.id; seen.add(k);
     S.rev = Math.max(S.rev, r.rev);
@@ -1689,6 +2164,7 @@ async function applyRemote(rows, full) {
     if (lj === b.json) { const [col, id] = k.split(SEP); setRow(S.data, col, id, null); }
   }
   normalize(S.data);
+  if (CHOQUES > choquesAntes) toast("Hubo un cambio al mismo tiempo en otro equipo. Se conservó el de este equipo: revisa ese dato.");
   if (localChanges()) { S.pending = true; S.dirty++; clearTimeout(saveTimer); saveTimer = setTimeout(persist, 800); }
 }
 function localChanges() {
@@ -2107,6 +2583,7 @@ function prepareLogin() {
 }
 
 function enterApp(kind) {
+  setTimeout(logAcceso, 1500);
   $("clave").value = "";
   saveSession(false);
   schedulePoll(); rtConnect();
@@ -2114,8 +2591,8 @@ function enterApp(kind) {
   applyModules();
   if (SB.nombre) document.title = SB.nombre + " · Mi oficina";
   $("login").hidden = true; $("app").hidden = false;
-  try { const f = localStorage.getItem(LS_FILTER); if (f && (f === "all" || S.data.clientes.some(c => c.id === f))) filter = f; } catch (e) {}
-  const h0 = location.hash.slice(1); if (S.data.clientes.some(c => c.id === h0)) filter = h0;
+  filter = "all"; // al abrir, siempre se empieza en Inicio
+  // (la dirección con # ya no abre un cliente: se empieza en Inicio)
   renderStatus(); armLock(); setView(view);
   if (kind === "nueva") S.notes.unshift("Oficina creada: desde ahora se guarda cifrada en la nube con tu usuario y clave.");
   else if (kind === "recuperada") S.notes.unshift("Acceso recuperado con el código de recuperación. Tu clave nueva ya abre la oficina; vuelve a guardar el código en su lugar seguro.");
@@ -2136,6 +2613,9 @@ function enterApp(kind) {
   if (kind === "admin") S.notes.unshift("Estás dentro de esta oficina como administrador. Lo que cambies se guarda en ella. Usa Salir para volver.");
   if (S.notes.length) toast(S.notes.join(" "));
   migrateAseo().catch(() => {});
+  if (S.aseoMigrado && !esGestor()) { S.aseoMigrado = false; (async () => {
+    if (SB.oficina) { try { await rpc("copia_manual", { p_id: SB.oficina }); } catch (e) { return; } }
+    S.pending = true; S.dirty++; persist(); })(); }
   try { sessionStorage.removeItem(SS_AGENDA); } catch (e) {}
   setTimeout(alertTick, 1500);
   v12AlEntrar();
@@ -2258,6 +2738,7 @@ async function persistNow() {
 /* ---------- Sincronización entre dispositivos ---------- */
 const isObj = x => x !== null && typeof x === "object" && !Array.isArray(x);
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+let CHOQUES = 0; // v2.27.0: cuántas veces dos equipos cambiaron el mismo dato (se avisa al usuario)
 function mergeData(B, L, R) {
   if (same(L, B)) return R;
   if (same(R, B)) return L;
@@ -2273,7 +2754,8 @@ function mergeData(B, L, R) {
     }
     return out;
   }
-  return L; // los dos cambiaron el mismo dato: gana lo hecho en este dispositivo
+  CHOQUES++;
+  return L; // los dos cambiaron el mismo dato: gana lo hecho en este dispositivo (y se avisa)
 }
 function mergeList(B, L, R) {
   const mb = new Map(B.map(x => [x.id, x])), ml = new Map(L.map(x => [x.id, x])), mr = new Map(R.map(x => [x.id, x]));
@@ -2733,6 +3215,37 @@ $("toast").addEventListener("pointerleave", toastGo); $("toast").addEventListene
 let lastPt = null, popAnchor = null, popPx = null;
 document.addEventListener("pointerdown", e => { lastPt = [e.clientX, e.clientY]; }, true);
 document.addEventListener("keydown", () => { lastPt = null; }, true);
+// Ventanas: se mueven por su barra de arriba y cambian de tamaño desde la esquina inferior derecha (en el teléfono
+// siguen siendo una hoja). El tamaño que dejas se recuerda para cada tipo de ventana.
+const WINS = (() => { try { return JSON.parse(localStorage.getItem("mo-ventanas") || "{}"); } catch (e) { return {}; } })();
+new ResizeObserver(() => {
+  const d = $("dlg");
+  if (!d.open || !d.dataset.key || !d.style.width) return;
+  WINS[d.dataset.key] = d.style.height ? { w: d.offsetWidth, h: d.offsetHeight } : { w: d.offsetWidth };
+  try { localStorage.setItem("mo-ventanas", JSON.stringify(WINS)); } catch (e) {}
+}).observe($("dlg"));
+function winBar(d) {
+  const b = el("div", { class: "wbar", title: "Arrastra para mover la ventana", "aria-hidden": "true" });
+  let ox = 0, oy = 0;
+  b.addEventListener("pointerdown", e => {
+    if (e.button !== 0 || narrow.matches) return;
+    const r = d.getBoundingClientRect();
+    popAnchor = null; // ya no se pega al ítem: se queda donde la dejes
+    d.style.margin = "0"; d.style.left = r.left + "px"; d.style.top = r.top + "px"; d.style.transform = "none"; d.style.transition = "none";
+    ox = e.clientX - r.left; oy = e.clientY - r.top;
+    b.setPointerCapture(e.pointerId); b.classList.add("on");
+  });
+  b.addEventListener("pointermove", e => {
+    if (!b.hasPointerCapture(e.pointerId)) return;
+    const w = d.offsetWidth;
+    // Siempre queda a la vista al menos un trozo: 80 px a los lados y la barra arriba o abajo.
+    d.style.left = Math.min(Math.max(e.clientX - ox, 8 - w + 80), innerWidth - 80) + "px";
+    d.style.top = Math.min(Math.max(e.clientY - oy, 0), innerHeight - 40) + "px";
+  });
+  const fin = e => { if (!b.hasPointerCapture(e.pointerId)) return; b.releasePointerCapture(e.pointerId); b.classList.remove("on"); d.style.transition = ""; };
+  b.addEventListener("pointerup", fin); b.addEventListener("pointercancel", fin);
+  return b;
+}
 function openDialog(d, light, opt = {}) {
   const a = document.activeElement, r0 = a && a !== document.body ? a.getBoundingClientRect() : null;
   const src = lastPt || (r0 ? [r0.left + r0.width / 2, r0.top + r0.height / 2] : null);
@@ -2743,10 +3256,15 @@ function openDialog(d, light, opt = {}) {
   const detached = opt.anchor && !opt.anchor.isConnected;
   const mode = opt.spot ? "spot" : narrow.matches ? "sheet" : opt.anchor && (!detached || wasPop) ? "pop" : "";
   if (d.open) d.close();
-  d.className = mode;
-  d.style.left = d.style.top = d.style.transform = d.style.transition = "";
+  d.className = mode || "win";
+  d.classList.toggle("wide", !!opt.wide);
+  d.dataset.key = mode === "sheet" || mode === "spot" ? "" : (opt.key || mode || "win");
+  d.style.left = d.style.top = d.style.transform = d.style.transition = d.style.margin = d.style.width = d.style.height = "";
   popAnchor = mode === "pop" && !detached ? opt.anchor : null;
   if (mode === "sheet") d.prepend(sheetGrab(d));
+  else if (mode !== "spot" && !d.querySelector(":scope > .wbar")) d.prepend(winBar(d));
+  const sz = d.dataset.key && WINS[d.dataset.key];
+  if (sz) { d.style.width = Math.min(sz.w, innerWidth - 16) + "px"; if (sz.h) d.style.height = Math.min(sz.h, innerHeight - 16) + "px"; }
   d.showModal();
   if (mode === "pop") {
     if (detached) { d.style.left = prev.left; d.style.top = prev.top; d.style.transformOrigin = prev.origin; }
@@ -2833,6 +3351,13 @@ function editor({ title, fields, values = {}, saveText = "Guardar", onSave, onDe
   };
   for (const f of fields) {
     const id = "f-" + f.name;
+    if (f.type === "action") { form.append(el("button", { class: "btn alt", type: "button", text: f.label, onclick: () => { d.close(); f.onClick(); } })); continue; }
+    if (f.type === "checks") {
+      const cur = values[f.name] || {};
+      form.append(el("fieldset", { class: "sw chk" }, el("legend", { text: f.label }),
+        ...f.options.map(([k, l]) => el("label", { class: "chk-i" }, el("input", { type: "checkbox", name: f.name + "." + k, checked: cur[k] !== false }), el("span", { text: l })))));
+      continue;
+    }
     let input;
     if (f.type === "swatch") {
       form.append(el("fieldset", { class: "sw" }, el("legend", { text: f.label }),
@@ -2870,6 +3395,8 @@ function editor({ title, fields, values = {}, saveText = "Guardar", onSave, onDe
     e.preventDefault();
     const v = {};
     for (const f of fields) {
+      if (f.type === "action") continue;
+      if (f.type === "checks") { v[f.name] = Object.fromEntries(f.options.map(([k]) => [k, !!form.elements[f.name + "." + k]?.checked])); continue; }
       if (!shown(f)) { v[f.name] = ""; continue; }
       const raw = form.elements[f.name].value;
       v[f.name] = f.type === "password" ? raw : raw.trim();
@@ -2889,7 +3416,7 @@ const cName = id => (S.data.clientes.find(c => c.id === id) || {}).nombre || "Ge
 /* ---------- Tareas ---------- */
 function taskDialog(t, fecha, hora, cliente) {
   if (!S.data.clientes.length) { toast("Primero agrega un cliente."); return; }
-  suggest("categorias", CATEGORIAS, S.data.tareas.map(x => x.categoria));
+  suggest("categorias", catNames(), S.data.tareas.map(x => x.categoria));
   suggest("responsables", responsables(), S.data.tareas.map(x => x.responsable));
   // Si la tarea ya es parte de una repetición, el formulario trae esa repetición; cambiarla vale para esta y las próximas.
   const rec = t && recurOf(t.frecuente);
@@ -2954,7 +3481,7 @@ const FREQ = [
   ["quincenal", "Quincenal: día 15 y último del mes", { q: true }],
   ["mensual", "Cada mes", { m: 1 }], ["bimestral", "Cada dos meses", { m: 2 }], ["trimestral", "Cada tres meses", { m: 3 }],
   ["cuatrimestral", "Cada cuatro meses", { m: 4 }], ["semestral", "Cada seis meses", { m: 6 }], ["anual", "Cada año", { m: 12 }]];
-const WEEKEND = [["igual", "Dejarla ese día"], ["antes", "Pasarla al viernes anterior"], ["despues", "Pasarla al lunes siguiente"]];
+const WEEKEND = [["igual", "Dejarla ese día"], ["antes", "Pasarla al día hábil anterior"], ["despues", "Pasarla al día hábil siguiente"]];
 const AHEAD = 31;
 // Cuándo termina una repetición: siempre (sin límite), después de un número de veces o en una fecha.
 const ENDS = [["nunca", "Sin límite: se repite siempre"], ["veces", "Un número de veces"], ["fecha", "Hasta una fecha"]];
@@ -2985,10 +3512,12 @@ const freqOf = t => FREQ.find(f => f[0] === t.frecuencia) || FREQ[3];
 const shiftAt = (rec, base) => { let d = 0; for (const s of rec.desfases || []) if (s.desde <= base) d = s.dias; return d; };
 function occurrences(t, to) {
   const out = [], s = parse(t.inicio), r = freqOf(t)[2], end = t.hasta && t.hasta < to ? t.hasta : to;
+  // v2.27.0: un día que cae en fin de semana o festivo se pasa al día hábil anterior o siguiente.
   const move = b => {
-    const w = b.getDay();
-    if (w % 6 || t.finDeSemana === "igual" || !t.finDeSemana) return b;
-    return t.finDeSemana === "antes" ? addDays(b, w ? -1 : -2) : addDays(b, w ? 2 : 1);
+    if (t.finDeSemana === "igual" || !t.finDeSemana) return b;
+    const paso = t.finDeSemana === "antes" ? -1 : 1;
+    let x = b; while (!diaHabil(x)) x = addDays(x, paso);
+    return x;
   };
   for (let i = 0; i < 2000; i++) {
     const y = s.getFullYear(), m = s.getMonth();
@@ -3012,7 +3541,7 @@ function ruleText(t) {
     : r.m === 12 ? "el " + fDay.format(s)
     : s.getDate() > 28 ? "el día " + s.getDate() + " (o el último del mes)" : "el día " + s.getDate();
   return [freqOf(t)[1] + (when ? ", " + when : ""), t.hora,
-    t.finDeSemana === "antes" ? "si cae en fin de semana, el viernes antes" : t.finDeSemana === "despues" ? "si cae en fin de semana, el lunes después" : "",
+    t.finDeSemana === "antes" ? "si cae en fin de semana o festivo, el día hábil antes" : t.finDeSemana === "despues" ? "si cae en fin de semana o festivo, el día hábil después" : "",
     t.veces ? t.veces + plural(t.veces, " vez", " veces") : t.hasta ? "hasta el " + short(t.hasta) + " " + t.hasta.slice(0, 4) : "sin límite",
     ...(t.desfases || []).filter(x => x.dias).slice(-1).map(x => "desde el " + short(x.desde) + ", " + Math.abs(x.dias) + plural(Math.abs(x.dias), " día ", " días ") + (x.dias > 0 ? "después" : "antes"))
   ].filter(Boolean).join(" · ");
@@ -3154,7 +3683,7 @@ const pastText = p => p.n ? " " + p.n + plural(p.n, " fecha que ya pasó quedó 
   : p.skipped ? " Las " + p.skipped + " fechas que ya pasaron no se crearon: agrégalas desde «Fechas» si hacen falta." : "";
 function recurDialog(t) {
   if (!S.data.clientes.length) { toast("Primero agrega un cliente."); return; }
-  suggest("categorias", CATEGORIAS, S.data.tareas.map(x => x.categoria));
+  suggest("categorias", catNames(), S.data.tareas.map(x => x.categoria));
   editor({
     title: t ? "Editar tarea frecuente" : "Nueva tarea frecuente",
     fields: [
@@ -3269,6 +3798,30 @@ function recurRow(t) {
 }
 
 /* ---------- Clientes ---------- */
+// v2.27.0: el dígito de verificación (DV) se calcula con el método de la DIAN. Si el NIT viene con guion o con el DV
+// pegado, se separa; si el DV no corresponde, no se guarda y se avisa.
+function dvNit(base) {
+  const pesos = [3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71];
+  const s = String(base).split("").reverse().reduce((a, x, i) => a + Number(x) * pesos[i], 0);
+  const r = s % 11;
+  return String(r > 1 ? 11 - r : r);
+}
+function normalizaNit(v) {
+  let base = String(v.nit || "").replace(/[\s.]/g, ""), dv = String(v.digito || "").trim();
+  if (!base) return null;
+  if (base.includes("-")) { const p = base.split("-"); base = p[0]; if (!dv) dv = p[1] || ""; }
+  else if (!dv && v.tipo === "Persona jurídica" && /^\d+$/.test(base)) {
+    if (base.length === 10) { // empresa con el DV pegado (ej. 8909039388): se separa solo si el DV coincide
+      if (dvNit(base.slice(0, -1)) !== base.slice(-1)) return "Ese NIT tiene 10 cifras y no coincide con su dígito de verificación. Si lleva el DV pegado, sepáralo con guion (ej. 890903938-8).";
+      dv = base.slice(-1); base = base.slice(0, -1);
+    } else if (base.length >= 6) dv = dvNit(base); // empresa sin DV escrito: se calcula con el método de la DIAN
+  }
+  if (!/^\d+$/.test(base)) return "El NIT o la cédula deben ser solo números, sin el dígito de verificación.";
+  if (dv && !/^\d$/.test(dv)) return "El dígito de verificación es un solo número.";
+  if (dv && dvNit(base) !== dv) return "El dígito de verificación no corresponde a ese NIT. Revísalo en el RUT antes de guardar.";
+  v.nit = base; v.digito = dv || undefined;
+  return null;
+}
 function clientDialog(c) {
   editor({
     title: c ? "Editar cliente" : "Nuevo cliente",
@@ -3276,8 +3829,8 @@ function clientDialog(c) {
       { name: "nombre", label: "Nombre o razón social", req: true },
       { name: "corto", label: "Nombre corto para el filtro" },
       { name: "tipo", label: "Tipo", type: "select", options: [["Persona jurídica", "Persona jurídica"], ["Persona natural", "Persona natural"]], req: true },
-      { name: "nit", label: "NIT o cédula" },
-      { name: "digito", label: "Último dígito del NIT" },
+      { name: "nit", label: "NIT o cédula", req: true, hint: "Sin el dígito de verificación (ej. 900123456)." },
+      { name: "digito", label: "Dígito de verificación (DV)", hint: "El número después del guion en el RUT (890903938-8 → 8). Se calcula solo si lo dejas vacío." },
       { name: "correo", label: "Correo", type: "email" },
       { name: "representante", label: "Representante legal" },
       { name: "periodicidadIva", label: "Periodicidad del IVA", list: "periodicidades" },
@@ -3285,10 +3838,12 @@ function clientDialog(c) {
       { name: "ciiu", label: "Actividades CIIU" },
       { name: "pila", label: "Vencimiento PILA" },
       { name: "camara", label: "Vigencia Cámara de Comercio" },
+      ...(c ? [{ name: "impuestos", label: "Impuestos y obligaciones", type: "action", onClick: () => { setFilter(c.id); setView("vencimientos"); } }] : []),
       { name: "color", label: "Color en el calendario", type: "swatch", options: [...COLORS, [GRAY, "Gris"]] }
     ],
     values: c || { tipo: "Persona jurídica", color: nextColor(S.data.clientes) },
     onSave: v => {
+      const errNit = normalizaNit(v); if (errNit) return errNit;
       if (!c && maxClientes() && S.data.clientes.length >= maxClientes()) return limitMsg(maxClientes());
       if (!v.color) delete v.color;
       if (c) Object.assign(c, v); else S.data.clientes.push({ id: uid(), color: nextColor(S.data.clientes), ...v });
@@ -3349,7 +3904,7 @@ function keyDialog(k) {
   editor({
     title: k ? "Editar acceso" : "Nuevo acceso",
     fields: [
-      { name: "cliente", label: "Cliente", type: "select", options: clientOpts("General"), req: false },
+      { name: "cliente", label: "Cliente", type: "select", options: clientOpts(), req: true },
       { name: "entidad", label: "Entidad o portal", req: true, ph: "DIAN, banco, operador PILA…" },
       { name: "tipo", label: "Tipo", list: "tipos-acceso", ph: "Banco, correo, PILA…" },
       { name: "usuario", label: "Usuario", req: true },
@@ -3407,7 +3962,15 @@ function forgetClip(text) {
     try { if (document.hasFocus() && (await navigator.clipboard.readText()) === text) await navigator.clipboard.writeText(""); } catch (e) {}
   }, CLIP_SECS * 1000);
 }
-async function copyText(text, what) {
+// Historial de accesos a la oficina: quién entró y cuándo.
+function logAcceso() {
+  if (!S.data) return;
+  if (!Array.isArray(S.data.accesos)) S.data.accesos = [];
+  S.data.accesos.push({ t: new Date().toISOString(), por: S.me });
+  if (S.data.accesos.length > 200) S.data.accesos.splice(0, S.data.accesos.length - 200);
+  changed();
+}
+async function copyText(text, what, k) {
   try { await navigator.clipboard.writeText(text); toast(what + " copiado." + (what === "Clave" ? " Se borra del portapapeles en " + CLIP_SECS + " s." : "")); if (what === "Clave") forgetClip(text); }
   catch (e) { toast("No se pudo copiar. Usa Mostrar y selecciona el texto."); }
 }
@@ -3473,7 +4036,50 @@ $("cambiar-acceso").addEventListener("click", () => esGestor() ? gestorClaveDial
 /* ---------- Configuración ---------- */
 const AVISO = [7, 15, 30, 45, 60], BLOQUEO = [5, 10, 20, 30, 60];
 const fillSelect = (s, opts, value) => { s.replaceChildren(...opts.map(([v, l]) => el("option", { value: v, text: l }))); s.value = String(value); };
+// Editor de categorías (Configuración). Cada cambio se guarda al momento.
+function renderCategorias() {
+  const box = $("cat-lista"); if (!box || !S.data) return;
+  const cats = S.data.categorias.slice().sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+  box.replaceChildren();
+  if (!cats.length) box.append(el("p", { class: "empty", text: "Sin categorías todavía." }));
+  for (const c of cats) {
+    const uso = [...S.data.tareas, ...S.data.frecuentes].filter(t => nkey(t.categoria || "") === nkey(c.nombre)).length;
+    const sel = el("select", { class: "input cat-c", "aria-label": "Color de " + c.nombre }, ...CAT_PAL.map(([h, nom]) => el("option", { value: h, text: nom })));
+    sel.value = c.color;
+    sel.addEventListener("change", () => { c.color = sel.value; changed(); });
+    const inp = el("input", { class: "input cat-n", type: "text", autocomplete: "off", "aria-label": "Nombre de la categoría" });
+    inp.value = c.nombre;
+    inp.addEventListener("change", () => renameCat(c, inp.value));
+    box.append(el("div", { class: "cat-r" },
+      el("span", { class: "cat-sw", style: "--cc:" + c.color, "aria-hidden": "true" }), inp, sel,
+      el("span", { class: "meta num", text: uso + plural(uso, " tarea", " tareas") }),
+      el("button", { class: "link", type: "button", text: "Quitar", onclick: () => quitarCat(c, uso) })));
+  }
+}
+function renameCat(c, raw) {
+  const n = raw.trim();
+  if (!n || n === c.nombre) { renderCategorias(); return; }
+  if (S.data.categorias.some(x => x !== c && nkey(x.nombre) === nkey(n))) { toast("Ya existe la categoría «" + n + "»."); renderCategorias(); return; }
+  const viejo = c.nombre;
+  c.nombre = n;
+  for (const t of [...S.data.tareas, ...S.data.frecuentes]) if (nkey(t.categoria || "") === nkey(viejo)) t.categoria = n;
+  changed();
+  toast("Categoría renombrada. Sus tareas ya usan el nombre nuevo.");
+}
+function quitarCat(c, uso) {
+  if (uso) { toast("«" + c.nombre + "» tiene " + uso + plural(uso, " tarea", " tareas") + ". Cambia esas tareas a otra categoría antes de quitarla."); return; }
+  removeItem("categorias", c, "Categoría quitada.");
+}
+for (const [h, nom] of CAT_PAL) $("cat-nuevo-color").append(el("option", { value: h, text: nom }));
+$("cat-add-btn").addEventListener("click", () => {
+  const inp = $("cat-nueva"), n = inp.value.trim();
+  if (!n) { toast("Escribe el nombre de la categoría."); inp.focus(); return; }
+  if (S.data.categorias.some(c => nkey(c.nombre) === nkey(n))) { toast("Ya existe la categoría «" + n + "»."); return; }
+  S.data.categorias.push({ id: uid(), nombre: n, color: $("cat-nuevo-color").value });
+  inp.value = ""; changed(); toast("Categoría agregada.");
+});
 function renderSettings() {
+  renderCfgClientes(); renderCategorias();
   renderUsers(); renderAlertSettings(); renderRecovery();
   const c = cfg();
   $("cfg-terminados").checked = c.verTerminados;
@@ -3523,9 +4129,9 @@ function exportSets() {
       cols: r.columnas.map(c => [c.nombre, c.tipo === "texto" ? 24 : 14, c.tipo === "fecha" ? "date" : c.tipo === "dinero" ? "money" : undefined]),
       rows: r.filas.map(f => f.map(v => v ?? "")) });
     // El aseo, como en la plantilla: cada día es un cargo, cada pago un abono, y el saldo acumulado.
-    if (S.data.aseo && (o.cliente === "all" || S.data.aseo.cliente === o.cliente)) sets.push({ name: "Aseo",
+    for (const c of aseosAll()) if (o.cliente === "all" || c.cliente === o.cliente) sets.push({ name: aseosAll().length > 1 ? "Aseo · " + cName(c.cliente).slice(0, 20) : "Aseo",
       cols: [["Fecha", 12, "date"], ["Movimiento", 30], ["Cargo", 14, "money"], ["Abono", 14, "money"], ["Saldo", 14, "money"], ["Detalle", 44]],
-      rows: aseoLedger().map(m => [m.fecha, m.kind === "dia" ? "Día de aseo" : "Pago", m.kind === "dia" ? m.valor : "", m.kind === "pago" ? m.valor : "", m.saldo, m.detalle]) });
+      rows: aseoLedger(c).map(m => [m.fecha, m.kind === "dia" ? "Día de aseo" : "Pago", m.kind === "dia" ? m.valor : "", m.kind === "pago" ? m.valor : "", m.saldo, m.detalle]) });
   }
   return { o, sets };
 }
@@ -3637,7 +4243,269 @@ $("exp-pdf").addEventListener("click", () => {
 });
 
 /* ---------- Pintar la pantalla ---------- */
-function renderFilters() {
+// Selector de cliente: mismo filtro que las pastillas.
+function syncSelect() {
+  const sel = $("cli-sel"); if (!sel) return;
+  sel.replaceChildren(el("option", { value: "all", text: "Todos los clientes" }), ...S.data.clientes.map(c => el("option", { value: c.id, text: c.nombre })));
+  sel.value = filter; sel.onchange = () => setFilter(sel.value);
+}
+// Resumen del tablero: clientes y tareas pendientes (del cliente elegido o de todos).
+function renderKpisExtra() {
+  const D = S.data, scope = filter === "all" ? null : filter;
+  const pend = D.tareas.filter(t => t.estado !== "hecha" && (!scope || t.cliente === scope));
+  $("kpi-clientes").replaceChildren(el("span", { class: "k", text: "Clientes" }),
+    el("span", { class: "v num", text: String(scope ? 1 : D.clientes.length) }),
+    el("span", { class: "s", text: scope ? "Viendo a " + cName(scope) : "Activos en la oficina" }));
+  $("kpi-pend").replaceChildren(el("span", { class: "k", text: "Tareas pendientes" }),
+    el("span", { class: "v num", text: String(pend.length) }),
+    el("span", { class: "s", text: scope ? "De " + cName(scope) : "De todos los clientes" }));
+}
+// Configuración › Clientes: lista editable con sus módulos.
+function renderCfgClientes() {
+  const box = $("cfg-clientes"); if (!box) return;
+  $("cfg-add-cli").onclick = () => clientDialog();
+  box.replaceChildren();
+  if (!S.data.clientes.length) { box.append(el("p", { class: "empty", text: "Sin clientes todavía. Agrega el primero." })); return; }
+  const MODS_C = [["calendario", "Calendario"], ["aseo", "Aseo"], ["registros", "Registros"], ["claves", "Claves"]];
+  for (const c of S.data.clientes) {
+    const mods = MODS_C.filter(([k]) => modCliente(c.id, k)).map(([, l]) => l);
+    box.append(el("div", { class: "cfg-row" },
+      el("div", { class: "cfg-row-t" }, el("span", { class: "client-n" }, dot(c.color || GRAY), c.nombre),
+        el("span", { class: "meta", text: [c.tipo, c.nit && "NIT " + c.nit].filter(Boolean).join(" · ") })),
+      el("span", { class: "meta", text: "Módulos: " + (mods.length ? mods.join(", ") : "ninguno") }),
+      el("div", { class: "cfg-row-a" },
+        el("button", { class: "btn alt", type: "button", "aria-label": "Editar " + c.nombre, text: "Editar", onclick: () => clientDialog(c) }),
+        el("button", { class: "link", type: "button", "aria-label": "Revisar " + c.nombre + " en el tablero", text: "Revisar",
+          onclick: () => { setFilter(c.id); setView("tablero"); } }))));
+  }
+}
+// Inicio (todos los clientes) o página de un cliente. En la página de un cliente aparecen su nombre y su ficha,
+// sus claves, tareas frecuentes y documentos; la lista general de clientes se oculta.
+function openCliente(id) { setFilter(id); setView("tablero"); }
+function renderClientHead() {
+  const c = filter === "all" ? null : S.data.clientes.find(x => x.id === filter);
+  $("cli-head").hidden = !c;
+  $("clientes-card").hidden = !!c;
+  $("frecuentes").hidden = !c;
+  $("documentos").hidden = !c;
+  $("btn-panel-venc").hidden = !c;
+  // Accesos sirve desde cualquier vista: con «Todos» muestra las claves de todos los clientes.
+  const accOff = !MOD("claves") || (filter !== "all" && !modCliente(filter, "claves"));
+  $("acc-fab").hidden = accOff;
+  if (accOff) toggleAcc(false);
+  $("v-tablero").classList.toggle("is-all", !c);
+  if (!c) return;
+  $("cli-name").replaceChildren(dot(c.color || GRAY), c.nombre);
+  $("cli-meta").textContent = [c.tipo, c.nit && "NIT " + c.nit].filter(Boolean).join(" · ");
+  $("cli-back").onclick = () => { setFilter("all"); setView("tablero"); };
+  $("cli-edit").onclick = () => clientFicha(c);
+}// Barra lateral (escritorio): «Mis clientes». Cada uno abre su página.
+// Módulos que el cliente tiene encendidos (los mismos criterios que las pestañas).
+function modsActivos(c) {
+  const ok = {
+    calendario: MOD("calendario") && modCliente(c.id, "calendario"),
+    aseo: MOD("aseo") && modCliente(c.id, "aseo") && !!controlDe(c.id),
+    registros: MOD("registros") && modCliente(c.id, "registros"),
+    claves: MOD("claves") && modCliente(c.id, "claves")
+  };
+  return MOD_CLI.filter(([m]) => ok[m]);
+}
+function abrirModulo(cid, m) {
+  openCliente(cid);
+  if (m === "claves") toggleAcc(true); else setView(m);
+}
+// Mis clientes (barra lateral): cada cliente, y debajo sus módulos activos. Se redibuja con cada cambio.
+function renderSideCli() {
+  const box = $("side-cli"); if (!box || !S.data) return;
+  const grupos = S.data.clientes.map(c => {
+    const mods = modsActivos(c);
+    return el("div", { class: "side-grp" },
+      el("button", { type: "button", "aria-pressed": String(filter === c.id), onclick: () => openCliente(c.id) },
+        dot(c.color || GRAY), el("span", { class: "lbl", text: c.corto || c.nombre })),
+      mods.length ? el("div", { class: "side-mods" }, ...mods.map(([m, nom]) => el("button", {
+        type: "button", class: "side-mod", "aria-pressed": String(filter === c.id && view === m), onclick: () => abrirModulo(c.id, m), text: nom
+      }))) : null);
+  });
+  box.replaceChildren(el("div", { class: "side-cli-h", text: "Mis clientes" }), ...grupos);
+}
+// Ficha del cliente: lo importante de un vistazo, y sus datos ordenados en secciones.
+function clientFicha(c) {
+  const D = S.data, d = $("dlg");
+  const pend = D.tareas.filter(t => t.cliente === c.id && t.estado !== "hecha");
+  const late = pend.filter(t => days(t.fecha) < 0).length;
+  const dues = D.vencimientos.filter(x => x.cliente === c.id && x.estado !== "pagada").sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const next = dues.find(x => days(x.fecha) >= 0) || dues[0];
+  const nClaves = D.claves.filter(k => k.cliente === c.id).length;
+  const nCred = D.obligaciones.filter(o => o.cliente === c.id).length;
+  const nDocs = D.documentos.filter(x => x.cliente === c.id).length;
+  const nit = c.nit ? c.nit + (c.digito ? "-" + c.digito : "") : "";
+  const stat = (n, label, cls) => el("div", {}, el("b", { class: cls || null, text: String(n) }), el("span", { text: label }));
+  const info = (k, v) => v ? [el("dt", { text: k }), el("dd", { text: v })] : [];
+  const sec = (titulo, rows) => el("section", { class: "ficha-sec" }, el("h3", { text: titulo }), el("dl", {}, ...rows));
+  const modBox = modEditor(c);
+  d.replaceChildren(el("div", { class: "dlg ficha" }, closeX(),
+    el("p", { class: "det-k" }, dot(c.color || GRAY), c.tipo || "Cliente"),
+    el("h2", { id: "dlg-t", text: c.nombre }),
+    el("p", { class: "meta", text: [nit && "NIT " + nit, c.periodicidadIva && "IVA " + c.periodicidadIva.toLowerCase(), c.correo].filter(Boolean).join(" · ") || "Todavía no hay datos de identificación." }),
+    el("div", { class: "ficha-stats num" },
+      stat(pend.length, plural(pend.length, "tarea pendiente", "tareas pendientes")),
+      stat(late, plural(late, "atrasada", "atrasadas"), late ? "late" : null),
+      stat(next ? short(next.fecha) : "—", next ? next.obligacion : "Sin vencimientos"),
+      stat(nClaves, plural(nClaves, "clave", "claves")),
+      stat(nCred, plural(nCred, "crédito", "créditos")),
+      stat(nDocs, plural(nDocs, "documento", "documentos"))),
+    el("div", { class: "ficha-grid" },
+      sec("Identificación", [...info("Nombre corto", c.corto), ...info("Tipo", c.tipo), ...info("NIT o cédula", nit), ...info("Representante legal", c.representante)]),
+      sec("Contacto", [...info("Correo", c.correo)]),
+      sec("Obligaciones", [...info("Periodicidad del IVA", c.periodicidadIva), ...info("Responsabilidades RUT", c.responsabilidades), ...info("Actividades CIIU", c.ciiu), ...info("Vencimiento PILA", c.pila), ...info("Cámara de Comercio", c.camara)]),
+      el("section", { class: "ficha-sec" }, el("h3", { text: "Módulos de este cliente" }), modBox)),
+    el("div", { class: "ficha-foot" },
+      el("button", { class: "btn alt", type: "button", text: "Impuestos y obligaciones", onclick: () => { d.close(); setView("vencimientos"); } }),
+      el("button", { class: "btn", type: "button", text: "Editar datos", onclick: () => { d.close(); clientDialog(c); } }))));
+  openDialog(d, true, { wide: true, key: "ficha" });
+}
+// Módulos de cada cliente (Calendario, Aseo, Registros, Claves). Se encienden y apagan en su ficha.
+// Apagar uno con datos quita esos datos del cliente (las tareas y los vencimientos no se tocan), por eso antes se ofrece
+// una copia. Al volver a encenderlo se puede importar esa copia.
+const MOD_CLI = [["calendario", "Calendario", "Sus tareas y vencimientos en la vista de calendario."],
+  ["aseo", "Aseo", "Días de aseo y pagos."], ["registros", "Registros", "Planillas y registros."], ["claves", "Claves", "Accesos, usuarios y claves."]];
+const modNombre = m => (MOD_CLI.find(x => x[0] === m) || [0, m])[1];
+function modCount(cid, m) {
+  if (m === "aseo") { const ctl = controlDe(cid); return ctl ? ctl.dias.length + ctl.pagos.length : 0; }
+  if (m === "claves") return S.data.claves.filter(k => k.cliente === cid).length;
+  if (m === "registros") return S.data.registros.filter(r => r.cliente === cid).length;
+  return 0;
+}
+function modDatos(cid, m) {
+  if (m === "aseo") return { aseo: aseosAll().filter(x => x.cliente === cid) };
+  if (m === "claves") return { claves: S.data.claves.filter(k => k.cliente === cid) };
+  if (m === "registros") return { registros: S.data.registros.filter(r => r.cliente === cid) };
+  return {};
+}
+// Quita los datos de ese módulo para ese cliente. No toca tareas ni vencimientos.
+function modQuitar(cid, m) {
+  const quita = arr => { for (let i = arr.length - 1; i >= 0; i--) if (arr[i].cliente === cid) arr.splice(i, 1); };
+  if (m === "aseo") quita(aseosAll());
+  if (m === "claves") quita(S.data.claves);
+  if (m === "registros") quita(S.data.registros);
+}
+function modExportar(c, m) {
+  const obj = { formato: "mi-oficina-modulo", modulo: m, cliente: c.nombre, exportado: new Date().toISOString(), datos: modDatos(c.id, m) };
+  const slug = norm(c.nombre).normalize("NFD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  download(new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" }), "mi-oficina-" + m + "-" + slug + "-" + iso(todayD()) + ".json");
+}
+// Mezcla una copia de ese módulo en el cliente. Lo que ya existe no se duplica. Devuelve cuántos datos entraron.
+function modFusionar(c, m, I) {
+  const D = S.data; let n = 0;
+  const libre = (list, id) => (!id || list.some(x => x.id === id)) ? uid() : id;
+  if (m === "claves") for (const k of I.claves || []) {
+    if (D.claves.some(x => x.cliente === c.id && nkey(x.entidad || "") === nkey(k.entidad || "") && nkey(x.usuario || "") === nkey(k.usuario || ""))) continue;
+    D.claves.push({ ...k, id: libre(D.claves, k.id), cliente: c.id }); n++;
+  }
+  if (m === "registros") for (const r of I.registros || []) {
+    if (D.registros.some(x => x.cliente === c.id && nkey(x.nombre || "") === nkey(r.nombre || ""))) continue;
+    D.registros.push({ ...r, id: libre(D.registros, r.id), cliente: c.id, filas: (r.filas || []).slice() }); n++;
+  }
+  if (m === "aseo") for (const a of I.aseo || []) {
+    const ctl = controlDe(c.id) || nuevoControl(c.id);
+    for (const k of ["prestador", "lugar", "valorDia"]) if (!ctl[k] && a[k]) ctl[k] = a[k];
+    for (const x of a.dias || []) if (!ctl.dias.some(y => y.id === x.id || y.fecha === x.fecha)) { ctl.dias.push({ ...x, id: libre(ctl.dias, x.id) }); n++; }
+    for (const x of a.pagos || []) if (!ctl.pagos.some(y => y.id === x.id || (y.fecha === x.fecha && y.valor === x.valor))) { ctl.pagos.push({ ...x, id: libre(ctl.pagos, x.id) }); n++; }
+  }
+  return n;
+}
+function modEditor(c) {
+  return el("div", { class: "mod-ed" }, ...MOD_CLI.map(([m, nom, desc]) => {
+    const n = m === "calendario" ? 0 : modCount(c.id, m);
+    const sw = el("input", { type: "checkbox", class: "mod-sw", "aria-label": nom + " para " + c.nombre });
+    sw.checked = modCliente(c.id, m);
+    sw.addEventListener("change", () => setModulo(c, m, sw.checked));
+    return el("label", { class: "mod-row" },
+      el("span", { class: "mod-t" }, el("b", { text: nom }),
+        el("span", { class: "meta", text: desc + (m === "calendario" ? "" : " · " + (n ? n + plural(n, " dato guardado", " datos guardados") : "Sin datos")) })),
+      sw);
+  }));
+}
+function setModulo(c, m, on) {
+  const fijar = v => { c.modulos = { calendario: true, aseo: true, registros: true, claves: true, ...(c.modulos || {}), [m]: v }; };
+  if (on) {
+    fijar(true);
+    if (m === "aseo" && !controlDe(c.id)) nuevoControl(c.id);
+    changed();
+    if (m === "calendario") clientFicha(c); else ofrecerImportar(c, m);
+    return;
+  }
+  const n = m === "calendario" ? 0 : modCount(c.id, m);
+  if (!n) { fijar(false); modQuitar(c.id, m); changed(); clientFicha(c); return; }
+  quitarDialogo(c, m, n, fijar);
+}
+function ofrecerImportar(c, m) {
+  const d = $("dlg");
+  d.replaceChildren(el("div", { class: "dlg" },
+    el("h2", { id: "dlg-t", text: modNombre(m) + " activado" }),
+    el("p", { class: "meta", text: "Si tienes una copia de este módulo de " + c.nombre + ", puedes importarla ahora. Si no, empieza vacío." }),
+    el("div", { class: "dlg-acts" }, el("span"), el("div", { class: "r" },
+      el("button", { class: "btn alt", type: "button", text: "Empezar vacío", onclick: () => clientFicha(c) }),
+      el("button", { class: "btn", type: "button", text: "Importar copia", onclick: () => elegirCopia(c, m) })))));
+  openDialog(d, true);
+}
+function elegirCopia(c, m) {
+  const inp = el("input", { type: "file", accept: ".json,application/json", class: "sr", tabindex: "-1", "aria-hidden": "true" });
+  document.body.append(inp);
+  inp.addEventListener("change", async () => {
+    const f = inp.files[0]; inp.remove(); if (!f) return;
+    let j = null;
+    try { j = JSON.parse(await f.text()); } catch (e) { j = null; }
+    if (!j || j.formato !== "mi-oficina-modulo" || j.modulo !== m || !j.datos) { toast("Ese archivo no es una copia de " + modNombre(m) + "."); return; }
+    const n = modFusionar(c, m, j.datos);
+    changed(); clientFicha(c);
+    toast(n ? n + plural(n, " dato importado.", " datos importados.") : "La copia no traía nada nuevo para este cliente.");
+  });
+  inp.click();
+}
+function quitarDialogo(c, m, n, fijar) {
+  const d = $("dlg"), nom = modNombre(m);
+  const detalle = n + (m === "aseo" ? plural(n, " movimiento de aseo", " movimientos de aseo") : m === "claves" ? plural(n, " clave", " claves") : plural(n, " registro", " registros"));
+  // La copia se baja sola antes de borrar: no hay que preguntar nada más.
+  const quitar = () => { modExportar(c, m); fijar(false); modQuitar(c.id, m); changed(); clientFicha(c); toast(nom + " quitado de " + c.nombre + ". Se descargó una copia por si la necesitas."); };
+  d.replaceChildren(el("div", { class: "dlg" },
+    el("h2", { id: "dlg-t", text: "Quitar " + nom + " de " + c.nombre }),
+    el("p", { class: "meta", text: "Se descargará una copia con " + detalle + " y después se borran de la oficina. Las tareas y los vencimientos no se tocan. Si vuelves a activar el módulo, podrás importar esa copia." }),
+    m === "claves" ? el("p", { class: "meta", text: "La copia de claves va sin cifrar: guárdala con cuidado y bórrala cuando ya no la necesites." }) : null,
+    el("div", { class: "dlg-acts" }, el("span"), el("div", { class: "r" },
+      el("button", { class: "btn alt", type: "button", text: "Cancelar", onclick: () => clientFicha(c) }),
+      el("button", { class: "btn", type: "button", text: "Quitar y descargar copia", onclick: quitar })))));
+  openDialog(d, true);
+}
+
+// Barra lateral: se puede contraer a solo iconos. Se recuerda en este equipo.
+function setSideMin(on) {
+  $("app").classList.toggle("side-min", on);
+  $("side-toggle").setAttribute("aria-expanded", String(!on));
+  $("side-toggle").title = on ? "Mostrar la barra lateral" : "Ocultar la barra lateral";
+  try { localStorage.setItem("mo-barra", on ? "min" : "full"); } catch (e) {}
+}
+$("side-toggle").addEventListener("click", () => setSideMin(!$("app").classList.contains("side-min")));
+try { setSideMin(localStorage.getItem("mo-barra") === "min"); } catch (e) {}// Accesos (claves): panel flotante que se abre y se cierra con el botón.
+function toggleAcc(on) {
+  const open = on === undefined ? !$("claves").classList.contains("acc-open") : on;
+  $("claves").classList.toggle("acc-open", open);
+  $("acc-fab").setAttribute("aria-expanded", String(open));
+  if (open) $("buscar-claves-ph") || $("qk-q").focus();
+}
+$("acc-fab").addEventListener("click", () => toggleAcc());
+$("acc-close").addEventListener("click", () => toggleAcc(false));
+function accTab(usuarios) {
+  $("claves").classList.toggle("acc-users", usuarios);
+  $("acc-t-claves").setAttribute("aria-pressed", String(!usuarios));
+  $("acc-t-users").setAttribute("aria-pressed", String(usuarios));
+  $("h-claves").textContent = usuarios ? "Usuarios" : "Claves";
+  if (usuarios) renderUsers(); else renderKeys();
+}
+$("acc-t-claves").addEventListener("click", () => accTab(false));
+$("acc-t-users").addEventListener("click", () => accTab(true));
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("claves").classList.contains("acc-open") && !$("dlg").open) toggleAcc(false); });function renderFilters() {
+  syncSelect();
   const box = $("filters"); box.replaceChildren();
   for (const [id, label] of [["all", "Todos"], ...S.data.clientes.map(c => [c.id, c.corto || c.nombre.split(" ").slice(0, 2).join(" ")])]) {
     box.append(el("button", { class: "chip", type: "button", "data-f": "chip:" + id, "aria-pressed": String(filter === id), onclick: () => setFilter(id) },
@@ -3653,7 +4521,14 @@ function setFilter(id) {
 // Solo se dibuja la vista que se ve: las otras se dibujan al abrirlas (setView llama a render).
 function render() {
   const D = S.data;
+  catAddFromData(D);
   if (filter !== "all" && !D.clientes.some(c => c.id === filter)) filter = "all";
+  applyModules();
+  renderClientHead();
+  renderSideCli();
+  if (view === "aseo" && !aseoOn()) { setView("tablero"); return; }
+  if (VIEW_MOD[view] && !modCliente(filter, VIEW_MOD[view])) { setView("tablero"); return; }
+  if (CLIENT_VIEWS.includes(view) && filter === "all") { setView("tablero"); return; }
   keepFocus(() => {
     renderFilters();
     if (view === "calendario") renderCalendar();
@@ -3665,10 +4540,12 @@ function render() {
     else renderBoard();
   });
   renderAlerts(); renderSelBar();
-  $("who").replaceChildren("Sesión de " + S.me, el("span", { text: " · " + cap(fDayLong.format(todayD())) }));
+  // v2.27.0: el título dice dónde estás (no un saludo repetido); el nombre del cliente va en su ficha.
+  $("who").replaceChildren(({ tablero: "Inicio", calendario: "Calendario", vencimientos: "Vencimientos", creditos: "Créditos", aseo: "Aseo", registros: "Registros", ajustes: "Configuración" })[view] || "Inicio", el("span", { text: " · " + cap(fDayLong.format(todayD())) }));
   $("foot").textContent = (D.actualizado ? "Último cambio: " + fStamp.format(new Date(D.actualizado)) + " por " + (D.actualizadoPor || "—") : "Sin cambios todavía");
 }
 function renderBoard() {
+  renderKpisExtra();
   const D = S.data;
   const mine = x => filter === "all" || x.cliente === filter;
   const open = D.tareas.filter(t => t.estado !== "hecha" && mine(t));
@@ -3684,7 +4561,7 @@ function renderBoard() {
     kl.replaceChildren(el("span", { class: "k", text: "Atrasadas" }), el("span", { class: "v late num", text: String(late.length) }),
       el("span", { class: "s" }, "Desde el " + short(oldest.fecha) + " (" + whenText(oldest.fecha).toLowerCase() + ")",
         filter === "all" && top && top[1] ? el("span", {}, " · ", el("b", { text: top[1] + " de " + (top[0].corto || top[0].nombre) })) : null));
-    kl.setAttribute("aria-label", late.length + plural(late.length, " tarea atrasada", " tareas atrasadas") + ". Ver la lista");
+    kl.setAttribute("aria-label", late.length + plural(late.length, " tarea atrasada", " tareas atrasadas") + ". Ver el detalle");
   } else {
     kl.replaceChildren(el("span", { class: "k", text: "Atrasadas" }), el("span", { class: "v ok", text: "Al día" }),
       el("span", { class: "s", text: open.length ? open.length + plural(open.length, " pendiente, ninguna atrasada", " pendientes, ninguna atrasada") : "No hay tareas pendientes" }));
@@ -3705,16 +4582,15 @@ function renderBoard() {
   if (n) {
     const dd = days(n.fecha), same = dues.filter(x => x.fecha === n.fecha).length;
     kv.replaceChildren(
-      el("span", { class: "row" }, el("span", { class: "k", text: (dd < 0 ? "Sin pagar" : "Próximo vencimiento") + (same > 1 ? " · " + same + " ese día" : "") }),
+      el("span", { class: "row" }, el("span", { class: "k", text: (dd < 0 ? "Sin pagar" : "Próximo vencimiento") + (same > 1 ? " · " + same + " vencen ese día" : "") }),
         el("span", { class: "num" + (dd <= soon() ? " late" : ""), text: dd > 1 ? dd + " días" : leftText(dd) })),
       el("span", { class: "v sm", text: n.obligacion }),
       el("span", { class: "s", text: [cName(n.cliente), n.periodo, short(n.fecha)].filter(Boolean).join(" · ") }));
   } else kv.replaceChildren(el("span", { class: "k", text: "Próximo vencimiento" }), el("span", { class: "v sm", text: "Ninguno pendiente" }));
-  kv.disabled = !n;
 
   // Aseo: lo que se debe, si el control tiene datos.
-  const ka = $("kpi-aseo"), hasAseo = !!(D.aseo && (D.aseo.dias.length || D.aseo.pagos.length));
-  ka.hidden = !hasAseo;
+  const ka = $("kpi-aseo"), ctl = controlDe(filter), hasAseo = !!(ctl && (ctl.dias.length || ctl.pagos.length));
+  ka.hidden = !hasAseo || !aseoOn();
   if (hasAseo) {
     const st = aseoState(), lastP = st.pagos[st.pagos.length - 1];
     ka.replaceChildren(el("span", { class: "k", text: "Aseo" + (st.A.lugar ? " · " + st.A.lugar : "") }),
@@ -3725,12 +4601,76 @@ function renderBoard() {
   renderTasks(open); renderClients(); renderRecurring(); renderDues(dues); renderKeys();
 }
 let kpiVenc = null;
-$("kpi-late").addEventListener("click", () => {
-  expanded.add("late"); render();
-  $("tareas").scrollIntoView({ block: "start", behavior: still.matches ? "auto" : "smooth" });
-});
-$("kpi-venc").addEventListener("click", e => { if (kpiVenc) detailDialog("venc", kpiVenc, e.currentTarget); });
-$("kpi-aseo").addEventListener("click", () => setView("aseo"));
+for (const [id, kind] of [["kpi-late", "late"], ["ring", "today"], ["kpi-venc", "venc"], ["kpi-aseo", "aseo"], ["kpi-clientes", "clientes"], ["kpi-pend", "pend"]])
+  $(id).addEventListener("click", e => kpiPop(kind, e.currentTarget));
+// Ventana de una tarjeta del resumen: la información completa de ese dato. Cada fila abre su ficha.
+function kpiPop(kind, anchor) {
+  const d = $("dlg"), D = S.data, today = iso(todayD());
+  const mine = x => filter === "all" || x.cliente === filter;
+  const row = (label, onOpen, right) => el("div", { class: "mini-r" },
+    onOpen ? el("button", { class: "lbl", type: "button", text: label, onclick: onOpen }) : el("span", { class: "lbl", text: label }), right);
+  const list = (rows, vacio) => rows.length ? el("div", { class: "mini" }, ...rows) : el("p", { class: "empty", text: vacio });
+  const stat = (n, label) => el("div", {}, el("b", { text: String(n) }), el("span", { text: label }));
+  const tRow = t => row((t.estado === "hecha" ? "✓ " : "") + t.titulo, e => detailDialog("tarea", t, e.currentTarget),
+    el("span", { class: "meta num", text: [short(t.fecha), hourText(t) || null, cShort(t.cliente)].filter(Boolean).join(" · ") }));
+  const lateT = D.tareas.filter(t => t.estado !== "hecha" && mine(t) && t.fecha < today).sort((a, b) => a.fecha.localeCompare(b.fecha) || byHour(a, b));
+  const hoyT = D.tareas.filter(t => t.fecha === today && mine(t)).sort(byHour);
+  const pendT = D.tareas.filter(t => t.estado !== "hecha" && mine(t));
+  const dues = D.vencimientos.filter(x => x.estado !== "pagada" && mine(x)).sort((a, b) => a.fecha.localeCompare(b.fecha));
+  let title = "", sub = "", body = [], foot = [];
+  if (kind === "late") {
+    title = "Tareas atrasadas";
+    sub = lateT.length ? lateT.length + plural(lateT.length, " tarea sin hacer", " tareas sin hacer") + " · desde el " + short(lateT[0].fecha) : "Ninguna tarea atrasada. Vas al día.";
+    body = [list(lateT.map(tRow), "")];
+    foot = [el("button", { class: "btn alt", type: "button", text: "Ver en Tareas", onclick: () => { d.close(); $("tareas").scrollIntoView({ block: "start", behavior: still.matches ? "auto" : "smooth" }); } })];
+  } else if (kind === "today") {
+    const dn = hoyT.filter(t => t.estado === "hecha").length;
+    title = "Hoy";
+    sub = hoyT.length ? dn + " de " + hoyT.length + plural(hoyT.length, " hecha", " hechas") : "No tienes tareas para hoy.";
+    body = [list(hoyT.map(tRow), "")];
+  } else if (kind === "venc") {
+    const vencidos = dues.filter(x => days(x.fecha) < 0).length;
+    title = "Vencimientos por pagar";
+    sub = dues.length ? dues.length + plural(dues.length, " pendiente", " pendientes") + (vencidos ? " · " + vencidos + plural(vencidos, " ya vencido", " ya vencidos") : "") : "No hay vencimientos pendientes.";
+    body = [list(dues.slice(0, 40).map(x => row(x.obligacion, e => detailDialog("venc", x, e.currentTarget),
+      el("span", { class: "meta num" + (days(x.fecha) <= soon() ? " late" : ""), text: [short(x.fecha), cShort(x.cliente)].join(" · ") }))), "")];
+  } else if (kind === "aseo") {
+    const ctl = controlDe(filter);
+    if (!ctl || !(ctl.dias.length || ctl.pagos.length)) {
+      title = "Aseo"; sub = "Entra a un cliente con control de aseo para ver su detalle.";
+    } else {
+      const st = aseoState(ctl);
+      title = "Aseo · " + (ctl.lugar || cName(ctl.cliente));
+      sub = st.debe > 0 ? fMoney.format(st.debe) + " por pagar" : "Al día";
+      body = [el("div", { class: "ficha-stats num" },
+        stat(st.sinPago.length, plural(st.sinPago.length, "día sin pagar", "días sin pagar")),
+        stat(st.pagos.length, plural(st.pagos.length, "pago", "pagos")),
+        stat(fMoney.format(sumV(st.pagos)), "pagado")),
+      list(st.sinPago.map(x => row(dShort(x.fecha), null, el("span", { class: "meta num", text: fMoney.format(Number(x.valor) || 0) }))), "Todos los días están pagados.")];
+      foot = [el("button", { class: "btn alt", type: "button", text: "Abrir Aseo", onclick: () => { d.close(); setView("aseo"); } })];
+    }
+  } else if (kind === "clientes") {
+    const cl = D.clientes.filter(c => filter === "all" || c.id === filter);
+    title = "Clientes";
+    sub = cl.length + plural(cl.length, " cliente", " clientes") + (filter === "all" ? " en la oficina" : "");
+    body = [list(cl.map(c => {
+      const p = pendT.filter(t => t.cliente === c.id).length, atr = lateT.filter(t => t.cliente === c.id).length;
+      return row(c.nombre, () => { d.close(); openCliente(c.id); }, el("span", { class: "meta num", text: p + plural(p, " pendiente", " pendientes") + (atr ? " · " + atr + plural(atr, " atrasada", " atrasadas") : "") }));
+    }), "Sin clientes todavía.")];
+  } else { // pend
+    title = "Tareas pendientes";
+    sub = pendT.length + plural(pendT.length, " tarea pendiente", " tareas pendientes") + (filter === "all" ? " de todos los clientes" : "");
+    body = [list(D.clientes.filter(c => filter === "all" || c.id === filter)
+      .map(c => [c, pendT.filter(t => t.cliente === c.id).length]).filter(([, n]) => n > 0)
+      .map(([c, n]) => row(c.nombre, () => { d.close(); openCliente(c.id); }, el("span", { class: "meta num", text: n + plural(n, " pendiente", " pendientes") }))), "No hay tareas pendientes.")];
+  }
+  d.replaceChildren(el("div", { class: "dlg" }, closeX(),
+    el("h2", { id: "dlg-t", text: title }),
+    el("p", { class: "meta", text: sub }),
+    ...body,
+    foot.length ? el("div", { class: "dlg-acts" }, el("span"), el("div", { class: "r" }, ...foot)) : null));
+  openDialog(d, true, { anchor });
+}
 // Tareas: arriba todas las atrasadas juntas (con su fecha en la fila), luego hoy y los próximos días; en cada día,
 // primero lo pendiente y luego lo terminado. Lo terminado de días anteriores solo aparece si se pide.
 let doneBack = 7, ahead = 7, pastDone = false;
@@ -3755,9 +4695,8 @@ function renderTasks(open) {
       text: isOpen ? "Mostrar menos" : "Ver las " + ts.length, onclick: () => { isOpen ? expanded.delete(key) : expanded.add(key); render(); } }));
     g.append(sec);
   };
-  if (lateT.length) listGroup("late", "Atrasadas", "late", lateT.length + plural(lateT.length, " pendiente", " pendientes") + " · desde el " + short(lateT[0].fecha), lateT, 6);
   const done = cfg().verTerminados ? S.data.tareas.filter(t => t.estado === "hecha" && mine(t) && t.fecha >= today && t.fecha <= to) : [];
-  const shownOpen = open.filter(t => t.fecha >= today && t.fecha <= to);
+  const shownOpen = open.filter(t => t.fecha <= to); // incluye las atrasadas: cada día atrasado tiene su grupo
   const byDay = new Map();
   for (const t of [...shownOpen, ...done]) { if (!byDay.has(t.fecha)) byDay.set(t.fecha, []); byDay.get(t.fecha).push(t); }
   for (const ds of [...byDay.keys()].sort()) {
@@ -3811,7 +4750,7 @@ function renderClients() {
   for (const c of S.data.clientes) {
     const pend = S.data.tareas.filter(t => t.cliente === c.id && t.estado !== "hecha").length;
     const nd = S.data.vencimientos.filter(d => d.cliente === c.id && d.estado !== "pagada" && days(d.fecha) >= 0).sort((a, b) => a.fecha.localeCompare(b.fecha))[0];
-    cl.append(el("button", { class: "client", type: "button", "data-k": "c:" + c.id, "data-f": "cl:" + c.id, onclick: e => clientPop(c, e.currentTarget), "aria-label": "Ver " + c.nombre },
+    cl.append(el("button", { class: "client", type: "button", "data-k": "c:" + c.id, "data-f": "cl:" + c.id, onclick: () => openCliente(c.id), "aria-label": "Ver " + c.nombre },
       el("span", { class: "client-n" }, dot(c.color || GRAY), c.nombre),
       el("span", { class: "meta", text: [c.tipo, c.nit && "NIT " + c.nit, c.periodicidadIva && "IVA " + c.periodicidadIva.toLowerCase(), c.correo].filter(Boolean).join(" · ") }),
       el("span", { class: "client-f" },
@@ -3928,7 +4867,7 @@ function renderKeys() {
         url ? el("a", { class: "cp go", href: url, target: "_blank", rel: "noopener noreferrer", title: "Abrir el portal", "aria-label": "Abrir el portal de " + k.entidad, text: "↗" }) : null)));
   }
   if (!ks.length) box.append(el("p", { class: "qk-none", text: !S.data.claves.length
-    ? "Sin claves guardadas. Agrégalas una por una o importa un CSV con columnas Cliente, Entidad, Usuario, Clave y Nota."
+    ? "Sin claves guardadas. Agrégalas una por una."
     : ws.length ? "Nada con «" + raw + "»." : "Este cliente no tiene claves guardadas." }));
 }
 // Copiar desde la lista: el botón dice «Copiada» un momento en el mismo lugar del toque.
@@ -3944,13 +4883,19 @@ async function copyBtn(b, text, what) {
 $("qk-q").addEventListener("input", () => renderKeys());
 $("qk-q").addEventListener("keydown", e => { if (e.key === "Escape" && e.target.value) { e.preventDefault(); e.stopPropagation(); e.target.value = ""; renderKeys(); } });
 function renderUsers() {
-  const box = $("users"); box.replaceChildren();
+  for (const box of [$("users"), $("users-pop")]) if (box) fillUsers(box);
+}
+function fillUsers(box) {
+  box.replaceChildren();
   for (const u of S.users) {
     const me = u.usuario === S.me;
     box.append(el("div", { class: "user" },
       el("span", {}, el("b", { text: u.usuario }), me ? el("span", { class: "meta", text: " · tú" }) : null),
       me ? el("span", { class: "meta", text: "Sesión abierta" }) : null));
   }
+  box.append(el("div", { class: "mini" }, el("h3", { text: "Últimos accesos a la oficina" }),
+    ...(S.data.accesos || []).slice(-15).reverse().map(a => el("div", { class: "user" },
+      el("span", {}, el("b", { text: a.por || "—" })), el("span", { class: "meta num", text: new Date(a.t).toLocaleString("es-CO") })))));
   box.append(el("p", { class: "meta", text: "Si alguien olvida su clave, la restablece con «Olvidé mi clave» y el código de recuperación de la oficina. Nadie más conoce ni fija la clave de otra persona." }));
 }
 // Estado y configuración del código de recuperación de la oficina.
@@ -4230,15 +5175,17 @@ const fDayLong = new Intl.DateTimeFormat("es-CO", { weekday: "long", day: "numer
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const WD = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const PER_DAY = 3;
+const CLIENT_VIEWS = ["vencimientos", "creditos", "registros"]; // solo con un cliente seleccionado
 const VIEWS = [["tablero", "tab-tablero", "v-tablero"], ["calendario", "tab-cal", "v-cal"], ["vencimientos", "tab-venc", "v-venc"], ["creditos", "tab-cred", "v-cred"], ["aseo", "tab-aseo", "v-aseo"], ["registros", "tab-reg", "v-reg"], ["ajustes", "tab-cfg", "v-cfg"]];
 let view = "tablero";
 let calMonth = new Date(todayD().getFullYear(), todayD().getMonth(), 1);
-try { view = localStorage.getItem(LS_VIEW) || view; } catch (e) {}
+// (al abrir se empieza en Inicio)
 
 function setView(v, focus) {
   view = VIEWS.some(x => x[0] === v) ? v : "tablero";
   if (VIEW_MOD[view] && !MOD(VIEW_MOD[view])) view = "tablero";
   if (!vistaPermitida(view)) view = "tablero";
+  if (CLIENT_VIEWS.includes(view) && filter === "all") view = "tablero";
   if (view === "ajustes") PERS = null;
   if (view === "ajustes" && S.data) loadCopias();
   if (view !== "calendario") calSel.clear(); // la selección es del calendario: al salir se suelta
@@ -4253,7 +5200,7 @@ function setView(v, focus) {
   if (S.data) render();
 }
 VIEWS.forEach(([name, tab], i) => {
-  $(tab).addEventListener("click", () => setView(name));
+  $(tab).addEventListener("click", () => { if (name === "tablero" && filter !== "all") setFilter("all"); setView(name); });
   $(tab).addEventListener("keydown", e => {
     const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
     if (step) { e.preventDefault(); setView(VIEWS[(i + step + VIEWS.length) % VIEWS.length][0], true); }
@@ -4359,7 +5306,7 @@ function itemButton(it) {
   // Solo las tareas se mueven: los vencimientos tienen fecha legal y las programadas aún no existen como tarea.
   const mv = it.kind === "tarea";
   return el("button", {
-    type: "button", class: "cal-it" + (it.urg ? " urg" : "") + (it.done ? " done" : "") + (it.kind === "prog" ? " prog" : "") + (mv ? " mv" : "") + (mv && calSel.has(it.ref.id) ? " sel" : ""),
+    type: "button", style: "--c:" + cColor(it.ref.cliente), class: "cal-it" + (it.urg ? " urg" : "") + (it.done ? " done" : "") + (it.kind === "prog" ? " prog" : "") + (mv ? " mv" : "") + (mv && calSel.has(it.ref.id) ? " sel" : ""),
     title: it.full + (mv ? " · Arrastra para moverla; Ctrl+clic selecciona varias" : ""),
     "data-id": mv ? it.ref.id : null, "data-f": mv ? "ci:" + it.ref.id : null, "aria-pressed": mv && calSel.size ? String(calSel.has(it.ref.id)) : null,
     "aria-keyshortcuts": mv ? "Alt+ArrowLeft Alt+ArrowRight Alt+ArrowUp Alt+ArrowDown" : null,
@@ -4477,13 +5424,15 @@ function clientPop(c, anchor) {
       ...next.map(t => row(t.titulo, e => detailDialog("tarea", t, e.currentTarget), el("span", { class: "meta num" + (days(t.fecha) < 0 ? " late" : ""), text: whenText(t.fecha) })))) : null,
     dues.length ? el("div", { class: "mini" }, el("h3", { text: "Vencimientos" }),
       ...dues.slice(0, 3).map(x => row(x.obligacion, e => detailDialog("venc", x, e.currentTarget), el("span", { class: "meta num", text: short(x.fecha) })))) : null,
-    S.data.aseo && S.data.aseo.cliente === c.id && (S.data.aseo.dias.length || S.data.aseo.pagos.length) ? (() => { const st = aseoState();
+    MOD("aseo") && !esGestor() && !controlDe(c.id) ? el("div", { class: "mini" }, el("h3", { text: "Aseo" }),
+      el("button", { class: "link", type: "button", text: "Activar control de aseo para este cliente", onclick: () => { d.close(); nuevoControl(c.id); changed(); setFilter(c.id); aseoConfigDialog(); } })) : null,
+    controlDe(c.id) && (controlDe(c.id).dias.length || controlDe(c.id).pagos.length) ? (() => { const st = aseoState(controlDe(c.id));
       return el("div", { class: "mini" }, el("h3", { text: "Aseo" }), row(st.debe > 0 ? fMoney.format(st.debe) + " por pagar" : "Al día",
-        () => { d.close(); setView("aseo"); }, el("span", { class: "meta num", text: st.sinPago.length + plural(st.sinPago.length, " día sin pagar", " días sin pagar") }))); })() : null,
+        () => { d.close(); setFilter(c.id); setView("aseo"); }, el("span", { class: "meta num", text: st.sinPago.length + plural(st.sinPago.length, " día sin pagar", " días sin pagar") }))); })() : null,
     keys.length ? el("div", { class: "mini" }, el("h3", { text: "Accesos" }),
       ...keys.slice(0, 4).map(k => row(k.entidad, e => keyPop(k, e.currentTarget), el("span", { class: "cell-acts" },
-        el("button", { class: "link", type: "button", text: "Usuario", "aria-label": "Copiar usuario de " + k.entidad, onclick: () => copyText(k.usuario, "Usuario") }),
-        el("button", { class: "link", type: "button", text: "Clave", "aria-label": "Copiar clave de " + k.entidad, onclick: () => copyText(k.clave, "Clave") }))))) : null,
+        el("button", { class: "link", type: "button", text: "Usuario", "aria-label": "Copiar usuario de " + k.entidad, onclick: () => copyText(k.usuario, "Usuario", k) }),
+        el("button", { class: "link", type: "button", text: "Clave", "aria-label": "Copiar clave de " + k.entidad, onclick: () => copyText(k.clave, "Clave", k) }))))) : null,
     el("div", { class: "dlg-acts" },
       el("span", { class: "cell-acts" },
         el("button", { class: "link", type: "button", text: "Editar", onclick: () => { d.close(); clientDialog(c); } }),
@@ -4498,7 +5447,7 @@ function keyPop(k, anchor, vis) {
   const add = (dt, dd) => rows.push(el("dt", { text: dt }), el("dd", {}, dd));
   add("Cliente", cName(k.cliente));
   add("Usuario", el("span", { class: "cell-acts" }, el("span", { text: k.usuario }),
-    el("button", { class: "link", type: "button", text: "Copiar", "aria-label": "Copiar usuario", onclick: () => copyText(k.usuario, "Usuario") })));
+    el("button", { class: "link", type: "button", text: "Copiar", "aria-label": "Copiar usuario", onclick: () => copyText(k.usuario, "Usuario", k) })));
   add("Clave", el("span", { class: "cell-acts" }, el("span", { class: "secret", text: vis ? k.clave : "••••••••" }),
     el("button", { class: "link", type: "button", text: vis ? "Ocultar" : "Mostrar", onclick: e => keyPop(k, e.currentTarget, !vis) })));
   if (url) add("Portal", el("a", { class: "link", href: url, target: "_blank", rel: "noopener noreferrer", text: new URL(url).hostname }));
@@ -4514,7 +5463,7 @@ function keyPop(k, anchor, vis) {
         el("button", { class: "link", type: "button", text: "Editar", onclick: () => { d.close(); keyDialog(k); } }),
         el("button", { class: "link", type: "button", text: "Cambiar contraseña", onclick: () => { d.close(); cambiarClaveDialog(k); } }),
         el("button", { class: "link danger", type: "button", text: "Eliminar", onclick: () => { d.close(); removeItem("claves", k, "Acceso eliminado."); } })),
-      el("span", { class: "r" }, el("button", { class: "btn", type: "button", text: "Copiar clave", onclick: () => copyText(k.clave, "Clave") })))));
+      el("span", { class: "r" }, el("button", { class: "btn", type: "button", text: "Copiar clave", onclick: () => copyText(k.clave, "Clave", k) })))));
   openDialog(d, true, { anchor });
   d.querySelector(".btn").focus();
 }
@@ -4925,25 +5874,23 @@ document.addEventListener("keydown", e => {
    Un solo control, como la plantilla de Excel: los días que vino la persona del aseo (cada uno es un cargo) y los pagos
    (abonos) que los cubren. Lo que se debe es lo de los días menos lo pagado; un día sin pago es lo pendiente.
    Reemplaza las tablas que llegaron de Notion (servicios, pagos y el registro anterior): se unen una sola vez al abrir. */
-const aseo = () => S.data.aseo || (S.data.aseo = { prestador: "", lugar: "", cliente: "", valorDia: 30000, dias: [], pagos: [] });
 const byF = (a, b) => a.fecha.localeCompare(b.fecha);
 const sumV = xs => xs.reduce((s, x) => s + (Number(x.valor) || 0), 0);
-const pagoOf = x => x.pago ? aseo().pagos.find(p => p.id === x.pago) || null : null;
+const pagoOf = (x, A = aseo()) => x.pago ? A.pagos.find(p => p.id === x.pago) || null : null;
 const WDS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
 const dShort = ds => { const d = parse(ds); return cap(WDS[d.getDay()]) + " " + d.getDate() + " " + MES[d.getMonth()]; };
-function aseoState() {
-  const A = aseo();
-  return { A, debe: sumV(A.dias) - sumV(A.pagos), sinPago: A.dias.filter(x => !pagoOf(x)).sort(byF), pagos: [...A.pagos].sort(byF) };
+function aseoState(A = aseo()) {
+  return { A, debe: sumV(A.dias) - sumV(A.pagos), sinPago: A.dias.filter(x => !pagoOf(x, A)).sort(byF), pagos: [...A.pagos].sort(byF) };
 }
 // Movimientos en orden, cada uno con el saldo que deja (en una misma fecha, los días van antes que el pago).
-function aseoLedger() {
-  const A = aseo(); let saldo = 0;
+function aseoLedger(A = aseo()) {
+  let saldo = 0;
   const ms = [...A.dias.map(x => ({ kind: "dia", ref: x, fecha: x.fecha, valor: Number(x.valor) || 0 })),
     ...A.pagos.map(p => ({ kind: "pago", ref: p, fecha: p.fecha, valor: Number(p.valor) || 0 }))]
     .sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.kind === "dia" ? -1 : 1));
   for (const m of ms) {
     saldo += m.kind === "dia" ? m.valor : -m.valor; m.saldo = saldo;
-    if (m.kind === "dia") { const p = pagoOf(m.ref); m.detalle = (p ? "Pagado el " + short(p.fecha) : "Sin pagar") + (m.ref.nota ? " · " + m.ref.nota : ""); }
+    if (m.kind === "dia") { const p = pagoOf(m.ref, A); m.detalle = (p ? "Pagado el " + short(p.fecha) : "Sin pagar") + (m.ref.nota ? " · " + m.ref.nota : ""); }
     else {
       const n = A.dias.filter(x => x.pago === m.ref.id).length;
       m.detalle = [n ? n + plural(n, " día", " días") : "Abono", m.ref.soporte ? "con documento soporte" : "sin documento soporte", m.ref.comprobante, m.ref.nota].filter(Boolean).join(" · ");
@@ -4956,13 +5903,16 @@ async function migrateAseo() {
   const D = S.data;
   D.migraciones = Array.isArray(D.migraciones) ? D.migraciones : [];
   if (D.migraciones.includes("aseo-unificado")) return;
+  if (esGestor()) return;
   const regs = D.registros.filter(r => /\baseo\b/.test(nkey(r.nombre)) && Array.isArray(r.columnas) && Array.isArray(r.filas));
   if (!regs.length) return;
   if (SB.oficina) { try { await rpc("copia_manual", { p_id: SB.oficina }); } catch (e) { return; } }
   const ci = (r, name) => r.columnas.findIndex(c => nkey(c.nombre) === name);
   const isPagos = r => ci(r, "valor pagado") >= 0, isOld = r => !isPagos(r) && ci(r, "pago") < 0;
   const rank = r => isPagos(r) ? 0 : isOld(r) ? 2 : 1;
-  const A = aseo(), refs = new Map(), byDate = new Map(A.dias.map(x => [x.fecha, x])), pagoDates = new Set(A.pagos.map(p => p.fecha)), desc = [];
+  const cliReg = regs.map(r => r.cliente).find(Boolean) || "";
+  if (!cliReg) return;
+  const A = controlDe(cliReg) || nuevoControl(cliReg), refs = new Map(), byDate = new Map(A.dias.map(x => [x.fecha, x])), pagoDates = new Set(A.pagos.map(p => p.fecha)), desc = [];
   const isDate = s => /^\d{4}-\d{2}-\d{2}$/.test(s);
   let nd = 0, np = 0;
   // Primero los pagos (para enlazar cada día con el suyo), luego los días y al final el registro anterior, solo para lo que falte.
@@ -5147,16 +6097,15 @@ function pagoPop(p, anchor) {
 function aseoConfigDialog() {
   const A = aseo();
   editor({
-    title: "Ajustes del aseo",
+    title: "Ajustes del aseo · " + cName(A.cliente),
     fields: [
       { name: "prestador", label: "Quién presta el servicio", ph: "Nombre de la persona o empresa" },
       { name: "lugar", label: "Lugar", ph: "Oficina 620" },
-      { name: "cliente", label: "Empresa que paga", type: "select", options: clientOpts("General") },
       { name: "valorDia", label: "Valor por día", req: true }],
-    values: { prestador: A.prestador || "", lugar: A.lugar || "", cliente: A.cliente || "", valorDia: fMoney.format(A.valorDia || 0) },
+    values: { prestador: A.prestador || "", lugar: A.lugar || "", valorDia: fMoney.format(A.valorDia || 0) },
     onSave: v => {
       const n = money(v.valorDia); if (!n) return "Escribe el valor por día.";
-      Object.assign(A, { prestador: v.prestador, lugar: v.lugar, cliente: v.cliente, valorDia: n }); changed();
+      Object.assign(A, { prestador: v.prestador, lugar: v.lugar, valorDia: n }); changed();
     }
   });
 }
@@ -5562,11 +6511,11 @@ const V12 = "1.2.0";
 /* ---------- Colecciones nuevas ----------
    Cada registro nuevo viaja como una fila «meta» con id x.<colección>.<id>. Así, si alguna vez se vuelve a la v1.0.1,
    esa versión las conserva tal cual (las lee y las vuelve a escribir sin tocarlas) en lugar de marcarlas como borradas. */
-const XCOLLS = ["tiposOblig", "obligaciones", "calendarios", "creditos", "cuotas", "pagos"];
+const XCOLLS = ["tiposOblig", "obligaciones", "calendarios", "creditos", "cuotas", "pagos", "categorias"];
 const XPRE = "x.";
 const xRow = id => { const m = /^x\.([A-Za-z]+)\.(.+)$/.exec(id); return m && XCOLLS.includes(m[1]) ? [m[1], m[2]] : null; };
 // Catálogos de la oficina que un gestor puede leer (no escribir).
-const X_OFICINA = ["tiposOblig", "calendarios"];
+const X_OFICINA = ["tiposOblig", "calendarios", "categorias"];
 
 // Cliente al que pertenece una fila: el servidor no puede leer los datos cifrados, así que la app se lo dice.
 function filaCliente(col, id, json) {
@@ -6019,7 +6968,7 @@ function vencPorCliente() {
   return card;
 }
 function reglaTexto(o) {
-  if (o.regla === "fija") return "Día " + o.dia + " del " + (Number(o.meses) || 1) + ".º mes después del periodo" + (o.finSemana === "siguiente" ? " (si cae en fin de semana, el lunes)" : "");
+  if (o.regla === "fija") return "Día " + o.dia + " del " + (Number(o.meses) || 1) + ".º mes después del periodo" + (o.finSemana === "siguiente" ? " (si cae en fin de semana o festivo, el siguiente día hábil)" : "");
   if (o.regla === "manual") return (o.fechas || []).length + plural((o.fechas || []).length, " fecha escrita", " fechas escritas");
   return "Calendario oficial validado";
 }
@@ -6035,7 +6984,7 @@ function oblDialog(o, cid) {
       { name: "regla", label: "De dónde salen las fechas", type: "select", options: REGLAS },
       { name: "dia", label: "Día del mes", type: "number", min: 1, max: 31, when: v => v.regla === "fija", hint: "Fecha que tú defines (por ejemplo, la que fija el municipio). La app no la inventa." },
       { name: "meses", label: "Meses después del cierre del periodo", type: "number", min: 0, max: 12, when: v => v.regla === "fija" },
-      { name: "finSemana", label: "Si cae en sábado o domingo", type: "select", options: [["igual", "Dejarla ese día"], ["siguiente", "Pasarla al lunes"]], when: v => v.regla === "fija", hint: "Los festivos no se calculan: revísalos en la vista previa." },
+      { name: "finSemana", label: "Si cae en sábado, domingo o festivo", type: "select", options: [["igual", "Dejarla ese día"], ["siguiente", "Pasarla al siguiente día hábil"]], when: v => v.regla === "fija", hint: "Los festivos colombianos (Ley Emiliani y Ley 2578 de 2026) cuentan como no hábiles." },
       { name: "responsable", label: "Responsable", list: "responsables" },
       { name: "activa", label: "Estado", type: "select", options: [["si", "Activa"], ["no", "Inactiva (no se generan fechas)"]] },
       { name: "nota", label: "Observaciones" }
@@ -6271,6 +7220,29 @@ function existeVenc(c, t, periodo, fecha) {
   return S.data.vencimientos.find(x => x.cliente === c && (x.gen === k
     || ((x.tipo === t.id || nkey(x.obligacion) === nob) && ((x.periodo && nkey(x.periodo) === np) || x.fecha === fecha || x.fechaOriginal === fecha)))) || null;
 }
+/* ---------- Festivos de Colombia (v2.27.0) ----------
+   Ley 51 de 1983 (Ley Emiliani) y Ley 2578 de 2026 (9 de julio, que se traslada al lunes).
+   Un vencimiento «fijo» o una tarea que cae en festivo se pasa al siguiente día hábil (con la opción elegida). */
+function pascua(y) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const mes = Math.floor((h + l - 7 * m + 114) / 31), dia = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(y, mes - 1, dia);
+}
+// Ley Emiliani: si el festivo cae de martes a domingo, pasa al lunes siguiente.
+function lunesSiguiente(y, m, d) { const x = new Date(y, m, d), w = x.getDay(); return addDays(x, w === 1 ? 0 : (8 - w) % 7); }
+function festivosCO(y) {
+  festivosCO.cache = festivosCO.cache || {};
+  if (festivosCO.cache[y]) return festivosCO.cache[y];
+  const set = new Set(), P = pascua(y), enPascua = n => iso(addDays(P, n));
+  [[0, 1], [4, 1], [6, 20], [7, 7], [11, 8], [11, 25]].forEach(([m, d]) => set.add(iso(new Date(y, m, d)))); // fijos
+  [[0, 6], [2, 19], [5, 29], [6, 9], [7, 15], [9, 12], [10, 1], [10, 11]].forEach(([m, d]) => set.add(iso(lunesSiguiente(y, m, d)))); // trasladables
+  [-3, -2, 43, 64, 71].forEach(n => set.add(enPascua(n))); // Jueves y Viernes Santo; Ascensión, Corpus Christi y Sagrado Corazón (lunes)
+  return (festivosCO.cache[y] = set);
+}
+function esFestivo(d) { return festivosCO(d.getFullYear()).has(iso(d)); }
+function diaHabil(d) { return d.getDay() !== 0 && d.getDay() !== 6 && !esFestivo(d); }
 function periodosFija(o, anio) {
   const p = (PERIODOS.find(x => x[0] === o.periodicidad) || PERIODOS[0])[2], out = [];
   for (const y of [anio - 1, anio]) for (let k = 0; k < 12 / p; k++) {
@@ -6278,7 +7250,7 @@ function periodosFija(o, anio) {
     const per = p === 12 ? "Año " + y : p === 1 ? MESES[m0] + " " + y : MESES[m0].slice(0, 3) + "–" + MESES[m1].slice(0, 3) + " " + y;
     const base = new Date(y, m1 + 1 + (Number(o.meses) || 0) - 1, 1), ult = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
     let d = new Date(base.getFullYear(), base.getMonth(), Math.min(o.dia || 1, ult));
-    if (o.finSemana === "siguiente") while (d.getDay() === 0 || d.getDay() === 6) d = addDays(d, 1);
+    if (o.finSemana === "siguiente") while (!diaHabil(d)) d = addDays(d, 1);
     out.push({ periodo: per, fecha: iso(d) });
   }
   return out.filter(x => x.fecha.slice(0, 4) === String(anio));
@@ -6362,13 +7334,16 @@ function generarDialog() {
    Al cambiarla, la anterior pasa a «historial» con sus fechas y una nota. Ver o copiar una anterior es una acción
    aparte y pide volver a escribir la clave de la app. Todo viaja cifrado como el resto; no va a exportaciones. */
 // Al editar un acceso: si la clave cambió, la anterior queda en el historial.
+// Cada vez que cambia el usuario o la clave, guarda la combinación que estaba vigente (usuario y clave).
 function claveHist(k, v, nota) {
-  if (!k.clave || v.clave === undefined || v.clave === k.clave) return;
+  const cambioClave = v.clave !== undefined && v.clave !== k.clave;
+  const cambioUsuario = v.usuario !== undefined && v.usuario !== k.usuario;
+  if (!cambioClave && !cambioUsuario) return;
   if (!Array.isArray(k.historial)) k.historial = [];
   const hoy = iso(todayD());
-  k.historial.push({ clave: k.clave, desde: k.vigenteDesde || k.rotacion || "", hasta: hoy, nota: nota || "", por: S.me, t: new Date().toISOString() });
+  k.historial.push({ usuario: k.usuario || "", clave: k.clave || "", desde: k.vigenteDesde || k.rotacion || "", hasta: hoy, nota: nota || "", por: S.me, t: new Date().toISOString() });
   k.vigenteDesde = hoy;
-  if (!v.rotacion || v.rotacion === k.rotacion) v.rotacion = hoy;
+  if (cambioClave && (!v.rotacion || v.rotacion === k.rotacion)) v.rotacion = hoy;
 }
 function cambiarClaveDialog(k) {
   editor({
@@ -6417,14 +7392,15 @@ function historialClavesLista(k, hasta, vis) {
   vis = vis || new Set();
   const d = $("dlg"), hs = (k.historial || []).map((h, i) => [h, i]).reverse();
   const fila = (h, i) => el("li", {},
-    el("span", { class: "meta num", text: (h.desde ? fechaCorta(h.desde) : "¿?") + " → " + fechaCorta(h.hasta) + (h.por ? " · cambió " + h.por : "") }),
+    el("span", { class: "meta num", text: (h.usuario ? "Usuario " + h.usuario + " · " : "") + (h.desde ? fechaCorta(h.desde) : "¿?") + " → " + fechaCorta(h.hasta) + (h.por ? " · cambió " + h.por : "") }),
     el("span", { class: "cell-acts" }, el("span", { class: "secret", text: vis.has(i) ? h.clave : "••••••••" }),
       el("button", { class: "link", type: "button", text: vis.has(i) ? "Ocultar" : "Mostrar", onclick: () => { vis.has(i) ? vis.delete(i) : vis.add(i); historialClavesLista(k, hasta, vis); } }),
+      h.usuario ? el("button", { class: "link", type: "button", text: "Copiar usuario anterior", "aria-label": "Copiar el usuario anterior hasta el " + fechaCorta(h.hasta), onclick: () => copyText(h.usuario, "Usuario") }) : null,
       el("button", { class: "link", type: "button", text: "Copiar esta anterior", "aria-label": "Copiar la contraseña anterior usada hasta el " + fechaCorta(h.hasta),
         onclick: () => copiarAnterior(h.clave, h.hasta) })),
     h.nota ? el("span", { class: "meta", text: h.nota }) : null);
   d.replaceChildren(el("div", { class: "dlg" }, closeX(),
-    el("p", { class: "det-k" }, dot(cColor(k.cliente)), "Historial de contraseñas"),
+    el("p", { class: "det-k" }, dot(cColor(k.cliente)), "Historial de usuarios y claves"),
     el("h2", { id: "dlg-t", text: k.entidad }),
     el("p", { class: "meta", text: "Vigente desde " + (k.vigenteDesde ? fechaCorta(k.vigenteDesde) : "—") + ". «Copiar contraseña» en la lista y en la ficha siempre copia la vigente." }),
     el("ol", { class: "hist claves-h" }, ...hs.map(([h, i]) => fila(h, i))),
@@ -6443,10 +7419,12 @@ async function copiarAnterior(text, hasta) {
    ninguna tarea. Las tareas de antes no tienen prioridad ni responsable: cuentan como «Sin prioridad» y «Sin responsable». */
 const PRIORIDADES = [["alta", "Alta"], ["media", "Media"], ["baja", "Baja"]];
 const ESTADOS_T = [["pendiente", "Pendientes"], ["atrasada", "Atrasadas"], ["proxima", "Próximos 7 días"], ["hecha", "Hechas"]];
-const TF0 = { cat: "", resp: "", estado: "", prio: "", cDesde: "", cHasta: "", fDesde: "", fHasta: "", q: "" };
+const TF0 = { cat: "", resp: "", estado: "ventana", prio: "", cDesde: "", cHasta: "", fDesde: "", fHasta: "", q: "" };
 let TF = { ...TF0 };
 try { TF = { ...TF0, ...JSON.parse(localStorage.getItem("mo-tfiltros") || "{}") }; } catch (e) {}
-const tfActivos = () => Object.keys(TF0).filter(k => TF[k]).length;
+TF.cDesde = TF.cHasta = TF.fDesde = TF.fHasta = ""; // ya no hay filtros de fecha: no se aplican en secreto
+// Con «Hoy y próximos» y sin otros filtros, la lista es la de siempre. Cualquier otra elección (incluida «Todas») muestra la lista completa.
+const tfActivos = () => Object.keys(TF0).filter(k => k !== "estado" && TF[k]).length + (TF.estado !== "ventana" ? 1 : 0);
 function tfSet(o) { Object.assign(TF, o); try { localStorage.setItem("mo-tfiltros", JSON.stringify(TF)); } catch (e) {} render(); }
 const estadoT = t => t.estado === "hecha" ? "hecha" : days(t.fecha) < 0 ? "atrasada" : "pendiente";
 // sin: nombre del filtro que se deja fuera (para contar por categoría con los demás filtros puestos).
@@ -6456,62 +7434,61 @@ function tareasFiltradas(sin) {
     && (sin === "cat" || !TF.cat || (TF.cat === "_" ? !t.categoria : nkey(t.categoria || "") === nkey(TF.cat)))
     && (!TF.resp || (TF.resp === "_" ? !t.responsable : t.responsable === TF.resp))
     && (!TF.prio || (TF.prio === "_" ? !t.prioridad : t.prioridad === TF.prio))
-    && (!TF.estado || (TF.estado === "proxima" ? t.estado !== "hecha" && days(t.fecha) >= 0 && days(t.fecha) <= 7
+    && (!TF.estado || TF.estado === "ventana" || (TF.estado === "proxima" ? t.estado !== "hecha" && days(t.fecha) >= 0 && days(t.fecha) <= 7
       : TF.estado === "pendiente" ? t.estado !== "hecha" : estadoT(t) === TF.estado))
     && (!TF.cDesde || (t.creada || "").slice(0, 10) >= TF.cDesde) && (!TF.cHasta || ((t.creada || "").slice(0, 10) && t.creada.slice(0, 10) <= TF.cHasta))
     && (!TF.fDesde || t.fecha >= TF.fDesde) && (!TF.fHasta || t.fecha <= TF.fHasta)
     && (!ws.length || ws.every(w => nkey([t.titulo, t.nota, t.categoria, cName(t.cliente), t.responsable].join(" ")).includes(w))));
 }
+const TF_ESTADOS = [["ventana", "Hoy y próximos"], ["", "Todas"], ["pendiente", "Pendientes"], ["atrasada", "Atrasadas"], ["proxima", "Próximos 7 días"], ["hecha", "Hechas"]];
 function renderTareasFiltros() {
   const box = $("tf-bar"); if (!box) return;
   const mine = S.data.tareas.filter(t => filter === "all" || t.cliente === filter);
   const abiertas = mine.filter(t => t.estado !== "hecha");
-  const vencidas = abiertas.filter(t => days(t.fecha) < 0).length, prox = abiertas.filter(t => days(t.fecha) >= 0 && days(t.fecha) <= 7).length;
-  // Contadores por categoría con los demás filtros aplicados.
-  const base = tareasFiltradas("cat"), cats = new Map();
-  for (const t of base) { const c = t.categoria || ""; cats.set(c, (cats.get(c) || 0) + 1); }
-  const catChips = [...cats].sort((a, b) => b[1] - a[1]).map(([c, n]) => {
-    const v = c || "_", on = TF.cat ? (TF.cat === "_" ? !c : nkey(TF.cat) === nkey(c)) : false;
-    return el("button", { class: "chip", type: "button", "aria-pressed": String(on), onclick: () => tfSet({ cat: on ? "" : v }) }, (c || "Sin categoría") + " ", el("span", { class: "num cnt", text: String(n) }));
-  });
-  const n = tfActivos();
-  const sel = (label, key, opts) => el("label", { class: "fl" }, el("span", { text: label }),
-    el("select", { class: "input", onchange: e => tfSet({ [key]: e.target.value }) }, ...[["", "Todos"], ...opts].map(([v, l]) => el("option", { value: v, text: l, selected: TF[key] === v }))));
-  const date = (label, key) => el("label", { class: "fl" }, el("span", { text: label }),
-    el("input", { class: "input", type: "date", value: TF[key], onchange: e => tfSet({ [key]: e.target.value }) }));
-  const q = el("input", { class: "input", type: "search", placeholder: "Buscar en tareas", value: TF.q, "aria-label": "Buscar en las tareas" });
+  const cuenta = { ventana: abiertas.filter(t => days(t.fecha) <= ahead).length, "": mine.length, pendiente: abiertas.length, atrasada: abiertas.filter(t => days(t.fecha) < 0).length,
+    proxima: abiertas.filter(t => days(t.fecha) >= 0 && days(t.fecha) <= 7).length, hecha: mine.length - abiertas.length };
+  const seg = el("div", { class: "tfx-seg", role: "group", "aria-label": "Ver tareas" }, ...TF_ESTADOS.map(([v, l]) =>
+    el("button", { class: "tfx-tab" + (v === "atrasada" && cuenta[v] ? " late" : ""), type: "button", "aria-pressed": String((TF.estado || "") === v),
+      onclick: () => tfSet({ estado: v }) }, l, " ", el("span", { class: "num cnt", text: String(cuenta[v]) }))));
+  const q = el("input", { class: "input", type: "search", placeholder: "Buscar tareas", value: TF.q, "aria-label": "Buscar en las tareas" });
   q.addEventListener("input", () => { TF.q = q.value; clearTimeout(q._t); q._t = setTimeout(() => { try { localStorage.setItem("mo-tfiltros", JSON.stringify(TF)); } catch (e) {} keepFocus(render); }, 220); });
-  const resps = responsables(S.data.tareas.map(t => t.responsable));
+  const cats = [...new Set(S.data.tareas.map(t => t.categoria).filter(Boolean))].sort((a, b) => a.localeCompare(b)).map(c => [c, c]);
+  const sel = (label, key, opts) => el("div", { class: "fl" },
+    el("select", { class: "input", "aria-label": label, onchange: e => tfSet({ [key]: e.target.value }) },
+      ...[["", label + ": todas"], ...opts].map(([v, l]) => el("option", { value: v, text: l, selected: TF[key] === v }))));
+  const n = ["cat", "resp", "prio", "q"].filter(k => TF[k]).length;
   box.replaceChildren(
-    el("div", { class: "tf-top" },
-      el("button", { class: "chip" + (vencidas ? " late" : ""), type: "button", "aria-pressed": String(TF.estado === "atrasada"), onclick: () => tfSet({ estado: TF.estado === "atrasada" ? "" : "atrasada" }) }, "Atrasadas ", el("span", { class: "num cnt", text: String(vencidas) })),
-      el("button", { class: "chip", type: "button", "aria-pressed": String(TF.estado === "proxima"), onclick: () => tfSet({ estado: TF.estado === "proxima" ? "" : "proxima" }) }, "Próximos 7 días ", el("span", { class: "num cnt", text: String(prox) })),
-      el("label", { class: "tf-q" }, q),
-      n ? el("button", { class: "link", type: "button", text: "Limpiar filtros (" + n + ")", onclick: () => tfSet({ ...TF0 }) }) : null),
-    el("details", { class: "fbar", open: TF._abierto || null, ontoggle: e => { TF._abierto = e.target.open; } },
-      el("summary", { text: "Más filtros" + (n ? " · " + n + plural(n, " activo", " activos") : "") }),
-      el("div", { class: "tf-cats", role: "group", "aria-label": "Categorías" }, ...catChips),
-      el("div", { class: "fbar-in" },
-        sel("Estado", "estado", ESTADOS_T), sel("Prioridad", "prio", [...PRIORIDADES, ["_", "Sin prioridad"]]),
-        sel("Responsable", "resp", [...resps.map(r => [r, r]), ["_", "Sin responsable"]]),
-        date("Fecha desde", "fDesde"), date("Fecha hasta", "fHasta"), date("Creada desde", "cDesde"), date("Creada hasta", "cHasta"))));
-}
-// Con filtros: una sola lista por fecha (con su fecha en cada fila), y el total arriba.
+    el("div", { class: "tfx-top" }, seg, el("label", { class: "tf-q" }, q)),
+    el("div", { class: "tfx-row" },
+      sel("Categoría", "cat", [...cats, ["_", "Sin categoría"]]),
+      sel("Responsable", "resp", [...responsables(S.data.tareas.map(t => t.responsable)).map(r => [r, r]), ["_", "Sin responsable"]]),
+      sel("Prioridad", "prio", [...PRIORIDADES, ["_", "Sin prioridad"]]),
+      n ? el("button", { class: "link", type: "button", text: "Limpiar filtros", onclick: () => tfSet({ ...TF0 }) }) : null));
+}// Con filtros: una sola lista por fecha (con su fecha en cada fila), y el total arriba.
 function renderTareasFiltradas() {
   const g = $("groups"); g.replaceChildren();
   const ts = tareasFiltradas().sort((a, b) => a.fecha.localeCompare(b.fecha) || byHour(a, b));
-  const cap0 = 60, all = expanded.has("tf");
-  g.append(el("div", { class: "group" },
-    el("div", { class: "group-h" }, el("strong", { text: "Resultado" }), el("span", { class: "meta num", text: ts.length + plural(ts.length, " tarea", " tareas") })),
-    ts.length ? el("ul", { class: "rows" }, ...ts.slice(0, all ? ts.length : cap0).map(t => taskRow(t, t.estado === "hecha", true)))
-      : el("p", { class: "empty", text: "Ninguna tarea cumple estos filtros." }),
-    ts.length > cap0 ? el("button", { class: "more", type: "button", text: all ? "Mostrar menos" : "Ver las " + ts.length, onclick: () => { all ? expanded.delete("tf") : expanded.add("tf"); render(); } }) : null));
+  const cap0 = 60, all = expanded.has("tf"), today = iso(todayD());
+  g.append(el("p", { class: "meta num", text: ts.length + plural(ts.length, " tarea", " tareas") }));
+  if (!ts.length) { g.append(el("p", { class: "empty", text: "Ninguna tarea cumple estos filtros." })); return; }
+  const byD = new Map();
+  for (const t of ts) { if (!byD.has(t.fecha)) byD.set(t.fecha, []); byD.get(t.fecha).push(t); }
+  let shown = 0;
+  for (const ds of byD.keys()) {
+    const dt = byD.get(ds), late = ds < today && dt.some(t => t.estado !== "hecha");
+    const show = all || shown < cap0;
+    shown += dt.length;
+    g.append(el("div", { class: "group" + (ds === today ? " is-today" : "") },
+      el("div", { class: "group-h" }, el("strong", { class: late ? "late" : null, text: dayLabel(ds) }), el("span", { class: "meta num", text: dt.length + plural(dt.length, " tarea", " tareas") })),
+      show ? el("ul", { class: "rows" }, ...dt.map(t => taskRow(t, t.estado === "hecha", false))) : null));
+  }
+  if (ts.length > cap0) g.append(el("button", { class: "more", type: "button", text: all ? "Mostrar menos" : "Ver las " + ts.length, onclick: () => { all ? expanded.delete("tf") : expanded.add("tf"); render(); } }));
 }
 // Prioridad y responsable en la fila de la tarea (solo si los tiene).
 function taskExtra(t) {
   const p = PRIORIDADES.find(x => x[0] === t.prioridad);
-  if (!p && !t.responsable) return null;
-  return el("span", { class: "t-extra" }, p ? el("span", { class: "prio prio-" + p[0], text: p[1] }) : null, t.responsable ? el("span", { class: "meta", text: t.responsable }) : null);
+  if (!p && !t.responsable && !t.categoria) return null;
+  return el("span", { class: "t-extra" }, t.categoria ? el("span", { class: "tag-c", style: "--cc:" + catColor(t.categoria), text: t.categoria }) : null, p ? el("span", { class: "prio prio-" + p[0], text: p[1] }) : null, t.responsable ? el("span", { class: "meta", text: t.responsable }) : null);
 }
 
 /* ---------- Obligaciones financieras y créditos ----------
@@ -7110,6 +8087,130 @@ const PRECARGA = [
 ];
 
 /* ==V12-FIN== */
+/* ==V13-INICIO== ════════════════════════════════════════════════════════════════════════════════════════
+   Mi Oficina v1.3.0: tablas con encabezado fijo, orden al hacer clic en el nombre de la columna (tres pasos:
+   A→Z o menor→mayor, al revés y sin orden) y ancho de columnas ajustable arrastrando el borde derecho del
+   encabezado (doble clic lo devuelve a automático). Solo cambia cómo se ven las tablas: no toca datos ni cifrado.
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════ */
+const V13 = "1.3.0";
+const ORDEN13 = new Map();   // encabezados de una tabla -> { col, dir }; así el orden se mantiene al volver a dibujarla
+const MES13 = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+
+// Valor comparable de una celda: fecha ("3 nov 2026" o "03/11/2026"), número (formato colombiano o normal) o texto.
+function valor13(txt) {
+  const t = String(txt).replace(/\s+/g, " ").trim();
+  if (!t || t === "—" || t === "-") return { vacio: true };
+  let m = /^(\d{1,2}) ([a-záéíóú]{3}) (\d{4})$/i.exec(t);
+  if (m && MES13.includes(m[2].toLowerCase())) return { f: Number(m[3]) * 10000 + (MES13.indexOf(m[2].toLowerCase()) + 1) * 100 + Number(m[1]) };
+  m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(t);
+  if (m) return { f: Number(m[3]) * 10000 + Number(m[2]) * 100 + Number(m[1]) };
+  const n = t.replace(/[$ \s%]/g, "");
+  if (/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(n)) return { n: Number(n.replace(/\./g, "").replace(",", ".")) };
+  if (/^-?\d+,\d+$/.test(n)) return { n: Number(n.replace(",", ".")) };
+  if (/^-?\d+(\.\d+)?$/.test(n)) return { n: Number(n) };
+  return { t: t.toLowerCase() };
+}
+// Compara dos celdas. Los vacíos van siempre al final.
+function cmp13(a, b, dir) {
+  const va = valor13(a.textContent), vb = valor13(b.textContent);
+  if (va.vacio || vb.vacio) return (va.vacio ? 1 : 0) - (vb.vacio ? 1 : 0);
+  const ka = va.n ?? va.f, kb = vb.n ?? vb.f;
+  if (ka !== undefined && kb !== undefined) return (ka - kb) * dir;
+  return String(va.t ?? ka).localeCompare(String(vb.t ?? kb), "es", { numeric: true, sensitivity: "base" }) * dir;
+}
+// Solo se ordenan tablas con un encabezado y filas completas (sin celdas combinadas).
+function ordenable13(table) {
+  const head = table.tHead, tb = table.tBodies[0];
+  if (!head || head.rows.length !== 1 || !tb) return false;
+  const n = head.rows[0].cells.length;
+  return [...tb.rows].every(tr => tr.cells.length === n && ![...tr.cells].some(c => c.colSpan > 1));
+}
+const clave13 = table => [...table.tHead.rows[0].cells].map(th => th.textContent.trim()).join("|");
+const sortable13 = th => th.textContent.trim() !== "" && !th.querySelector(".sr");
+
+// Coloca las filas en su orden. Solo mueve nodos si el orden cambia (así el observador no entra en bucle).
+function aplicarOrden13(table, st) {
+  const tb = table.tBodies[0];
+  const filas = [...tb.rows];
+  filas.forEach((tr, i) => { if (tr._o13 === undefined) tr._o13 = i; });
+  const nuevo = st && st.dir
+    ? filas.slice().sort((a, b) => cmp13(a.cells[st.col], b.cells[st.col], st.dir))
+    : filas.slice().sort((a, b) => a._o13 - b._o13);
+  if (document.activeElement && tb.contains(document.activeElement)) return;   // no mover filas mientras se escribe
+  if (nuevo.some((tr, i) => tb.rows[i] !== tr)) nuevo.forEach(tr => tb.appendChild(tr));
+}
+function pintarTabla13(table) {
+  if (!ordenable13(table)) return;
+  const st = ORDEN13.get(clave13(table));
+  [...table.tHead.rows[0].cells].forEach((th, i) => {
+    if (!th.querySelector(".tirador13")) th.append(el("span", { class: "tirador13", "aria-hidden": "true" }));
+    if (!sortable13(th)) return;
+    const asc = !!st && st.col === i && st.dir === 1, desc = !!st && st.col === i && st.dir === -1;
+    th.classList.add("ord13");
+    th.classList.toggle("ord13-asc", asc);
+    th.classList.toggle("ord13-desc", desc);
+    th.setAttribute("aria-sort", asc ? "ascending" : desc ? "descending" : "none");
+  });
+  aplicarOrden13(table, st);
+}
+let pendiente13 = false;
+function pasarTablas13() {
+  pendiente13 = false;
+  for (const table of document.querySelectorAll("table")) {
+    try { pintarTabla13(table); } catch (err) { console.error("Tabla v1.3.0:", err); }
+  }
+}
+// Al volver a dibujar la página, las tablas nuevas reciben el orden y el encabezado fijo.
+function programarTablas13() {
+  if (pendiente13) return;
+  pendiente13 = true;
+  requestAnimationFrame(pasarTablas13);
+}
+new MutationObserver(programarTablas13).observe(document.body, { childList: true, subtree: true });
+
+// Clic en el encabezado: A→Z (o menor→mayor), al revés y sin orden.
+document.addEventListener("click", e => {
+  const th = e.target.closest?.("th.ord13");
+  if (!th || e.target.closest(".tirador13")) return;
+  const table = th.closest("table");
+  if (!table || !ordenable13(table)) return;
+  const col = [...th.parentElement.cells].indexOf(th);
+  const clave = clave13(table), act = ORDEN13.get(clave);
+  if (!act || act.col !== col) ORDEN13.set(clave, { col, dir: 1 });
+  else if (act.dir === 1) ORDEN13.set(clave, { col, dir: -1 });
+  else ORDEN13.delete(clave);
+  pintarTabla13(table);
+});
+
+// Ancho de columna: arrastrar el borde derecho del encabezado. Doble clic: automático.
+let arrastre13 = null;
+document.addEventListener("pointerdown", e => {
+  const t = e.target.closest?.(".tirador13"); if (!t) return;
+  const th = t.parentElement, table = th.closest("table");
+  if (!table.dataset.redim13) {
+    [...th.parentElement.cells].forEach(c => { c.style.width = c.getBoundingClientRect().width + "px"; });
+    table.style.tableLayout = "fixed";
+    table.dataset.redim13 = "1";
+  }
+  arrastre13 = { th, x: e.clientX, w: th.getBoundingClientRect().width };
+  t.setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+document.addEventListener("pointermove", e => {
+  if (!arrastre13) return;
+  arrastre13.th.style.width = Math.max(60, arrastre13.w + e.clientX - arrastre13.x) + "px";
+});
+const soltar13 = () => { arrastre13 = null; };
+document.addEventListener("pointerup", soltar13);
+document.addEventListener("pointercancel", soltar13);
+document.addEventListener("dblclick", e => {
+  const t = e.target.closest?.(".tirador13"); if (!t) return;
+  const table = t.closest("table");
+  table.style.tableLayout = ""; delete table.dataset.redim13;
+  [...table.tHead.rows[0].cells].forEach(c => { c.style.width = ""; });
+});
+programarTablas13();
+/* ==V13-FIN== */
 prepareLogin();
 </script>
 </body>
